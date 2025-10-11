@@ -11,6 +11,7 @@ export function createCacheMiddleware({
   cacheClient,
   ttlSeconds = 60,
 }: CacheMiddlewareOptions) {
+  if (!cacheClient) throw new Error("cacheClient is required");
   return async function cacheMiddleware(
     req: Request,
     res: Response,
@@ -42,8 +43,8 @@ export function createCacheMiddleware({
           cacheClient.set(cacheKey, bodyStr, ttlSeconds);
           cacheClient.sadd(patternSetKey, cacheKey);
         } catch (err) {
+          console.error("Cache set error:", err);
           // Fail silently, don't block response
-          // Optionally log error here
         }
         res.setHeader("X-Cache", "MISS");
         return originalJson(body);
@@ -51,6 +52,7 @@ export function createCacheMiddleware({
 
       next();
     } catch (err) {
+      console.error("Cache middleware error:", err);
       next(err);
     }
   };
@@ -61,6 +63,7 @@ export function createInvalidateMiddleware({
 }: {
   cacheClient: CacheClient;
 }) {
+  if (!cacheClient) throw new Error("cacheClient is required");
   return async function invalidateMiddleware(
     req: Request,
     res: Response,
@@ -90,6 +93,7 @@ export function createInvalidateMiddleware({
       }
     } catch (err) {
       // Optional: log error but don't block response
+      console.error("Invalidate middleware error:", err);
     }
 
     next();

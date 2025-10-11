@@ -1,11 +1,14 @@
-import type Redis from "ioredis";
 import { CacheClient } from "../types";
 
-export function createRedisCacheClient(redisClient: Redis): CacheClient {
+export function createRedisCacheClient(redisClient: any): CacheClient {
+  if (!redisClient) {
+    throw new Error(
+      "redisClient is required. Install 'ioredis' with `npm install ioredis`."
+    );
+  }
   return {
-    async get(key) {
-      const val = await redisClient.get(key);
-      return val;
+    get(key) {
+      return redisClient.get(key);
     },
 
     async set(key, value, ttlSeconds) {
