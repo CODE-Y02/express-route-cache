@@ -1,6 +1,7 @@
-import { CacheClient } from "../types";
+import { CacheClient } from "express-route-cache";
+import Redis from "ioredis";
 
-export function createRedisCacheClient(redisClient: any): CacheClient {
+export function createRedisCacheClient(redisClient: Redis): CacheClient {
   if (!redisClient) {
     throw new Error(
       "redisClient is required. Install 'ioredis' with `npm install ioredis`."

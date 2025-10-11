@@ -3,8 +3,6 @@
     "target": "ES2018",
     "module": "commonjs",
     "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "dist",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -12,7 +10,5 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "isolatedModules": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "example"]
+  }
 }

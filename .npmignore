@@ -1,8 +1,7 @@
-src
 example
-.gitignore
+src
+*.ts
 tsconfig.json
+tsconfig.esm.json
+.changeset
 .eslintrc.json
-README.md
-
-
