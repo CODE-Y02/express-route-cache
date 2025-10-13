@@ -1,0 +1,24 @@
+{
+  "name": "@express-route-cache/core",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "build": "tsc",
+    "dev": "tsc --watch --preserveWatchOutput"
+  },
+  "peerDependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.3"
+  },
+  "dependencies": {
+    "node-cache": "^5.1.2"
+  }
+}

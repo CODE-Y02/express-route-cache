@@ -1,0 +1,21 @@
+{
+  "name": "cache-example",
+  "version": "0.0.0",
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "start": "node ./dist/index.js"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.3",
+    "ts-node-dev": "^2.0.0"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "portfinder": "^1.0.38",
+    "@express-route-cache/core": "workspace:*"
+  }
+}
