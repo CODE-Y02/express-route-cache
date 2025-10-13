@@ -1,10 +1,10 @@
 import {
   createCacheMiddleware,
   createInvalidateMiddleware,
+  createNodeCacheClient,
 } from "@express-route-cache/core";
 import express, { Request, Response } from "express";
 import portfinder from "portfinder";
-import createNodeCacheClient from "../../../packages/core/dist/adapters/nodeCache";
 
 const app = express();
 app.use(express.json());

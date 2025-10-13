@@ -1,9 +1,7 @@
 import NodeCache from "node-cache";
 import type { CacheClient } from "../types";
 
-export default function createNodeCacheClient(
-  defaultTTLSeconds = 60
-): CacheClient {
+export function createNodeCacheClient(defaultTTLSeconds = 60): CacheClient {
   const cache = new NodeCache({ stdTTL: defaultTTLSeconds, useClones: false });
 
   return {
