@@ -14,18 +14,30 @@ const cacheClient = createNodeCacheClient(120);
 const cacheMiddleware = createCacheMiddleware({ cacheClient, ttlSeconds: 120 });
 const invalidateMiddleware = createInvalidateMiddleware({ cacheClient });
 
+/***
+ * NOTE: Don't use it like app.use(cacheMiddleware)
+ */
+
 app.get(
   "/v1/users/:username",
   cacheMiddleware,
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
+    await simulateDelay(2000);
     res.json({ username: req.params.username, data: "Some user data" });
   }
 );
 
-// TODO : FIX invalidation
 app.post("/v1/users", invalidateMiddleware, (req: Request, res: Response) => {
   res.json({ message: "User created" });
 });
+
+app.post(
+  "/v1/users/:username",
+  invalidateMiddleware,
+  (req: Request, res: Response) => {
+    res.json({ message: "User updated  " + req.params.username });
+  }
+);
 
 app.get("/hi", (req, res) => {
   return res.json({ message: "hello from server" });
@@ -43,3 +55,6 @@ portfinder.getPort((err, port) => {
     });
   }
 });
+
+const simulateDelay = (delay: number) =>
+  new Promise((resolve) => setTimeout(resolve, delay));
