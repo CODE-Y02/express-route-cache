@@ -1,7 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import type { CacheClient, CacheMiddlewareOptions } from "./types";
-import { getCacheKey, getPatternSetKey, mutatingMethods } from "./utils";
+import {
+  getCacheKeyForRoute,
+  getPatternSetKey,
+  getParentRoutePatterns,
+  invalidatePath,
+  mutatingMethods,
+} from "./utils";
 
+// Cache GET responses
 export function createCacheMiddleware({
   cacheClient,
   ttlSeconds = 60,
@@ -16,22 +23,17 @@ export function createCacheMiddleware({
     }
 
     const routePattern = `${req.baseUrl}${req.route.path}`;
-    const cacheKey = getCacheKey(req);
-    const patternSetKey = getPatternSetKey(routePattern);
-
-    console.log("router path key -->", routePattern);
+    const cacheKey = getCacheKeyForRoute(req);
+    const parentPatterns = getParentRoutePatterns(routePattern);
 
     try {
       const cachedBody = await cacheClient.get(cacheKey);
       if (cachedBody) {
-        // Cache hit - respond immediately
-
         res.setHeader("X-Cache", "HIT");
-        res.json({
+        return res.json({
           fromCache: true,
           data: JSON.parse(cachedBody),
         });
-        return res;
       }
 
       // Cache miss - hijack res.json to cache the response
@@ -41,7 +43,10 @@ export function createCacheMiddleware({
         try {
           const bodyStr = JSON.stringify(body);
           cacheClient.set(cacheKey, bodyStr, ttlSeconds);
-          cacheClient.sadd(patternSetKey, cacheKey);
+          for (const pattern of parentPatterns) {
+            const patternSetKey = getPatternSetKey(pattern);
+            cacheClient.sadd(patternSetKey, cacheKey);
+          }
         } catch (err) {
           // Fail silently, don't block response
           // Optionally log error here
@@ -57,6 +62,7 @@ export function createCacheMiddleware({
   };
 }
 
+// Invalidate cache on mutating requests
 export function createInvalidateMiddleware({
   cacheClient,
 }: {
@@ -70,8 +76,6 @@ export function createInvalidateMiddleware({
     if (
       !mutatingMethods.includes(req.method as (typeof mutatingMethods)[number])
     ) {
-      console.log("returning");
-
       return next();
     }
     if (!req.route) {
@@ -79,26 +83,7 @@ export function createInvalidateMiddleware({
     }
 
     const routePattern = `${req.baseUrl}${req.route.path}`;
-    const patternSetKey = getPatternSetKey(routePattern);
-
-    console.log("patternSetKey.  ", routePattern);
-
-    try {
-      // Get all cached keys for this pattern
-      const keys = await cacheClient.smembers(patternSetKey);
-
-      console.log("all keys", keys);
-
-      if (keys.length > 0) {
-        await cacheClient.del(...keys);
-        // Clear keys from set
-        for (const key of keys) {
-          await cacheClient.srem(patternSetKey, key);
-        }
-      }
-    } catch (err) {
-      // Optional: log error but don't block response
-    }
+    await invalidatePath(cacheClient, routePattern);
 
     next();
   };
