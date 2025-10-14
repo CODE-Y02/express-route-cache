@@ -1,22 +1,44 @@
 {
   "name": "@express-route-cache/core",
   "version": "0.0.0",
-  "private": true,
+  "description": "Core caching functionality for Express routes",
+  "author": "Yatharth Lakhate (https://code-y02.github.io/)",
+  "license": "MIT",
+  "homepage": "https://github.com/CODE-Y02/express-route-cache",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CODE-Y02/express-route-cache.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/CODE-Y02/express-route-cache/issues"
+  },
+  "keywords": [
+    "express",
+    "caching",
+    "route-caching",
+    "node-cache",
+    "middleware"
+  ],
   "exports": {
     ".": "./dist/index.js"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "build": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch"
   },
   "peerDependencies": {
     "express": "^5.1.0"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "@types/express": "^5.0.3"
+    "@types/express": "^5.0.3",
+    "tsup": "^8.5.0"
   },
   "dependencies": {
     "node-cache": "^5.1.2"
