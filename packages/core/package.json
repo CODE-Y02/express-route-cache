@@ -46,5 +46,8 @@
   },
   "dependencies": {
     "node-cache": "^5.1.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
