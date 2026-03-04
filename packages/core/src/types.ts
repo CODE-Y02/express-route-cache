@@ -1,59 +1,142 @@
+import type { Request, Response, NextFunction } from "express";
+
+// ─── Cache Client Interface (Adapter Contract) ─────────────────────────────
+
 /**
- * Interface representing a cache client with basic get/set/del operations,
- * and Redis-like set operations for tracking cache keys by route pattern.
+ * The universal cache client interface that all adapters must implement.
+ * Intentionally minimal: basic KV + `incr` for epochs + `mget` for batch reads.
+ * No Set operations (sadd/smembers) — keeps Memcached fully compatible.
  */
 export interface CacheClient {
-  /**
-   * Retrieve a cached value by key.
-   * @param key - The cache key.
-   * @returns A promise resolving to the cached string value or null if not found.
-   */
+  /** Retrieve a cached value by key. Returns `null` on miss. */
   get(key: string): Promise<string | null>;
 
-  /**
-   * Store a value in the cache with an optional TTL.
-   * @param key - The cache key.
-   * @param value - The string value to store.
-   * @param ttlSeconds - Optional time-to-live in seconds.
-   */
+  /** Batch-retrieve multiple keys. Returns array in same order, `null` for misses. */
+  mget(keys: string[]): Promise<(string | null)[]>;
+
+  /** Store a value with optional TTL in seconds. */
   set(key: string, value: string, ttlSeconds?: number): Promise<void>;
 
-  /**
-   * Delete one or more keys from the cache.
-   * @param keys - One or more cache keys to delete.
-   */
+  /** Delete one or more keys. */
   del(...keys: string[]): Promise<void>;
 
-  /**
-   * Add a member to a set stored under a given key.
-   * Used for tracking keys associated with route patterns.
-   * @param setKey - The key representing the set.
-   * @param member - The member to add to the set.
-   */
-  sadd(setKey: string, member: string): Promise<void>;
+  /** Atomically increment a numeric key (creates with value 1 if missing). Returns new value. */
+  incr(key: string): Promise<number>;
+
+  /** Optional cleanup/disconnect hook. */
+  disconnect?(): Promise<void>;
+}
+
+// ─── Cache Entry (what we store in the cache) ───────────────────────────────
+
+/** Internal structure stored as JSON string in the cache. */
+export interface CacheEntry {
+  /** The serialized response body. */
+  body: string;
+  /** HTTP status code of the original response. */
+  statusCode: number;
+  /** Response headers to replay (content-type, etc). */
+  headers: Record<string, string>;
+  /** Unix timestamp (ms) when this entry was created. */
+  createdAt: number;
+}
+
+// ─── Configuration Types ────────────────────────────────────────────────────
+
+/**
+ * Global configuration passed to `createCache()`.
+ * Inspired by TanStack Query's option model.
+ */
+export interface CacheConfig {
+  /** The cache adapter instance (memory, Redis, Memcached, etc). */
+  adapter: CacheClient;
 
   /**
-   * Retrieve all members of a set stored under a given key.
-   * @param setKey - The key representing the set.
-   * @returns A promise resolving to an array of members in the set.
+   * How long (seconds) data is considered **fresh**.
+   * During this window, cached data is returned instantly.
+   * @default 60
    */
-  smembers(setKey: string): Promise<string[]>;
+  staleTime?: number;
 
   /**
-   * Remove a member from a set stored under a given key.
-   * @param setKey - The key representing the set.
-   * @param member - The member to remove from the set.
+   * How long (seconds) **stale** data is kept before eviction.
+   * Total TTL in cache = staleTime + gcTime.
+   * @default 300
    */
-  srem(setKey: string, member: string): Promise<void>;
+  gcTime?: number;
+
+  /**
+   * Stale-While-Revalidate. When `true`, stale data is served instantly
+   * while the handler re-executes in the background to refresh the cache.
+   * When `false`, stale data is treated as a cache miss.
+   * @default false
+   */
+  swr?: boolean;
+
+  /**
+   * Enable stampede / thundering-herd protection.
+   * When `true`, concurrent requests for the same cache key coalesce
+   * into a single handler execution.
+   * @default true
+   */
+  stampede?: boolean;
+
+  /**
+   * Cache key namespace prefix.
+   * @default "erc:"
+   */
+  keyPrefix?: string;
+
+  /**
+   * Request headers whose values should be included in the cache key,
+   * enabling user-specific or variant-specific caching.
+   * Example: `['authorization']` to cache per-user.
+   * @default []
+   */
+  vary?: string[];
+
+  /**
+   * Whether caching is enabled globally.
+   * @default true
+   */
+  enabled?: boolean;
 }
 
 /**
- * Options for cache middleware creation.
+ * Per-route options passed to `cache.route()`.
+ * Overrides global CacheConfig for the specific route.
  */
-export interface CacheMiddlewareOptions {
-  /** The cache client instance to use */
-  cacheClient: CacheClient;
-
-  /** Time-to-live for cached items in seconds. Optional, defaults to implementation default */
-  ttlSeconds?: number;
+export interface RouteOptions {
+  staleTime?: number;
+  gcTime?: number;
+  swr?: boolean;
+  enabled?: boolean;
+  vary?: string[];
+  /** Custom cache key override. If provided, used instead of auto-generated key. */
+  key?: string | ((req: Request) => string);
 }
+
+/** The object returned by `createCache()`. */
+export interface CacheInstance {
+  /** Global middleware — caches all GET routes. Use with `app.use()`. */
+  middleware: () => ExpressMiddleware;
+
+  /** Per-route middleware — use as `router.get('/path', cache.route(), handler)`. */
+  route: (opts?: RouteOptions) => ExpressMiddleware;
+
+  /** Invalidation middleware — use as `router.post('/path', cache.invalidate('/path'), handler)`. */
+  invalidate: (...routePatterns: string[]) => ExpressMiddleware;
+
+  /** Programmatic invalidation — call from anywhere (service layer, cron, webhook). */
+  invalidateRoute: (...routePatterns: string[]) => Promise<void>;
+
+  /** Access the underlying adapter. */
+  adapter: CacheClient;
+}
+
+/** Standard Express middleware signature. */
+export type ExpressMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => void;
