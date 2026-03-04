@@ -1,6 +1,6 @@
 {
   "name": "@express-route-cache/memcached",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "description": "Memcached adapter for @express-route-cache/core",
   "author": "Yatharth Lakhate (https://code-y02.github.io/)",
   "license": "MIT",

@@ -1,6 +1,6 @@
 {
   "name": "@express-route-cache/core",
-  "version": "0.0.0",
+  "version": "0.1.1",
   "description": "Core caching functionality for Express routes",
   "author": "Yatharth Lakhate (https://code-y02.github.io/)",
   "license": "MIT",
