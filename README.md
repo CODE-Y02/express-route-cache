@@ -1,164 +1,183 @@
-# @express-route-cache
-
-> **TanStack Query for the backend** — Production-grade, drop-in route caching for Express.js with O(1) invalidation.
+<div align="center">
+  <h1>⚡ @express-route-cache</h1>
+  <p><strong>TanStack Query for the Backend</strong></p>
+  <p>Production-grade, drop-in route caching for Express.js with O(1) invalidation, SWR, and Stampede Protection.</p>
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
+[![NPM Version](https://img.shields.io/npm/v/@express-route-cache/core.svg)](https://www.npmjs.com/package/@express-route-cache/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why?
+</div>
 
-Every existing Express caching middleware (`apicache`, `route-cache`, `cache-express`) shares the same production pain-points:
+<hr />
 
-| Problem                    | Existing Packages | This Library                                              |
-| -------------------------- | ----------------- | --------------------------------------------------------- |
-| O(N) invalidation          | ❌ scan all keys  | ✅ O(1) epoch `incr`                                      |
-| No server-side SWR         | ❌                | ✅ serve stale, revalidate in background                  |
-| Stampede / thundering herd | ❌                | ✅ in-flight request coalescing                           |
-| Locked to one cache store  | ❌                | ✅ Adapter pattern: Memory, Redis, Memcached              |
-| Familiar DX                | ❌                | ✅ TanStack Query–inspired (`staleTime`, `gcTime`, `swr`) |
+### 😭 The Problem with Express Caching
 
-## Quick Start
+Every existing Express caching middleware (`apicache`, `route-cache`, `cache-express`) shares the same fatal production pain-points:
+
+- ❌ **O(N) Invalidation:** When a user updates their profile, traditional libraries have to `SCAN` the entire Redis instance to find and delete all keys that match `/users/123/*`. This hangs the Node event loop and brings down databases.
+- ❌ **No Stale-While-Revalidate (SWR):** Cache expires -> next user waits 300ms for a fresh database pull.
+- ❌ **Thundering Herds:** A viral post expires from the cache. 1,000 requests hit Express. Your database gets 1,000 identical queries simultaneously and melts.
+
+### 🚀 The Solution
+
+Meet `@express-route-cache`. We brought the modern conveniences of frontend data-fetching (like TanStack/React Query) to your backend Express APIs.
+
+| Feature                    | Existing Packages | This Library                                           |
+| -------------------------- | ----------------- | ------------------------------------------------------ |
+| **Invalidation**           | ❌ `SCAN` / `DEL` | ✅ **O(1) Epoch `INCR`** (Instant, zero blocking)      |
+| **Stale-While-Revalidate** | ❌                | ✅ **Instant Stale Delivery** + Background Refresh     |
+| **Stampede Protection**    | ❌                | ✅ **Request Coalescing** (1,000 reqs = 1 DB call)     |
+| **Adapters**               | ❌ Locked to one  | ✅ **Memory, Redis (ioredis), Memcached (memjs)**      |
+| **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `gcTime`, `swr: true`) |
+
+---
+
+## 📦 Installation
 
 ```bash
+# Core package (includes Memory adapter out of the box)
 npm install @express-route-cache/core
-# For Redis:  npm install @express-route-cache/redis ioredis
-# For Memcached: npm install @express-route-cache/memcached memjs
+
+# Want distributed caching? Add an adapter:
+npm install @express-route-cache/redis ioredis
+npm install @express-route-cache/memcached memjs
 ```
+
+## 🛠️ Quick Start
 
 ```ts
 import express from "express";
 import { createCache, createMemoryAdapter } from "@express-route-cache/core";
 
 const app = express();
+
+// 1. Initialize the Cache
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  staleTime: 60, // data fresh for 60 seconds
-  gcTime: 300, // stale data kept 5 more minutes
-  swr: true, // serve stale + revalidate in background
+  staleTime: 60, // Fresh for 60 seconds (Instant HIT)
+  gcTime: 300, // Kept stale for 5 more minutes
+  swr: true, // Enable Stale-While-Revalidate!
 });
 
-// Cache all GET routes
+// 2. Cache globally (Only caches GET requests automatically)
 app.use(cache.middleware());
 
-// Or per-route with overrides
+// 3. Or override per-route
 app.get("/users/:id", cache.route({ staleTime: 120 }), getUser);
 
-// Auto-invalidate on mutation
+// 4. Invalidate instantly upon mutation (POST/PUT/DELETE)
 app.post("/users", cache.invalidate("/users"), createUser);
 ```
 
-## How It Works
+---
 
-### Cache Lifecycle (TanStack-Inspired)
+## 🧠 Core Concepts
 
-```
-Request → Is data FRESH? (age < staleTime)
-           │ YES → Return cached ⚡ (X-Cache: HIT)
-           │ NO  → Is data STALE? (age < staleTime + gcTime)
-           │        │ YES + swr:true  → Return stale 🔄, revalidate in background
-           │        │ YES + swr:false → Cache MISS, re-fetch
-           │        │ NO (expired)    → Evicted. Cache MISS.
-```
+### 1. Fresh vs Stale (TanStack-Inspired)
 
-### O(1) Epoch Invalidation
+We use a two-tier timing model:
 
-Instead of tracking cache keys in Sets (O(N) to delete), each route pattern has an **epoch counter**. Cache keys include the epoch version:
+1. **`staleTime`**: The duration data is considered "fresh". The cache returns the value instantly.
+2. **`gcTime`**: The duration data remains in the cache _after_ it becomes stale.
 
-```
-Cache key: "erc:GET:/users/123?abc|v:/users=0|v:/users/123=0"
-```
+If `swr: true` is enabled:
 
-To invalidate `/users`: just `INCR epoch:/users` → **O(1)**. All future requests generate keys with the new epoch → automatic cache miss. Old entries self-expire via `gcTime`.
+- **Fresh**: ⚡ Instant HIT.
+- **Stale**: 🔄 Instant HIT (returns stale data) + Background revalidation triggers automatically.
+- **Expired/Evicted**: ⏳ MISS (handler runs, updates cache).
 
-### Stampede Protection
+### 2. O(1) Epoch Invalidation
 
-When 1000 concurrent requests hit a cold cache key, only **1 handler executes**. All others await the same in-flight Promise and receive the result.
+Instead of slow `Set` key tracking, we use **Epoch Versioning**. Every route pattern has a tiny numeric counter in the cache.
+When you cache `/users/123`, the key looks like this: `erc:GET:/users/123|v:/users=5|v:/users/:id=2`.
 
-## Packages
+To invalidate the entire `/users` tree, we simply increment the `/users` counter to `6`. All future requests generate brand new keys, immediately abandoning the old data. It requires zero key scanning.
 
-| Package                          | Description                      |
-| -------------------------------- | -------------------------------- |
-| `@express-route-cache/core`      | Core library + in-memory adapter |
-| `@express-route-cache/redis`     | Redis adapter (via ioredis)      |
-| `@express-route-cache/memcached` | Memcached adapter (via memjs)    |
+### 3. Stampede Protection
 
-## API
+If 5,000 users request `/viral-post` at the exact same millisecond the cache expires, `@express-route-cache` steps in. It holds the 4,999 connection promises in memory and executes your Express handler exactly **one** time. Once the database returns the data, all 5,000 connections are resolved simultaneously.
+
+---
+
+## 📖 API Reference
 
 ### `createCache(config)`
 
-| Option      | Type          | Default  | Description                                |
-| ----------- | ------------- | -------- | ------------------------------------------ |
-| `adapter`   | `CacheClient` | —        | **Required**. Cache adapter instance       |
-| `staleTime` | `number`      | `60`     | Seconds data is considered fresh           |
-| `gcTime`    | `number`      | `300`    | Seconds stale data is kept before eviction |
-| `swr`       | `boolean`     | `false`  | Serve stale data while revalidating        |
-| `stampede`  | `boolean`     | `true`   | Coalesce concurrent requests               |
-| `vary`      | `string[]`    | `[]`     | Request headers to segment cache by        |
-| `keyPrefix` | `string`      | `"erc:"` | Key namespace prefix                       |
-| `enabled`   | `boolean`     | `true`   | Enable/disable caching                     |
+| Option      | Type          | Default | Description                                                        |
+| ----------- | ------------- | ------- | ------------------------------------------------------------------ |
+| `adapter`   | `CacheClient` | —       | **Required**. Memory, Redis, or Memcached adapter.                 |
+| `staleTime` | `number`      | `60`    | Seconds data stays fresh.                                          |
+| `gcTime`    | `number`      | `300`   | Seconds stale data stays in cache.                                 |
+| `swr`       | `boolean`     | `false` | Enable background revalidation.                                    |
+| `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                  |
+| `vary`      | `string[]`    | `[]`    | Headers to namespace caches (e.g. `['authorization']`).            |
+| `sortQuery` | `boolean`     | `false` | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`) |
+| `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                           |
 
-Returns: `{ middleware(), route(opts?), invalidate(...patterns), invalidateRoute(...patterns), adapter }`
+Returns `{ middleware(), route(), invalidate(), invalidateRoute(), adapter }`.
 
-### `cache.route(opts?)`
+### `cache.route(opts)`
 
-Per-route override. Accepts: `staleTime`, `gcTime`, `swr`, `enabled`, `vary`, `key`.
+Per-route middleware. Accepts all configuration options (like `staleTime`) as overrides for a specific endpoint.
 
-### `cache.invalidate(...patterns)`
+### `cache.invalidate(...routePatterns)`
 
-Express middleware that increments epoch counters for the given route patterns.
+Express middleware to invalidate particular routes.
+`app.post('/article', cache.invalidate('/articles'), handler)`
 
-### `cache.invalidateRoute(...patterns)`
+### `cache.invalidateRoute(...routePatterns)`
 
-Programmatic invalidation — call from services, cron jobs, webhooks.
+Programmatic invalidation for use inside services, cron jobs, or webhooks.
+`await cache.invalidateRoute('/users/123');`
 
-## Adapters
+---
 
-### Memory (built-in)
+## 🔌 Adapters
+
+### Memory (Built-in)
+
+For single-process apps and local development.
 
 ```ts
 import { createMemoryAdapter } from "@express-route-cache/core";
-const adapter = createMemoryAdapter(600); // default TTL 600s
+const adapter = createMemoryAdapter(600); // Default strict TTL fallback: 600s
 ```
 
-### Redis
+### Redis (`@express-route-cache/redis`)
+
+Highly recommended for production.
 
 ```ts
 import { createRedisAdapter } from "@express-route-cache/redis";
+
+// Connect via URL
 const adapter = createRedisAdapter({ url: "redis://localhost:6379" });
-// Or: createRedisAdapter({ client: existingIoredisInstance })
+
+// OR reuse your existing application client safely (we won't double-close it!)
+const adapter = createRedisAdapter({ client: myGlobalIoredisClient });
 ```
 
-### Memcached
+### Memcached (`@express-route-cache/memcached`)
+
+Perfect for high-throughput, pure KV caching.
 
 ```ts
 import { createMemcachedAdapter } from "@express-route-cache/memcached";
 const adapter = createMemcachedAdapter({ servers: "localhost:11211" });
 ```
 
-### Custom Adapter
+---
 
-Implement the `CacheClient` interface:
+## 🔍 HTTP Headers
 
-```ts
-interface CacheClient {
-  get(key: string): Promise<string | null>;
-  mget(keys: string[]): Promise<(string | null)[]>;
-  set(key: string, value: string, ttlSeconds?: number): Promise<void>;
-  del(...keys: string[]): Promise<void>;
-  incr(key: string): Promise<number>;
-  disconnect?(): Promise<void>;
-}
-```
+We automatically append headers for CDN and debugging visibility:
 
-## Response Headers
+- `X-Cache`: `HIT` | `MISS` | `STALE`
+- `Age`: How many seconds old the data is.
+- `Cache-Control`: Respects your `staleTime` (e.g. `public, max-age=60`).
 
-| Header          | Value               | Meaning                                 |
-| --------------- | ------------------- | --------------------------------------- |
-| `X-Cache`       | `HIT`               | Fresh data from cache                   |
-| `X-Cache`       | `STALE`             | Stale data (SWR revalidation triggered) |
-| `X-Cache`       | `MISS`              | Fresh data from handler                 |
-| `Age`           | seconds             | How old the cached response is          |
-| `Cache-Control` | `public, max-age=N` | Remaining freshness window              |
+---
 
 ## License
 
