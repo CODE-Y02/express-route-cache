@@ -99,6 +99,8 @@ To invalidate the entire `/users` tree, we simply increment the `/users` counter
 
 If 5,000 users request `/viral-post` at the exact same millisecond the cache expires, `@express-route-cache` steps in. It holds the 4,999 connection promises in memory and executes your Express handler exactly **one** time. Once the database returns the data, all 5,000 connections are resolved simultaneously.
 
+> 📚 **Deep Dive:** Want to know _why_ we didn't use Redis distributed locks? Or how exactly the `INCR` command guarantees O(1) performance? Read our [Architecture & Trade-offs](./ARCHITECTURE.md) document for detailed diagrams.
+
 ---
 
 ## 📖 API Reference
