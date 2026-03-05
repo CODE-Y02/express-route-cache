@@ -88,6 +88,7 @@ export function buildVersionedKey(opts: {
   parentPatterns: string[];
   vary?: string[];
   varyValues?: Record<string, string>;
+  sortQuery?: boolean;
 }): string {
   const {
     prefix,
@@ -98,12 +99,13 @@ export function buildVersionedKey(opts: {
     parentPatterns,
     vary,
     varyValues,
+    sortQuery,
   } = opts;
 
-  // Query hash (deterministic)
-  const queryKeys = Object.keys(query);
+  // Query hash (deterministic if sortQuery is enabled)
+  const queryKeys = sortQuery ? Object.keys(query).sort() : Object.keys(query);
   const queryHash = queryKeys.length
-    ? crypto.createHash("md5").update(JSON.stringify(query)).digest("hex")
+    ? crypto.createHash("md5").update(JSON.stringify(query, sortQuery ? queryKeys : undefined)).digest("hex")
     : "";
 
   // Epoch version segments
@@ -132,7 +134,8 @@ export async function buildCacheKey(
   client: CacheClient,
   req: Request,
   prefix: string,
-  vary?: string[]
+  vary?: string[],
+  sortQuery?: boolean
 ): Promise<{ key: string; routePattern: string; parentPatterns: string[] }> {
   const routePattern = getRoutePattern(req);
   const parentPatterns = getParentRoutePatterns(routePattern);
@@ -156,6 +159,7 @@ export async function buildCacheKey(
     parentPatterns,
     vary,
     varyValues,
+    sortQuery,
   });
 
   return { key, routePattern, parentPatterns };

@@ -80,15 +80,24 @@ To invalidate `/users`, we simply increment its epoch. All future requests for `
 
 ### `createCache(config)`
 
-| Option      | Type          | Default | Description                                        |
-| ----------- | ------------- | ------- | -------------------------------------------------- |
-| `adapter`   | `CacheClient` | —       | **Required**. Memory, Redis, or Memcached adapter. |
-| `staleTime` | `number`      | `60`    | Seconds data stays fresh.                          |
-| `gcTime`    | `number`      | `300`   | Seconds stale data stays in cache.                 |
-| `swr`       | `boolean`     | `false` | Enable background revalidation.                    |
-| `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.  |
-| `vary`      | `string[]`    | `[]`    | Headers to include in cache key (e.g. `['auth']`). |
-| `enabled`   | `boolean`     | `true`  | Toggle caching globally.                           |
+| Option      | Type          | Default | Description                                                         |
+| ----------- | ------------- | ------- | ------------------------------------------------------------------- |
+| `adapter`   | `CacheClient` | —       | **Required**. Memory, Redis, or Memcached adapter.                  |
+| `staleTime` | `number`      | `60`    | Seconds data stays fresh.                                           |
+| `gcTime`    | `number`      | `300`   | Seconds stale data stays in cache.                                  |
+| `swr`       | `boolean`     | `false` | Enable background revalidation.                                     |
+| `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                   |
+| `vary`      | `string[]`    | `[]`    | Headers to include in cache key (e.g. `['auth']`).                  |
+| `sortQuery` | `boolean`     | `false` | Deterministically sort query params (`?b=2&a=1` equals `?a=1&b=2`). |
+| `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                            |
+
+### Architectural Considerations
+
+**Stampede Protection**:
+By default, the library leverages in-memory request coalescing (`stampede: true`). If 1,000 concurrent requests suddenly hit a cold cache for the same key, only **1** database query will execute per Node.js process. This protects downstream services without the complexity of distributed locks.
+
+**Query Parameter Determinism (`sortQuery`)**:
+If your API endpoints commonly receive query string parameters in arbitrary orders (e.g. `?page=1&limit=10` vs `?limit=10&page=1`), we highly recommend setting `sortQuery: true`. This sorts the keys before building the cache hash, ensuring 100% determinism and preventing accidental cache bloat.
 
 ## Adapters
 

@@ -31,6 +31,7 @@ const cache = createCache({
 - **Atomic Increments**: Uses Memcached `incr` for O(1) invalidation.
 - **Lightweight**: Optimized for simple, high-throughput key-value storage.
 - **Binary Friendly**: Correctly handles serialized response buffers.
+- **Safe Lifecycle Management**: If you pass an existing `client` instance, the adapter will _never_ call `.close()` on it when tearing down, ensuring it won't kill connections shared by the rest of your app.
 
 ## Documentation
 

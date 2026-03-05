@@ -66,7 +66,9 @@ export function createRedisAdapter(opts: RedisAdapterOptions = {}): CacheClient 
     },
 
     async disconnect(): Promise<void> {
-      await redis.quit();
+      if (!opts.client) {
+        await redis.quit();
+      }
     },
   };
 }

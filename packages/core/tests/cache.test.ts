@@ -109,6 +109,21 @@ describe("@express-route-cache/core", () => {
       await request(app).get("/users?page=2");
       expect(getCallCount()).toBe(2); // both are MISS (different query params)
     });
+
+    it("with sortQuery=true, different parameter order should HIT the same cache", async () => {
+      const { app, getCallCount } = createTestApp({
+        adapter: createMemoryAdapter(),
+        staleTime: 5,
+        sortQuery: true, // enable deterministic queries
+      });
+
+      await request(app).get("/users?a=1&b=2");
+      expect(getCallCount()).toBe(1); // MISS
+
+      const res = await request(app).get("/users?b=2&a=1");
+      expect(getCallCount()).toBe(1); // HIT!
+      expect(res.headers["x-cache"]).toBe("HIT");
+    });
   });
 
   // ── 2. Cache Headers ────────────────────────────────────────────────

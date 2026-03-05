@@ -100,6 +100,14 @@ export interface CacheConfig {
    * @default true
    */
   enabled?: boolean;
+
+  /**
+   * Whether to sort query parameter keys before hashing.
+   * Enables deterministic cache keys for identical requests with different param order.
+   * (e.g., `?a=1&b=2` equals `?b=2&a=1`)
+   * @default false
+   */
+  sortQuery?: boolean;
 }
 
 /**
@@ -112,6 +120,7 @@ export interface RouteOptions {
   swr?: boolean;
   enabled?: boolean;
   vary?: string[];
+  sortQuery?: boolean;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
 }

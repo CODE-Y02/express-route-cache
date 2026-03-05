@@ -66,6 +66,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     keyPrefix: config.keyPrefix ?? DEFAULTS.keyPrefix,
     vary: config.vary ?? DEFAULTS.vary,
     enabled: config.enabled ?? DEFAULTS.enabled,
+    sortQuery: config.sortQuery ?? false,
   };
 
   const client = config.adapter;
@@ -95,6 +96,7 @@ export function createCache(config: CacheConfig): CacheInstance {
       const gcTime = routeOpts?.gcTime ?? globalOpts.gcTime;
       const swr = routeOpts?.swr ?? globalOpts.swr;
       const vary = routeOpts?.vary ?? globalOpts.vary;
+      const sortQuery = routeOpts?.sortQuery ?? globalOpts.sortQuery;
       const totalTTL = staleTime + gcTime;
 
       try {
@@ -115,7 +117,8 @@ export function createCache(config: CacheConfig): CacheInstance {
             client,
             req,
             globalOpts.keyPrefix,
-            vary
+            vary,
+            sortQuery
           );
           cacheKey = result.key;
         }
@@ -320,10 +323,12 @@ function interceptResponse(
           .set(cacheKey, serializeEntry(entry), totalTTL)
           .catch(() => {/* Fail silently */});
 
-        // Set cache headers on MISS
-        res.setHeader("X-Cache", "MISS");
-        res.setHeader("Age", "0");
-        res.setHeader("Cache-Control", `public, max-age=${staleTime}`);
+        // Set cache headers on MISS if they haven't been sent yet (e.g., chunked responses)
+        if (!res.headersSent) {
+          res.setHeader("X-Cache", "MISS");
+          res.setHeader("Age", "0");
+          res.setHeader("Cache-Control", `public, max-age=${staleTime}`);
+        }
 
         resolve(entry);
       } else {

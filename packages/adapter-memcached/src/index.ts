@@ -89,7 +89,9 @@ export function createMemcachedAdapter(
     },
 
     async disconnect(): Promise<void> {
-      client.close();
+      if (!opts.client) {
+        client.close();
+      }
     },
   };
 }

@@ -31,6 +31,7 @@ const cache = createCache({
 - **High Performance**: Uses native Redis `MGET`, `SET EX`, and `INCR` commands.
 - **Distributed**: Perfect for multi-instance Express applications.
 - **Flexible**: Accepts connection strings, `ioredis` options, or an existing `ioredis` instance.
+- **Safe Lifecycle Management**: If you pass an existing `client` instance, the adapter will _never_ call `.quit()` on it when tearing down, ensuring it won't kill connections shared by the rest of your app.
 
 ## Documentation
 
