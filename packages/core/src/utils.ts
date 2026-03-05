@@ -153,7 +153,9 @@ export async function buildCacheKey(
     prefix,
     method: req.method,
     routePattern,
-    url: req.originalUrl || req.url,
+    url: sortQuery
+      ? (req.originalUrl || req.url || "").split("?")[0] || ""
+      : req.originalUrl || req.url || "",
     query: req.query as Record<string, unknown>,
     epochs,
     parentPatterns,
