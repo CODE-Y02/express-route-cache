@@ -51,7 +51,6 @@ jobs:
           # This tells Changesets what command to run when it determines a publish is necessary
           publish: pnpm run release
           commit: "chore(release): version packages"
-          title: "chore(release): version packages"
         env:
           # Used to create PRs and push commits
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
