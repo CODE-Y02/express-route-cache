@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - "v*" # Matches v1, v2, v1.1, etc for patch releases
+      - next # Matches beta/rc branches
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 

@@ -183,6 +183,33 @@ We automatically append headers for CDN and debugging visibility:
 
 ---
 
+## 🚀 Release Channels & Versioning
+
+This project uses an automated CI/CD pipeline (via [Changesets](https://github.com/changesets/changesets)) to manage NPM distributions directly from GitHub branches. 
+
+Depending on your stability needs, you can install from different channels using NPM `dist-tags`:
+
+| Channel | NPM Tag | Command | GitHub Branch | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| **Stable** | `@latest` | `npm i @express-route-cache/core@latest` | `main` | Production-ready. This is the default. |
+| **Beta/RC** | `@next` | `npm i @express-route-cache/core@next` | `next` | Cutting-edge features currently in development. |
+| **Legacy** | `@vX.Y-lts` | `npm i @express-route-cache/core@v0.1-lts` | `v*` (e.g., `v0.1`) | Old architectural versions maintained solely for critical security/hotfix patches. |
+
+### For Contributors & Maintainers
+If you are contributing to this project or managing releases, please read our [Contributing Guide](CONTRIBUTING.md#release-channels--versioning) to understand how we use the `main`, `next`, and `v*` branches to automatically deploy updates to NPM.
+
+---
+
+## 👨‍💻 Author
+
+Created and maintained by **Yatharth Lakhate**.
+If you have questions, feedback, or need to report a vulnerability privately, you can reach me directly:
+
+- **LinkedIn**: [Yatharth Lakhate](https://www.linkedin.com/in/yatharth-lakhate/)
+- **X (Twitter)**: [@Yatharth_L](https://x.com/Yatharth_L)
+
+---
+
 ## License
 
 MIT

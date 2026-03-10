@@ -115,6 +115,7 @@ If 5,000 users request `/viral-post` at the exact same millisecond the cache exp
 | `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                  |
 | `vary`      | `string[]`    | `[]`    | Headers to namespace caches (e.g. `['authorization']`).            |
 | `sortQuery` | `boolean`     | `false` | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`) |
+| `maxBodySize`| `number`     | `2097152` | Max response body size in bytes to cache (default: 2MB). Prevents memory leaks. |
 | `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                           |
 
 Returns `{ middleware(), route(), invalidate(), invalidateRoute(), adapter }`.
@@ -178,6 +179,16 @@ We automatically append headers for CDN and debugging visibility:
 - `X-Cache`: `HIT` | `MISS` | `STALE`
 - `Age`: How many seconds old the data is.
 - `Cache-Control`: Respects your `staleTime` (e.g. `public, max-age=60`).
+
+---
+
+## 👨‍💻 Author
+
+Created and maintained by **Yatharth Lakhate**.
+If you have questions, feedback, or need to report a vulnerability privately, you can reach me directly:
+
+- **LinkedIn**: [Yatharth Lakhate](https://www.linkedin.com/in/yatharth-lakhate/)
+- **X (Twitter)**: [@Yatharth_L](https://x.com/Yatharth_L)
 
 ---
 
