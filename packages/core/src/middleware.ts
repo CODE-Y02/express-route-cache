@@ -15,6 +15,7 @@ import {
   getParentRoutePatterns,
   getEpochKey,
 } from "./utils";
+import { LRUCache } from "lru-cache";
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
 
@@ -26,6 +27,7 @@ const DEFAULTS = {
   keyPrefix: "erc:",
   vary: [] as string[],
   enabled: true,
+  maxBodySize: 2097152, // 2MB
 } as const;
 
 // ─── Stampede Lock ──────────────────────────────────────────────────────────
@@ -35,7 +37,9 @@ const DEFAULTS = {
  * Key = cache key, Value = in-flight Promise of the response.
  * When 1000 requests hit a cold cache, only 1 handler executes.
  */
-const inflightRequests = new Map<string, Promise<CacheEntry | null>>();
+const inflightRequests = new LRUCache<string, Promise<CacheEntry | null>>({
+  max: 5000, // Maximum pending locks to prevent memory leaks from massive unique key attacks
+});
 
 // ─── createCache ────────────────────────────────────────────────────────────
 
@@ -67,6 +71,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     vary: config.vary ?? DEFAULTS.vary,
     enabled: config.enabled ?? DEFAULTS.enabled,
     sortQuery: config.sortQuery ?? false,
+    maxBodySize: config.maxBodySize ?? DEFAULTS.maxBodySize,
   };
 
   const client = config.adapter;
@@ -97,6 +102,7 @@ export function createCache(config: CacheConfig): CacheInstance {
       const swr = routeOpts?.swr ?? globalOpts.swr;
       const vary = routeOpts?.vary ?? globalOpts.vary;
       const sortQuery = routeOpts?.sortQuery ?? globalOpts.sortQuery;
+      const maxBodySize = routeOpts?.maxBodySize ?? globalOpts.maxBodySize;
       const totalTTL = staleTime + gcTime;
 
       try {
@@ -147,8 +153,11 @@ export function createCache(config: CacheConfig): CacheInstance {
                 client,
                 cacheKey,
                 req,
+                res,
                 next,
-                totalTTL
+                totalTTL,
+                staleTime,
+                maxBodySize
               );
               return;
             }
@@ -178,7 +187,8 @@ export function createCache(config: CacheConfig): CacheInstance {
           client,
           cacheKey,
           totalTTL,
-          staleTime
+          staleTime,
+          maxBodySize
         );
 
         if (globalOpts.stampede) {
@@ -274,11 +284,14 @@ function interceptResponse(
   client: CacheClient,
   cacheKey: string,
   totalTTL: number,
-  staleTime: number
+  staleTime: number,
+  maxBodySize: number
 ): Promise<CacheEntry | null> {
   return new Promise<CacheEntry | null>((resolve) => {
     // One-shot flag: prevents re-entry from monkey-patching
     let intercepted = false;
+    let currentSize = 0;
+    let sizeExceeded = false;
 
     const originalEnd = res.end.bind(res);
     const originalWrite = res.write.bind(res);
@@ -289,8 +302,15 @@ function interceptResponse(
       chunk: any,
       ...args: any[]
     ): boolean {
-      if (chunk) {
-        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      if (chunk && !sizeExceeded) {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        currentSize += buffer.length;
+        if (currentSize > maxBodySize) {
+          sizeExceeded = true;
+          chunks.length = 0; // free memory
+        } else {
+          chunks.push(buffer);
+        }
       }
       return originalWrite(chunk, ...args);
     } as typeof res.write;
@@ -302,8 +322,21 @@ function interceptResponse(
       }
       intercepted = true;
 
-      if (chunk) {
-        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      if (chunk && !sizeExceeded) {
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        currentSize += buffer.length;
+        if (currentSize > maxBodySize) {
+          sizeExceeded = true;
+          chunks.length = 0; // free memory
+        } else {
+          chunks.push(buffer);
+        }
+      }
+
+      if (sizeExceeded) {
+        // Fallback: Skip caching to protect memory limits
+        resolve(null);
+        return originalEnd(chunk, ...args);
       }
 
       const body = Buffer.concat(chunks).toString("utf-8");
@@ -321,7 +354,7 @@ function interceptResponse(
         // Store in cache (fire-and-forget)
         client
           .set(cacheKey, serializeEntry(entry), totalTTL)
-          .catch(() => {/* Fail silently */});
+          .catch(() => {/* Fail silently */ });
 
         // Set cache headers on MISS if they haven't been sent yet (e.g., chunked responses)
         if (!res.headersSent) {
@@ -345,30 +378,46 @@ function interceptResponse(
 
 /**
  * Re-execute the handler in the background for SWR revalidation.
- * This is a simplified approach: we create a lightweight mock response
- * to capture the output without sending it to the client.
+ * This runs the Express middleware chain using a mock response object.
  */
 async function revalidateInBackground(
   client: CacheClient,
   cacheKey: string,
-  _req: Request,
-  _next: NextFunction,
-  totalTTL: number
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  totalTTL: number,
+  staleTime: number,
+  maxBodySize: number
 ): Promise<void> {
-  // The actual revalidation will happen on the next request that encounters
-  // a stale entry with SWR disabled (when the stale window passes).
-  // For true background revalidation, the handler would need to be re-invoked,
-  // which requires access to the route handler itself. Instead, we mark the
-  // entry for eager refresh: the next request will see STALE status and
-  // the response from the fresh handler run will update the cache.
-  //
-  // This is the pragmatic approach: the FIRST request after stale gets
-  // stale data instantly, the SECOND request gets fresh data.
-  // True background revalidation would require re-invoking the Express handler
-  // pipeline which is complex and error-prone.
-  //
-  // If the user needs true background revalidation, they can use the
-  // programmatic `invalidateRoute()` from a background job.
+  // Create a Mock Response object inheriting from the real one but disabling network output
+  const mockRes = Object.create(res);
+  mockRes.statusCode = 200;
+  Object.defineProperty(mockRes, "headersSent", { value: false, writable: true });
+  Object.defineProperty(mockRes, "finished", { value: false, writable: true });
+
+  // Isolate headers
+  const localHeaders = new Map<string, string | string[]>();
+  mockRes.setHeader = (name: string, value: string | string[]) => { localHeaders.set(name.toLowerCase(), value); return mockRes; };
+  mockRes.getHeader = (name: string) => localHeaders.get(name.toLowerCase());
+  mockRes.removeHeader = (name: string) => localHeaders.delete(name.toLowerCase());
+  mockRes.getHeaders = () => Object.fromEntries(localHeaders);
+
+  // Override output methods to prevent writing to real socket
+  mockRes.write = () => true;
+  mockRes.end = () => mockRes;
+
+  // Now capture this fake output
+  interceptResponse(
+    req,
+    mockRes as Response,
+    next,
+    client,
+    cacheKey,
+    totalTTL,
+    staleTime,
+    maxBodySize
+  ).catch(() => { });
 }
 
 /** Extract headers worth caching from the response. */

@@ -108,6 +108,14 @@ export interface CacheConfig {
    * @default false
    */
   sortQuery?: boolean;
+
+  /**
+   * Maximum response body size (in bytes) to cache. 
+   * Protects Node.js memory limits during large streaming downloads.
+   * If a response exceeds this size, it serves normally but skips the cache.
+   * @default 2097152 (2MB)
+   */
+  maxBodySize?: number;
 }
 
 /**
@@ -121,6 +129,7 @@ export interface RouteOptions {
   enabled?: boolean;
   vary?: string[];
   sortQuery?: boolean;
+  maxBodySize?: number;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
 }

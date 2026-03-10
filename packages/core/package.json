@@ -50,6 +50,7 @@
     "vitest": "^3.0.0"
   },
   "dependencies": {
+    "lru-cache": "^11.2.6",
     "node-cache": "^5.1.2"
   },
   "publishConfig": {

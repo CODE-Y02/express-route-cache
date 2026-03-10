@@ -55,6 +55,14 @@ function createTestApp(cacheOpts?: Parameters<typeof createCache>[0]) {
     res.status(500).json({ error: "fail", callCount });
   });
 
+  // GET /large — returns large payload to test maxBodySize
+  app.get("/large", cache.route(), (req: Request, res: Response) => {
+    callCount++;
+    // creates a string slightly larger than 1MB
+    const largePayload = "A".repeat(1024 * 1024 + 100);
+    res.send(largePayload);
+  });
+
   return { app, cache, getCallCount: () => callCount, resetCallCount: () => { callCount = 0; } };
 }
 
@@ -332,6 +340,30 @@ describe("@express-route-cache/core", () => {
       await request(app).get("/users");
       await request(app).get("/users");
       expect(getCallCount()).toBe(2); // handler called both times
+    });
+  });
+
+  // ── 10. Memory Protection (maxBodySize) ──────────────────────────────
+
+  describe("Memory Protection (maxBodySize)", () => {
+    it("responses exceeding maxBodySize should bypass the cache", async () => {
+      const { app, getCallCount } = createTestApp({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+        maxBodySize: 1024 * 1024, // 1MB limit
+      });
+
+      // Fetch a payload slightly larger than 1MB
+      const res1 = await request(app).get("/large");
+      expect(res1.status).toBe(200);
+      expect(res1.headers["x-cache"]).toBeUndefined(); // Fallback skips caching
+      expect(getCallCount()).toBe(1);
+
+      // Second fetch should NOT be a hit because the 1st request dumped the chunks
+      const res2 = await request(app).get("/large");
+      expect(res2.status).toBe(200);
+      expect(res2.headers["x-cache"]).toBeUndefined();
+      expect(getCallCount()).toBe(2); // Handler re-executed
     });
   });
 });

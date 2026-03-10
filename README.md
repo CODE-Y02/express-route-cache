@@ -116,6 +116,7 @@ If 5,000 users request `/viral-post` at the exact same millisecond the cache exp
 | `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                  |
 | `vary`      | `string[]`    | `[]`    | Headers to namespace caches (e.g. `['authorization']`).            |
 | `sortQuery` | `boolean`     | `false` | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`) |
+| `maxBodySize`| `number`     | `2097152` | Max response body size in bytes to cache (default: 2MB). Prevents memory leaks. |
 | `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                           |
 
 Returns `{ middleware(), route(), invalidate(), invalidateRoute(), adapter }`.

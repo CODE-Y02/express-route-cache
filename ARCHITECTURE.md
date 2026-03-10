@@ -42,10 +42,10 @@ All future `/users/*` requests will now query for `v:/users=6`, causing an insta
 
 When a highly trafficked endpoint's cache expires, 1,000 concurrent requests might hit the Express backend before the first database query has finished repopulating the cache. Without protection, this creates a "thundering herd" or "stampede" that passes 1,000 identical queries to Postgres/MongoDB simultaneously.
 
-### Our Solution: In-Memory Promise Maps
+### Our Solution: In-Memory Promise LRU Cache
 
-When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's execution. It stores this Promise in an in-memory `Map`.
-If subsequent requests arrive for the exact same cache key while the operation is pending, they await the _existing_ Promise instead of calling `next()`.
+When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's execution. It stores this Promise in an in-memory `LRUCache`.
+If subsequent requests arrive for the exact same cache key while the operation is pending, they await the _existing_ Promise instead of calling `next()`. (An LRU cache is specifically used here to prevent Out-Of-Memory attacks if a malicious actor sends millions of unique query parameters).
 
 ```mermaid
 sequenceDiagram
@@ -82,22 +82,23 @@ sequenceDiagram
 
 Standard TTL caches create latency spikes. If data is cached for 60 seconds, the unlucky user who arrives at second 61 absorbs the full cost of the database query.
 
-### Our Solution: Two-Tier Freshness
+### Our Solution: The "Mock Response" Engine
 
-Inspired by TanStack Query, we maintain two timers:
+Inspired by Next.js's Incremental Static Regeneration (ISR) and server actions, we maintain two timers:
 
 1. `staleTime`: The duration the data is considered 100% fresh.
 2. `gcTime`: The total duration the data is kept in the cache (`setex` TTL).
 
 If a request arrives when the age is between `staleTime` and `gcTime`:
 
-1. The server instantly responds with the stale `CacheEntry`.
-2. The server fires an asynchronous `next()` execution in the background to revalidate the data and update the cache for the _next_ user.
+1. The server instantly responds using the real Express `res` object with the stale `CacheEntry`. The user's TCP connection is closed.
+2. The middleware clones the `res` object using `Object.create()`, strips out the native network `write` and `end` bindings, and forces the HTTP `next()` chain to run in the background. 
+3. Your standard database handler executes, calls `mockRes.json(data)`, and our caching layer silently intercepts that fresh data stream into Redis without throwing `ERR_HTTP_HEADERS_SENT` Socket errors.
 
 ### Trade-offs
 
-- **Pros:** Near 100% perceived uptime and instant latency for end users on highly trafficked routes.
-- **Cons:** "Dirty" background Express contexts. Because Express relies heavily on `res.write` and `res.end` to finish handlers, background revalidation involves intercepting these streams while simultaneously holding a "dummy" response object, which can conflict with poor downstream middleware that checks for open sockets.
+- **Pros:** Near 100% perceived uptime and instant latency for end users, with *Zero API Changes*. Developers do not have to write special background callback functions; they just write standard Express handlers. (This is exactly how Next.js works under the hood).
+- **Cons:** Background processing occupies the single-threaded Node.js event loop momentarily. Revalidating a massive payload (e.g., executing `JSON.stringify` on a 5MB array) will temporarily block synchronous operations on the main thread for a few milliseconds.
 
 ---
 
@@ -115,3 +116,15 @@ If `sortQuery: true` is enabled via configuration, we extract the keys via `Obje
 
 - **Pros:** High cache hit-rates regardless of frontend framework behavior.
 - **Cons:** Tiny CPU overhead (milliseconds) to sort object key Arrays on the Node.js main thread. Off by default for maximum raw throughput, recommended for public REST APIs.
+
+---
+
+## 5. Large Response / Streaming Protection (`maxBodySize`)
+
+### The Problem
+
+If a route serves a 500MB video or a massive CSV file, loading that entire buffer into Node.js memory (`chunks.push(...)`) for caching will instantly consume the heap. If 4 users download a 500MB file simultaneously, the Node process will hit its 2GB limit and crash with a V8 OOM exception.
+
+### Our Solution
+
+We implemented a hard runtime size boundary (`maxBodySize`, defaulting to 2MB). As the Express request streams chunks into `res.write`, we track the cumulative length. If the size exceeds the boundary, we immediately dump the stored `chunks` to free memory and flip an `abortCaching` flag. The stream continues perfectly to the end user without attempting to buffer the gigabytes of data into Redis.
