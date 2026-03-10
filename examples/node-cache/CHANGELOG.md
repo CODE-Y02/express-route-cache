@@ -1,5 +1,12 @@
 # cache-example
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies [e610874]
+  - @express-route-cache/core@0.1.3
+
 ## 0.0.4
 
 ### Patch Changes

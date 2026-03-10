@@ -1,5 +1,12 @@
 # @express-route-cache/memcached
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [e610874]
+  - @express-route-cache/core@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
