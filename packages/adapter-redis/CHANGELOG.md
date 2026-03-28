@@ -1,5 +1,16 @@
 # @express-route-cache/redis
 
+## 0.2.0
+
+### Minor Changes
+
+- Support for auto invalidate & few critical bug fixes
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/core@1.0.0
+
 ## 0.1.4
 
 ### Patch Changes

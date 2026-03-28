@@ -8,6 +8,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
+    "version-packages": "changeset version",
+    "changeset": "changeset",
     "release": "pnpm run build && pnpm run test && changeset publish"
   },
   "devDependencies": {

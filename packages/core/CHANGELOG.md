@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 1.0.0
+
+### Major Changes
+
+- Support for auto invalidate & few critical bug fixes
+
 ## 0.2.0
 
 ### Minor Changes
