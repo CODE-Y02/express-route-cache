@@ -39,6 +39,8 @@ export interface CacheEntry {
   headers: Record<string, string>;
   /** Unix timestamp (ms) when this entry was created. */
   createdAt: number;
+  /** Whether the body is base64 encoded. */
+  isBase64?: boolean;
 }
 
 // ─── Configuration Types ────────────────────────────────────────────────────
@@ -116,6 +118,13 @@ export interface CacheConfig {
    * @default 2097152 (2MB)
    */
   maxBodySize?: number;
+
+  /**
+   * Automatically invalidate the cache for the current route pattern 
+   * when a mutation request (POST, PUT, DELETE, PATCH) is successful.
+   * @default false
+   */
+  autoInvalidate?: boolean;
 }
 
 /**
@@ -130,6 +139,7 @@ export interface RouteOptions {
   vary?: string[];
   sortQuery?: boolean;
   maxBodySize?: number;
+  autoInvalidate?: boolean;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
 }

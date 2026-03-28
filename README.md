@@ -30,7 +30,9 @@ Meet `@express-route-cache`. We brought the modern conveniences of frontend data
 | **Stale-While-Revalidate** | ❌                | ✅ **Instant Stale Delivery** + Background Refresh     |
 | **Stampede Protection**    | ❌                | ✅ **Request Coalescing** (1,000 reqs = 1 DB call)     |
 | **Adapters**               | ❌ Locked to one  | ✅ **Memory, Redis (ioredis), Memcached (memjs)**      |
-| **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `gcTime`, `swr: true`) |
+| **Binary Support**         | ❌ JSON only      | ✅ **Automatic** (Images, PDFs, Buffers)               |
+| **Header Preservation**    | ❌ Stripped       | ✅ **Automatic** (CORS, Custom Headers)                |
+| **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `autoInvalidate`)      |
 
 ---
 
@@ -117,6 +119,7 @@ If 5,000 users request `/viral-post` at the exact same millisecond the cache exp
 | `vary`      | `string[]`    | `[]`    | Headers to namespace caches (e.g. `['authorization']`).            |
 | `sortQuery` | `boolean`     | `false` | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`) |
 | `maxBodySize`| `number`     | `2097152` | Max response body size in bytes to cache (default: 2MB). Prevents memory leaks. |
+| `autoInvalidate`| `boolean`   | `false` | Automatically invalidate route patterns on successful `POST/PUT/DELETE`. |
 | `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                           |
 
 Returns `{ middleware(), route(), invalidate(), invalidateRoute(), adapter }`.
@@ -179,7 +182,17 @@ We automatically append headers for CDN and debugging visibility:
 
 - `X-Cache`: `HIT` | `MISS` | `STALE`
 - `Age`: How many seconds old the data is.
-- `Cache-Control`: Respects your `staleTime` (e.g. `public, max-age=60`).
+- `Cache-Control`: Respects your `staleTime` (e.g. `public, max-age=60`). **Note:** If your handler sets its own `Cache-Control` (e.g., `private`), this library respects it and won't overwrite it.
+
+---
+
+## 🛠️ Advanced Features
+
+### Binary Data Support
+Unlike most Express caching libraries that only handle JSON strings, `@express-route-cache` supports binary responses out of the box. You can cache images, PDFs, and ZIP files without corruption.
+
+### Smart Invalidation
+Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
 
 ---
 

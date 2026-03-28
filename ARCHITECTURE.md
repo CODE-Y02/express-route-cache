@@ -25,8 +25,17 @@ flowchart TD
 ```
 
 **Invalidation Flow:**
-When `POST /users` occurs, we don't look for cache keys. We simply execute `INCR epoch:/users` to change it from `5` to `6`.
+When `POST /users` occurs, we don't look for cache keys. We simply execute `INCR epoch:/users` to change it from `5` to `6` **after the handler finishes successfully**.
 All future `/users/*` requests will now query for `v:/users=6`, causing an instant, calculated **O(1) Cache MISS**.
+
+### Sequential Integrity (Smart Invalidation)
+
+To prevent race conditions during database updates, all invalidations (manual or automatic) are hooked into the Express `res.on('finish')` event. This guarantees that:
+1. The database update completes.
+2. The response is sent to the client.
+3. Only then is the cache invalidated.
+
+Without this "post-handler" sequence, a concurrent `GET` request could hit the server *after* the epoch is incremented but *before* the DB update is finished, causing the server to re-cache stale data under the new epoch (creating a "Cache Zombie").
 
 ### Trade-offs
 
@@ -116,6 +125,20 @@ If `sortQuery: true` is enabled via configuration, we extract the keys via `Obje
 
 - **Pros:** High cache hit-rates regardless of frontend framework behavior.
 - **Cons:** Tiny CPU overhead (milliseconds) to sort object key Arrays on the Node.js main thread. Off by default for maximum raw throughput, recommended for public REST APIs.
+
+---
+
+## 6. Binary Serialization & Header Preservation
+
+### The Problem
+Traditional JSON caching middlewares fail in two ways:
+1. They convert all response bodies to UTF-8 strings, which corrupts binary data like PNGs or PDFs.
+2. They strip custom headers (like CORS or App-Version) during replay.
+
+### Our Solution
+We use a **Base64 Serialization Layer**. All response bodies (Buffers or strings) are converted to Base64 strings before storage. When serving a `HIT`, we check an `isBase64` flag in the metadata and decode back to a Buffer before calling `res.end()`. 
+
+Furthermore, we use `res.getHeaders()` to capture the full response state, filtering only for ephemeral headers (like `Set-Cookie` or `X-Express-*`), ensuring a perfect high-fidelity replay of the original response.
 
 ---
 
