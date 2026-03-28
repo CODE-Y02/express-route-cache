@@ -140,6 +140,19 @@ Programmatic invalidation for use inside services, cron jobs, or webhooks.
 
 ---
 
+## 🛠️ Advanced Features
+
+### Binary Data Support
+Unlike most Express caching libraries that only handle JSON strings, `@express-route-cache` supports binary responses out of the box. You can cache images, PDFs, and ZIP files without corruption.
+
+### Smart Invalidation
+Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
+
+### Comprehensive Header Preservation
+We use `res.getHeaders()` to capture the full response state, filtering only for ephemeral headers (like `Set-Cookie` or `X-Express-*`), ensuring a perfect high-fidelity replay of the original response including CORS and custom headers.
+
+---
+
 ## 🔌 Adapters
 
 ### Memory (Built-in)

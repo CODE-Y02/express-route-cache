@@ -3,9 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - "v*"
-      - next
+      - "!main"
+      - "!next"
+      - "!v*"
+      - "**" # This tells CI to run on all other feature branches
   pull_request:
     branches:
       - main

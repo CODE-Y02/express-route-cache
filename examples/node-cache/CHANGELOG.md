@@ -1,5 +1,23 @@
 # cache-example
 
+## 0.1.0
+
+### Minor Changes
+
+- Support for auto invalidate & few critical bug fixes
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/core@1.0.0
+
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [e83284d]
+  - @express-route-cache/core@0.2.0
+
 ## 0.0.5
 
 ### Patch Changes

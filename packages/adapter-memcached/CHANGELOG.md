@@ -1,5 +1,31 @@
 # @express-route-cache/memcached
 
+## 0.2.0
+
+### Minor Changes
+
+- Support for auto invalidate & few critical bug fixes
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/core@1.0.0
+
+## 0.1.4
+
+### Patch Changes
+
+- e83284d: feat: add `autoInvalidate` option for automatic O(1) route clearing on mutations (POST, PUT, DELETE, PATCH).
+
+  This update also includes critical bug fixes:
+  - Fix binary data corruption by using Base64 serialization.
+  - Preserve all non-sensitive response headers on cache replay.
+  - Respect manual `Cache-Control` headers from handlers.
+  - Resolve invalidation race conditions by moving logic to the `res.on('finish')` hook.
+
+- Updated dependencies [e83284d]
+  - @express-route-cache/core@0.2.0
+
 ## 0.1.3
 
 ### Patch Changes
