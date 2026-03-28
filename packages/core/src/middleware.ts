@@ -28,6 +28,7 @@ const DEFAULTS = {
   vary: [] as string[],
   enabled: true,
   maxBodySize: 2097152, // 2MB
+  autoInvalidate: false,
 } as const;
 
 // ─── Stampede Lock ──────────────────────────────────────────────────────────
@@ -72,6 +73,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     enabled: config.enabled ?? DEFAULTS.enabled,
     sortQuery: config.sortQuery ?? false,
     maxBodySize: config.maxBodySize ?? DEFAULTS.maxBodySize,
+    autoInvalidate: config.autoInvalidate ?? DEFAULTS.autoInvalidate,
   };
 
   const client = config.adapter;
@@ -84,8 +86,19 @@ export function createCache(config: CacheConfig): CacheInstance {
       res: Response,
       next: NextFunction
     ): Promise<void> {
-      // Only cache GET requests
+      // Handle auto-invalidation for non-GET mutation methods
       if (req.method !== "GET") {
+        const autoInv = routeOpts?.autoInvalidate ?? globalOpts.autoInvalidate;
+        if (autoInv) {
+          res.on("finish", async () => {
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              const pattern = routeOpts?.key ? null : (await buildCacheKey(client, req, globalOpts.keyPrefix, [], false)).routePattern;
+              if (pattern) {
+                await invalidateRoutes([pattern]);
+              }
+            }
+          });
+        }
         next();
         return;
       }
@@ -208,11 +221,6 @@ export function createCache(config: CacheConfig): CacheInstance {
 
   async function invalidateRoutes(routePatterns: string[]): Promise<void> {
     for (const pattern of routePatterns) {
-      const parents = getParentRoutePatterns(pattern);
-      // Invalidate the deepest pattern (the one specified) and all parents
-      // Actually we only need to increment the exact pattern's epoch
-      // because the key includes ALL parent epochs.
-      // Incrementing /users will change keys for /users, /users/:id, etc.
       const epochKey = getEpochKey(pattern);
       await client.incr(epochKey);
     }
@@ -224,16 +232,16 @@ export function createCache(config: CacheConfig): CacheInstance {
     middleware: () => createCacheHandler(),
     route: (opts?: RouteOptions) => createCacheHandler(opts),
     invalidate: (...routePatterns: string[]) => {
-      return async function invalidateMiddleware(
-        _req: Request,
-        _res: Response,
-        next: NextFunction
-      ): Promise<void> {
-        try {
-          await invalidateRoutes(routePatterns);
-        } catch {
-          // Don't block the request on invalidation failure
-        }
+      return (req: Request, res: Response, next: NextFunction) => {
+        res.on("finish", async () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              await invalidateRoutes(routePatterns);
+            } catch {
+              // Don't block
+            }
+          }
+        });
         next();
       };
     },
@@ -265,12 +273,17 @@ function sendCachedResponse(
   // Add cache-specific headers
   res.setHeader("X-Cache", cacheStatus);
   res.setHeader("Age", String(ageSeconds));
-  res.setHeader(
-    "Cache-Control",
-    `public, max-age=${Math.max(0, staleTime - ageSeconds)}`
-  );
 
-  res.end(entry.body);
+  // Only force public Cache-Control if the application hasn't set its own
+  if (!res.getHeader("cache-control")) {
+    res.setHeader(
+      "Cache-Control",
+      `public, max-age=${Math.max(0, staleTime - ageSeconds)}`
+    );
+  }
+
+  const body = entry.isBase64 ? Buffer.from(entry.body, "base64") : entry.body;
+  res.end(body);
 }
 
 /**
@@ -339,7 +352,9 @@ function interceptResponse(
         return originalEnd(chunk, ...args);
       }
 
-      const body = Buffer.concat(chunks).toString("utf-8");
+      const bodyBuffer = Buffer.concat(chunks);
+      // Store version 2 format (Base64) to handle binary data safely
+      const body = bodyBuffer.toString("base64");
 
       // Only cache successful responses (2xx)
       const statusCode = res.statusCode;
@@ -349,23 +364,26 @@ function interceptResponse(
           statusCode,
           headers: extractCacheableHeaders(res),
           createdAt: Date.now(),
+          isBase64: true,
         };
 
         // Store in cache (fire-and-forget)
         client
           .set(cacheKey, serializeEntry(entry), totalTTL)
-          .catch(() => {/* Fail silently */ });
+          .catch(() => { /* Fail silently */ });
 
-        // Set cache headers on MISS if they haven't been sent yet (e.g., chunked responses)
+        // Set cache headers on MISS if they haven't been sent yet
         if (!res.headersSent) {
           res.setHeader("X-Cache", "MISS");
           res.setHeader("Age", "0");
-          res.setHeader("Cache-Control", `public, max-age=${staleTime}`);
+          if (!res.getHeader("cache-control")) {
+            res.setHeader("Cache-Control", `public, max-age=${staleTime}`);
+          }
         }
 
         resolve(entry);
       } else {
-        // Non-2xx: don't cache, resolve with null (no rejection = no unhandled errors)
+        // Non-2xx: don't cache
         resolve(null);
       }
 
@@ -423,13 +441,19 @@ async function revalidateInBackground(
 /** Extract headers worth caching from the response. */
 function extractCacheableHeaders(res: Response): Record<string, string> {
   const headers: Record<string, string> = {};
-  const contentType = res.getHeader("content-type");
-  if (contentType) {
-    headers["content-type"] = String(contentType);
+  const rawHeaders = res.getHeaders();
+
+  for (const [key, value] of Object.entries(rawHeaders)) {
+    if (!value) continue;
+
+    const lowerKey = key.toLowerCase();
+    // Skip cookie headers and internal express headers
+    if (lowerKey === "set-cookie" || lowerKey.startsWith("x-express-")) {
+      continue;
+    }
+
+    headers[key] = String(value);
   }
-  const contentEncoding = res.getHeader("content-encoding");
-  if (contentEncoding) {
-    headers["content-encoding"] = String(contentEncoding);
-  }
+
   return headers;
 }
