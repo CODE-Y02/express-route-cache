@@ -35,6 +35,12 @@ features:
   - icon: 📜
     title: Header Preservation
     details: Automatically preserves CORS, custom headers, and response metadata for a perfect replay.
+  - icon: 🛠️
+    title: Standalone Fetch
+    details: Manual data caching with full SWR and Stampede Protection. Not just for Express routes.
+  - icon: 🔁
+    title: Built-in Retries
+    details: Exponential backoff retries for your data fetchers. Handle flaky APIs with ease.
 ---
 
 ### 🚀 Why express-route-cache?

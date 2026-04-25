@@ -1,3 +1,8 @@
+---
+title: Getting Started | @express-route-cache
+description: Learn how to set up production-grade route caching for Express.js in less than a minute.
+---
+
 # Getting Started
 
 ## Installation
@@ -47,18 +52,57 @@ app.post("/users", cache.invalidate("/users"), (req, res) => {
   res.status(201).json({ success: true });
 });
 
+// 5. Manual Data Caching (Standalone Fetch)
+const data = await cache.fetch('users-list', async () => {
+  return [{ id: 1, name: 'John' }];
+}, { swr: true, retry: 3 });
+
 app.listen(3000);
 ```
 
 ## Key Concepts
 
-### Two-Tier Timing
-
-We use two timers to manage your data lifecycle:
-
-1. **`staleTime`**: Data is "fresh". Returned instantly.
-2. **`gcTime`**: Data is "stale". If `swr` is enabled, returned instantly while refreshing in the background.
-
 ### Invalidation
 
 Invalidation is **O(1)**. Instead of searching for keys to delete, we use "Epoch Versioning". Incrementing a version number makes all old cache entries instantly obsolete.
+
+## 🛠️ Advanced Patterns
+
+### 1. Custom Cache Keys
+Sometimes `req.path` isn't enough. You can override the key manually:
+```ts
+// Static key
+cache.route({ key: 'my-custom-key' });
+
+// Dynamic key based on request (e.g., user-specific)
+cache.route({ key: (req) => `user-${req.user.id}-profile` });
+```
+
+### 2. Header-based Caching (`vary`)
+If your API returns different data based on headers (like `Authorization` or `Accept-Language`), use the `vary` option:
+```ts
+cache.route({ vary: ['Authorization', 'Accept-Language'] });
+```
+
+### 3. Query Parameter Determinism
+Avoid cache fragmentation by sorting query parameters:
+```ts
+// ?b=2&a=1 will be treated the same as ?a=1&b=2
+cache.route({ sortQuery: true });
+```
+
+### 4. Automatic Invalidation
+You can tell the cache to automatically increment the version for a route pattern whenever a successful `POST`, `PUT`, or `DELETE` request is made:
+```ts
+// Globally
+const cache = createCache({ autoInvalidate: true, ... });
+
+// Or per-route
+app.post('/users', cache.route({ autoInvalidate: true }), createUser);
+```
+
+### 5. Memory Protection (`maxBodySize`)
+To prevent large responses (like 500MB videos) from crashing your Node process or filling up Redis, use `maxBodySize`. Any response larger than this will simply skip the cache.
+```ts
+cache.route({ maxBodySize: 1024 * 1024 * 5 }); // 5MB limit
+```

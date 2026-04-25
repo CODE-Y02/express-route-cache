@@ -1,3 +1,8 @@
+---
+title: "Memcached Adapter | @express-route-cache"
+description: "Distributed caching using Memcached (memjs) for low-latency production environments."
+---
+
 # Memcached Adapter
 
 The Memcached adapter is ideal for high-performance key-value caching where complex data structures are not required.

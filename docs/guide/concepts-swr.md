@@ -1,3 +1,8 @@
+---
+title: "Stale-While-Revalidate (SWR) | @express-route-cache"
+description: "Learn how SWR keeps your API responses instant by refreshing cache in the background."
+---
+
 # Stale-While-Revalidate (SWR)
 
 Latency spikes are the enemy of a great user experience. `@express-route-cache` uses SWR to ensure your users never wait for a database refresh.

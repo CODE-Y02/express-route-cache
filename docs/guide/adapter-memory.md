@@ -1,3 +1,8 @@
+---
+title: "Memory Adapter | @express-route-cache"
+description: "High-performance in-memory caching for single-instance applications."
+---
+
 # Memory Adapter
 
 The Memory adapter is built into `@express-route-cache/core` and is perfect for single-process applications or local development.

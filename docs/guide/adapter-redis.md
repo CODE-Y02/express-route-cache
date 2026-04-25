@@ -1,3 +1,8 @@
+---
+title: "Redis Adapter | @express-route-cache"
+description: "Distributed caching using Redis (ioredis) for multi-instance production environments."
+---
+
 # Redis Adapter
 
 The Redis adapter is the recommended choice for production environments. It allows multiple server instances to share the same cache and persist data across restarts.

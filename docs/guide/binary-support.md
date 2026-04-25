@@ -1,3 +1,8 @@
+---
+title: "Binary Support | @express-route-cache"
+description: "Learn how we handle Images, PDFs, and ZIP files using automatic Base64 serialization."
+---
+
 # Binary Support
 
 Unlike many Express caching libraries that only handle JSON, `@express-route-cache` has first-class support for binary data.
