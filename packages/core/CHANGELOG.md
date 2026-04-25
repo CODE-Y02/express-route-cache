@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 1.1.0
+
+### Minor Changes
+
+- 273105e: including custom swr and LLM improvements
+
 ## 1.0.0
 
 ### Major Changes
