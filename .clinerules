@@ -1,0 +1,18 @@
+# Project Rules for AI Agents (@express-route-cache)
+
+## Architectural Constraints
+
+- **Post-Response Invalidation**: When implementing mutations or cache clearing, always hook into `res.on('finish')` to ensure the database update has completed successfully before the cache is modified.
+- **Binary Data Handling**: Never assume response bodies are UTF-8 strings. Use the `isBase64` flag in `CacheEntry` metadata and decode before `res.end()`.
+- **Header Preservation**: Use `res.getHeaders()` to capture all non-sensitive response state (CORS, custom app headers). Avoid hardcoding specific headers (like `content-type`) except as fallbacks.
+- **Atomic Invalidation**: Use `client.incr(epochKey)` for O(1) invalidation. Never use `SCAN` or `DEL` patterns for route patterns.
+
+## Performance & Safety
+
+- **Non-Blocking Caching**: Cache storage (`client.set`) and background revalidation (SWR) should be fire-and-forget. Do not `await` them if it delays the response to the client.
+- **Memory Safety**: Respect `maxBodySize` to prevent OOM errors when buffering responses in Node.js.
+
+## Dependencies
+
+- **Tailwind CSS**: Use version 3.4. do not upgrade to v4.
+- **Package Manager**: Use `pnpm`.
