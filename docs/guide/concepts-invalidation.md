@@ -1,3 +1,8 @@
+---
+title: "Epoch Invalidation | @express-route-cache"
+description: "Understand the O(1) invalidation system that makes this library production-ready for large datasets."
+---
+
 # Epoch Invalidation
 
 Invalidating cached data is notoriously difficult. Most libraries struggle with performance when deleting many keys at once.

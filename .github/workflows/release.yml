@@ -52,11 +52,9 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          # This tells Changesets what command to run when it determines a publish is necessary
-          publish: pnpm run release
+          # Use @next tag for the next branch, otherwise default to @latest
+          publish: npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
           commit: "chore(release): version packages"
         env:
-          # Used to create PRs and push commits
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Used by `changeset publish` automatically to authenticate to NPM
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

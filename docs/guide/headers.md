@@ -1,3 +1,8 @@
+---
+title: "Header Preservation | @express-route-cache"
+description: "How we replay CORS and custom headers to ensure your API behaves identically when cached."
+---
+
 # Header Preservation
 
 `@express-route-cache` ensures that your cached responses are high-fidelity replays of the original, including all relevant HTTP headers.

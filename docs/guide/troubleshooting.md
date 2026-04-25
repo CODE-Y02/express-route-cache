@@ -1,3 +1,8 @@
+---
+title: "Troubleshooting | @express-route-cache"
+description: "Solutions for common issues like cache zombies, high memory usage, and unexpected cache misses."
+---
+
 # Troubleshooting
 
 ## Common Issues

@@ -1,3 +1,8 @@
+---
+title: Architecture & Design | @express-route-cache
+description: Deep dive into O(1) Epoch Invalidation, SWR implementation, and Stampede Protection logic.
+---
+
 # Architecture & Design Decisions
 
 This document outlines the core architectural choices, optimizations, and trade-offs made in `@express-route-cache`. It is meant for senior engineers and contributors who want to understand _why_ the cache works the way it does.
@@ -12,7 +17,10 @@ When a user updates their profile, the system must invalidate `/api/users/123`, 
 ### Our Solution: Epoch Versioning
 
 We assign an integer "epoch" counter to every route pattern (e.g., `/users` -> Epoch `1`).
-This epoch is embedded directly into the generated cache key when storing data.
+This epoch is embedded directly into the generated cache key when storing data. 
+
+> [!NOTE]
+> Manual `cache.fetch()` keys bypass the automatic route epoch versioning by default for simplicity, but you can manually include version segments in your custom keys if needed.
 
 ```mermaid
 flowchart TD
@@ -53,8 +61,11 @@ When a highly trafficked endpoint's cache expires, 1,000 concurrent requests mig
 
 ### Our Solution: In-Memory Promise LRU Cache
 
-When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's execution. It stores this Promise in an in-memory `LRUCache`.
-If subsequent requests arrive for the exact same cache key while the operation is pending, they await the _existing_ Promise instead of calling `next()`. (An LRU cache is specifically used here to prevent Out-Of-Memory attacks if a malicious actor sends millions of unique query parameters).
+When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's (or manual `fetcher`'s) execution. It stores this Promise in an in-memory `LRUCache`. 
+
+The `inflightRequests` map stores `Promise<any>`, allowing it to seamlessly coalesce both Express response objects and generic data fetched via `cache.fetch()`.
+
+If subsequent requests arrive for the exact same cache key while the operation is pending, they await the _existing_ Promise instead of calling `next()` or re-running the fetcher. (An LRU cache is specifically used here to prevent Out-Of-Memory attacks if a malicious actor sends millions of unique query parameters).
 
 ```mermaid
 sequenceDiagram

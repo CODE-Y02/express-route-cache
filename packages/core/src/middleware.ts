@@ -29,16 +29,18 @@ const DEFAULTS = {
   enabled: true,
   maxBodySize: 2097152, // 2MB
   autoInvalidate: false,
+  retry: 0,
 } as const;
 
 // ─── Stampede Lock ──────────────────────────────────────────────────────────
 
 /**
  * In-memory lock map for stampede protection.
- * Key = cache key, Value = in-flight Promise of the response.
- * When 1000 requests hit a cold cache, only 1 handler executes.
+ * Key = cache key, Value = in-flight Promise of the data/response.
+ * Ensures that if 1,000 requests hit a cold cache simultaneously,
+ * only 1 handler executes while the others wait for the result.
  */
-const inflightRequests = new LRUCache<string, Promise<CacheEntry | null>>({
+const inflightRequests = new LRUCache<string, Promise<any>>({
   max: 5000, // Maximum pending locks to prevent memory leaks from massive unique key attacks
 });
 
@@ -74,6 +76,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     sortQuery: config.sortQuery ?? false,
     maxBodySize: config.maxBodySize ?? DEFAULTS.maxBodySize,
     autoInvalidate: config.autoInvalidate ?? DEFAULTS.autoInvalidate,
+    retry: config.retry ?? DEFAULTS.retry,
   };
 
   const client = config.adapter;
@@ -84,7 +87,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     return async function cacheHandler(
       req: Request,
       res: Response,
-      next: NextFunction
+      next: NextFunction,
     ): Promise<void> {
       // Handle auto-invalidation for non-GET mutation methods
       if (req.method !== "GET") {
@@ -92,7 +95,17 @@ export function createCache(config: CacheConfig): CacheInstance {
         if (autoInv) {
           res.on("finish", async () => {
             if (res.statusCode >= 200 && res.statusCode < 300) {
-              const pattern = routeOpts?.key ? null : (await buildCacheKey(client, req, globalOpts.keyPrefix, [], false)).routePattern;
+              const pattern = routeOpts?.key
+                ? null
+                : (
+                    await buildCacheKey(
+                      client,
+                      req,
+                      globalOpts.keyPrefix,
+                      [],
+                      false,
+                    )
+                  ).routePattern;
               if (pattern) {
                 await invalidateRoutes([pattern]);
               }
@@ -137,7 +150,7 @@ export function createCache(config: CacheConfig): CacheInstance {
             req,
             globalOpts.keyPrefix,
             vary,
-            sortQuery
+            sortQuery,
           );
           cacheKey = result.key;
         }
@@ -170,7 +183,7 @@ export function createCache(config: CacheConfig): CacheInstance {
                 next,
                 totalTTL,
                 staleTime,
-                maxBodySize
+                maxBodySize,
               );
               return;
             }
@@ -201,7 +214,7 @@ export function createCache(config: CacheConfig): CacheInstance {
           cacheKey,
           totalTTL,
           staleTime,
-          maxBodySize
+          maxBodySize,
         );
 
         if (globalOpts.stampede) {
@@ -247,6 +260,94 @@ export function createCache(config: CacheConfig): CacheInstance {
     },
     invalidateRoute: (...routePatterns: string[]) =>
       invalidateRoutes(routePatterns),
+    /**
+     * Standalone data fetching with built-in SWR and Stampede Protection.
+     * Use this for manual data caching (e.g., Database calls, External APIs).
+     * 
+     * @example
+     * const users = await cache.fetch('all-users', () => db.users.findMany(), { 
+     *   staleTime: 60, 
+     *   swr: true,
+     *   retry: 3 
+     * });
+     * 
+     * @template T - The type of data being fetched.
+     * @param key - Unique cache identifier.
+     * @param fetcher - Async function to retrieve data on MISS or SWR revalidation.
+     * @param opts - Overrides for staleTime, gcTime, retry count, and SWR toggle.
+     * @returns The cached or freshly fetched data.
+     */
+    fetch: async <T>(
+      key: string,
+      fetcher: () => Promise<T>,
+      opts?: Omit<
+        RouteOptions,
+        "key" | "autoInvalidate" | "vary" | "sortQuery"
+      >,
+    ): Promise<T> => {
+      const staleTime = opts?.staleTime ?? globalOpts.staleTime;
+      const gcTime = opts?.gcTime ?? globalOpts.gcTime;
+      const swr = opts?.swr ?? globalOpts.swr;
+      const retryCount = opts?.retry ?? globalOpts.retry;
+      const totalTTL = staleTime + gcTime;
+      const cacheKey = key.startsWith(globalOpts.keyPrefix)
+        ? key
+        : `${globalOpts.keyPrefix}${key}`;
+
+      // ── Try cache read ────────────────────────────────────────────
+      const cached = await client.get(cacheKey);
+      if (cached) {
+        try {
+          const entry = JSON.parse(cached);
+          if (entry && typeof entry.createdAt === "number") {
+            const ageSeconds = (Date.now() - entry.createdAt) / 1000;
+            if (ageSeconds < staleTime) {
+              return (entry.data ?? entry.body) as T;
+            }
+            if (ageSeconds < totalTTL && swr) {
+              // 🔄 Stale + SWR — serve stale, revalidate in background
+              executeFetcherWithRetry(fetcher, retryCount)
+                .then(async (data) => {
+                  await client.set(
+                    cacheKey,
+                    JSON.stringify({ data, createdAt: Date.now() }),
+                    totalTTL,
+                  );
+                })
+                .catch(() => {
+                  /* Background fail stays silent */
+                });
+              return (entry.data ?? entry.body) as T;
+            }
+          }
+        } catch {
+          /* Fall through to MISS */
+        }
+      }
+
+      // ── Cache MISS ────────────────────────────────────────────────
+      if (globalOpts.stampede && inflightRequests.has(cacheKey)) {
+        return await inflightRequests.get(cacheKey);
+      }
+
+      const promise = executeFetcherWithRetry(fetcher, retryCount).then(
+        async (data) => {
+          await client.set(
+            cacheKey,
+            JSON.stringify({ data, createdAt: Date.now() }),
+            totalTTL,
+          );
+          return data;
+        },
+      );
+
+      if (globalOpts.stampede) {
+        inflightRequests.set(cacheKey, promise);
+        promise.finally(() => inflightRequests.delete(cacheKey));
+      }
+
+      return await promise;
+    },
     adapter: client,
   };
 }
@@ -261,7 +362,7 @@ function sendCachedResponse(
   entry: CacheEntry,
   ageSeconds: number,
   staleTime: number,
-  cacheStatus: "HIT" | "STALE"
+  cacheStatus: "HIT" | "STALE",
 ): void {
   res.status(entry.statusCode);
 
@@ -278,7 +379,7 @@ function sendCachedResponse(
   if (!res.getHeader("cache-control")) {
     res.setHeader(
       "Cache-Control",
-      `public, max-age=${Math.max(0, staleTime - ageSeconds)}`
+      `public, max-age=${Math.max(0, staleTime - ageSeconds)}`,
     );
   }
 
@@ -298,7 +399,7 @@ function interceptResponse(
   cacheKey: string,
   totalTTL: number,
   staleTime: number,
-  maxBodySize: number
+  maxBodySize: number,
 ): Promise<CacheEntry | null> {
   return new Promise<CacheEntry | null>((resolve) => {
     // One-shot flag: prevents re-entry from monkey-patching
@@ -311,10 +412,7 @@ function interceptResponse(
     const chunks: Buffer[] = [];
 
     // Capture writes
-    res.write = function (
-      chunk: any,
-      ...args: any[]
-    ): boolean {
+    res.write = function (chunk: any, ...args: any[]): boolean {
       if (chunk && !sizeExceeded) {
         const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
         currentSize += buffer.length;
@@ -368,9 +466,9 @@ function interceptResponse(
         };
 
         // Store in cache (fire-and-forget)
-        client
-          .set(cacheKey, serializeEntry(entry), totalTTL)
-          .catch(() => { /* Fail silently */ });
+        client.set(cacheKey, serializeEntry(entry), totalTTL).catch(() => {
+          /* Fail silently */
+        });
 
         // Set cache headers on MISS if they haven't been sent yet
         if (!res.headersSent) {
@@ -406,19 +504,26 @@ async function revalidateInBackground(
   next: NextFunction,
   totalTTL: number,
   staleTime: number,
-  maxBodySize: number
+  maxBodySize: number,
 ): Promise<void> {
   // Create a Mock Response object inheriting from the real one but disabling network output
   const mockRes = Object.create(res);
   mockRes.statusCode = 200;
-  Object.defineProperty(mockRes, "headersSent", { value: false, writable: true });
+  Object.defineProperty(mockRes, "headersSent", {
+    value: false,
+    writable: true,
+  });
   Object.defineProperty(mockRes, "finished", { value: false, writable: true });
 
   // Isolate headers
   const localHeaders = new Map<string, string | string[]>();
-  mockRes.setHeader = (name: string, value: string | string[]) => { localHeaders.set(name.toLowerCase(), value); return mockRes; };
+  mockRes.setHeader = (name: string, value: string | string[]) => {
+    localHeaders.set(name.toLowerCase(), value);
+    return mockRes;
+  };
   mockRes.getHeader = (name: string) => localHeaders.get(name.toLowerCase());
-  mockRes.removeHeader = (name: string) => localHeaders.delete(name.toLowerCase());
+  mockRes.removeHeader = (name: string) =>
+    localHeaders.delete(name.toLowerCase());
   mockRes.getHeaders = () => Object.fromEntries(localHeaders);
 
   // Override output methods to prevent writing to real socket
@@ -434,8 +539,8 @@ async function revalidateInBackground(
     cacheKey,
     totalTTL,
     staleTime,
-    maxBodySize
-  ).catch(() => { });
+    maxBodySize,
+  ).catch(() => {});
 }
 
 /** Extract headers worth caching from the response. */
@@ -456,4 +561,33 @@ function extractCacheableHeaders(res: Response): Record<string, string> {
   }
 
   return headers;
+}
+
+/**
+ * Helper to execute a fetcher with exponential backoff retry logic.
+ * 
+ * @param fetcher - The async function to execute.
+ * @param retries - Total number of retries to attempt.
+ * @returns The successful result of the fetcher.
+ * @throws The last error encountered after all retries are exhausted.
+ * @internal
+ */
+async function executeFetcherWithRetry<T>(
+  fetcher: () => Promise<T>,
+  retries: number,
+): Promise<T> {
+  let lastError: any;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fetcher();
+    } catch (err) {
+      lastError = err;
+      if (i < retries) {
+        // Exponential backoff: 200ms, 400ms, 800ms...
+        const delay = Math.pow(2, i) * 200;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
 }

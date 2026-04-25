@@ -1,3 +1,8 @@
+---
+title: "Stampede Protection | @express-route-cache"
+description: "How request coalescing prevents the thundering herd problem from crashing your database."
+---
+
 # Stampede Protection
 
 A "Cache Stampede" occurs when a popular cache entry expires and hundreds of concurrent requests hit the database simultaneously to refresh it.

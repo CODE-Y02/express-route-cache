@@ -1,3 +1,8 @@
+---
+title: "Architecture & Design | @express-route-cache"
+description: "A deep dive into the design decisions, O(1) invalidation strategy, and the Sequential Integrity pattern."
+---
+
 # Architecture & Design
 
 This page explains the core architectural choices and trade-offs made in `@express-route-cache`.

@@ -1,6 +1,17 @@
 {
   "name": "express-route-cache",
   "private": true,
+  "description": "The definitive, production-grade route caching library for Express.js. Featuring O(1) Epoch Invalidation, SWR, Stampede Protection, and full Redis/Memcached support.",
+  "keywords": [
+    "express",
+    "caching",
+    "redis",
+    "swr",
+    "stale-while-revalidate",
+    "production-ready",
+    "distributed-cache",
+    "stampede-protection"
+  ],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

@@ -43,6 +43,12 @@ export interface CacheEntry {
   isBase64?: boolean;
 }
 
+/** Generic structure for manual fetch caching. */
+export interface DataEntry<T = any> {
+  data: T;
+  createdAt: number;
+}
+
 // ─── Configuration Types ────────────────────────────────────────────────────
 
 /**
@@ -125,6 +131,12 @@ export interface CacheConfig {
    * @default false
    */
   autoInvalidate?: boolean;
+
+  /**
+   * Number of times to retry a failed fetch before giving up.
+   * @default 0
+   */
+  retry?: number;
 }
 
 /**
@@ -140,6 +152,7 @@ export interface RouteOptions {
   sortQuery?: boolean;
   maxBodySize?: number;
   autoInvalidate?: boolean;
+  retry?: number;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
 }
@@ -157,6 +170,13 @@ export interface CacheInstance {
 
   /** Programmatic invalidation — call from anywhere (service layer, cron, webhook). */
   invalidateRoute: (...routePatterns: string[]) => Promise<void>;
+
+  /** Standalone fetch with SWR and Stampede protection. */
+  fetch: <T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    opts?: Omit<RouteOptions, "key" | "autoInvalidate" | "vary" | "sortQuery">
+  ) => Promise<T>;
 
   /** Access the underlying adapter. */
   adapter: CacheClient;

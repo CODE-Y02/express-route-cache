@@ -6,6 +6,7 @@ export type {
   CacheInstance,
   RouteOptions,
   ExpressMiddleware,
+  DataEntry,
 } from "./types";
 
 // ─── Core Factory ───────────────────────────────────────────────────────────
