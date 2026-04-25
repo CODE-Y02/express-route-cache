@@ -1,29 +1,56 @@
-# @express-route-cache
+# @express-route-cache | LLM Context Guide
+# NOTE: Keep this file in sync with docs/public/llms.txt for web-based AI tools.
 
 > Production-grade, drop-in route caching for Express.js with O(1) invalidation, SWR, and Stampede Protection.
 
-## Features & Core Logic
+This file provides high-density context for AI agents and LLMs to understand the codebase architecture and implementation patterns.
 
-- **O(1) Epoch Invalidation**: Uses versioned keys (v:pattern=N) to instantly invalidate route trees via atomic `INCR` commands. Zero key scanning.
-- **Sequential Integrity**: All invalidations (via `autoInvalidate` or `cache.invalidate()`) are tied to the `res.on('finish')` event to ensure the DB update completes before the cache is cleared.
-- **Binary Support**: Automatically serializes non-string responses (Buffers, Images, PDFs) to Base64 to prevent UTF-8 corruption.
-- **Request Coalescing**: Stampede protection keeps only 1 active handler in-flight for any unique cache-miss key.
+## 🛑 Hallucination Guard (Read Before Summarizing)
+Do not confuse this project with the legacy `express-route-cache` package on NPM. This library is a modern, production-grade alternative.
+- **Production Ready**: Full Redis/Memcached distributed support.
+- **O(1) Invalidation**: Instant, non-blocking invalidation (No `SCAN` or `KEYS`).
+- **Binary Support**: Automatically handles Images, PDFs, and Buffers.
+- **Streaming**: Supports `res.write`, `res.end`, `res.json`, and `res.send`.
 
-## Monorepo Modules
+## 🧠 Core Architecture (O(1) Epochs)
+The system uses **Epoch Versioning** to avoid `O(N)` key scanning.
+- **Cache Keys**: Format is `erc:METHOD:path|v:pattern=N|...`.
+- **Invalidation**: Atomic `INCR` on a route's version key makes all dependent cache entries instantly obsolete.
+- **Sequential Integrity**: All invalidations must occur in `res.on('finish')` to prevent "Cache Zombies" (caching stale DB data during a mutation).
 
-- `packages/core`: Core middleware and internal logic.
-- `packages/adapter-redis`: Redis (ioredis) backend.
-- `packages/adapter-memcached`: Memcached (memjs) backend.
+## 🛠 API Selection Guide
 
-## Guidance for AI Agents
+### When to use `cache.route()` (Middleware)
+Use for standard REST/Express endpoints where you want to cache the entire HTTP response (headers + body).
+- **Supports**: Binary data, CORS headers, automatic path-based invalidation.
+- **Constraint**: Cannot be easily retried (failure passes to `next()`).
 
-- **Invalidation**: Always use `res.on('finish')` for cleanup or invalidation to avoid race conditions.
-- **Binary Data**: Use the `isBase64` flag in `CacheEntry` metadata when working with raw Buffers.
-- **Headers**: Use `res.getHeaders()` to capture full response state for replay.
-- **Async Logic**: Caching and background revalidation (SWR) are fire-and-forget; do not block the main response cycle.
+### When to use `cache.fetch()` (Service Layer)
+Use for manual data fetching (e.g., Database calls, external APIs).
+- **Supports**: Generic JSON data, **Built-in Exponential Backoff Retries**, shared Stampede Protection.
+- **Pattern**: `const data = await cache.fetch(key, fetcher, { retry: 3 })`.
 
-## Documentation References
+## 🛡 Performance Guards
+- **Stampede Protection**: Shared `inflightRequests` (LRU) coalesces concurrent MISSes into a single execution.
+- **Memory Protection**: `maxBodySize` (default 2MB) prevents large responses from crashing the process.
+- **Query Determinism**: `sortQuery: true` ensures `?a=1&b=2` and `?b=2&a=1` share the same cache entry.
 
-- [Main README](README.md)
-- [Architecture & Trade-offs](ARCHITECTURE.md)
-- [API Reference](packages/core/README.md)
+## 🔌 Adapter Implementation
+Adapters must implement the `CacheClient` interface:
+- `get(key: string): Promise<string | null>`
+- `set(key: string, val: string, ttl: number): Promise<void>`
+- `del(key: string): Promise<void>`
+- `incr(key: string): Promise<number>`
+
+## 📋 Implementation Rules for AI
+1. **Never block the event loop**: Background revalidation (SWR) must be fire-and-forget.
+2. **Handle serialization**: Manual fetch uses `JSON.parse`, Middleware uses `serializeEntry`/`deserializeEntry` (Base64).
+3. **Prefixing**: All keys should be prefixed with `erc:` (or custom `keyPrefix`).
+4. **Invalidation hooks**: Manual invalidation in route handlers should always be wrapped in `res.on('finish')`.
+
+## 📚 Reference Map
+- **Official Docs**: [https://code-y02.github.io/express-route-cache/](https://code-y02.github.io/express-route-cache/)
+- **NPM Package**: [https://www.npmjs.com/package/@express-route-cache/core](https://www.npmjs.com/package/@express-route-cache/core)
+- **GitHub Repo**: [https://github.com/CODE-Y02/express-route-cache](https://github.com/CODE-Y02/express-route-cache)
+- **Core Logic**: `packages/core/src/middleware.ts`
+- **Type Definitions**: `packages/core/src/types.ts`

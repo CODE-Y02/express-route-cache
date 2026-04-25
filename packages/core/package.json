@@ -1,7 +1,7 @@
 {
   "name": "@express-route-cache/core",
   "version": "1.0.0",
-  "description": "Core caching functionality for Express routes",
+  "description": "TanStack Query for the Backend. Production-grade route caching for Express.js with O(1) invalidation, SWR, and Stampede Protection.",
   "author": "Yatharth Lakhate (https://code-y02.github.io/)",
   "license": "MIT",
   "homepage": "https://github.com/CODE-Y02/express-route-cache",
@@ -18,7 +18,15 @@
     "caching",
     "route-caching",
     "node-cache",
-    "middleware"
+    "middleware",
+    "swr",
+    "stale-while-revalidate",
+    "stampede-protection",
+    "request-coalescing",
+    "tanstack-query",
+    "react-query",
+    "redis",
+    "memcached"
   ],
   "files": [
     "dist",

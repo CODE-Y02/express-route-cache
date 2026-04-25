@@ -26,6 +26,8 @@ coverage
 out/
 build
 dist
+**/.vitepress/dist
+**/.vitepress/cache
 
 
 # Debug

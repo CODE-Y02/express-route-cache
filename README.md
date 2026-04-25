@@ -7,8 +7,16 @@
 [![NPM Version](https://img.shields.io/npm/v/@express-route-cache/core.svg)](https://www.npmjs.com/package/@express-route-cache/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/CODE-Y02/express-route-cache/actions/workflows/release.yml/badge.svg)](https://github.com/CODE-Y02/express-route-cache/actions)
+[![ChatGPT](https://img.shields.io/badge/Chat--GPT-Support-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/?q=Analyze+this+library.+Docs:+https://code-y02.github.io/express-route-cache/+GitHub:+https://github.com/CODE-Y02/express-route-cache+NPM:+https://www.npmjs.com/package/@express-route-cache/core)
+[![Claude](https://img.shields.io/badge/Claude-Support-d97757?logo=anthropic&logoColor=white)](https://claude.ai/new?q=Help+me+with+this+library.+Docs:+https://code-y02.github.io/express-route-cache/+LLM+Context:+https://code-y02.github.io/express-route-cache/llms.txt)
+[![Cursor](https://img.shields.io/badge/Cursor-Context-519aba?logo=cursor&logoColor=white)](https://code-y02.github.io/express-route-cache/llms.txt)
 
 </div>
+
+<hr />
+
+> [!IMPORTANT]
+> **Production-Grade & Distributed**: Unlike legacy `express-route-cache` or `apicache` packages, this library is built for high-scale, distributed environments. It features O(1) invalidation, full Redis/Memcached support, and native binary handling.
 
 <hr />
 
@@ -24,15 +32,17 @@ Every existing Express caching middleware (`apicache`, `route-cache`, `cache-exp
 
 Meet `@express-route-cache`. We brought the modern conveniences of frontend data-fetching (like TanStack/React Query) to your backend Express APIs.
 
-| Feature                    | Existing Packages | This Library                                           |
-| -------------------------- | ----------------- | ------------------------------------------------------ |
-| **Invalidation**           | ❌ `SCAN` / `DEL` | ✅ **O(1) Epoch `INCR`** (Instant, zero blocking)      |
-| **Stale-While-Revalidate** | ❌                | ✅ **Instant Stale Delivery** + Background Refresh     |
-| **Stampede Protection**    | ❌                | ✅ **Request Coalescing** (1,000 reqs = 1 DB call)     |
-| **Adapters**               | ❌ Locked to one  | ✅ **Memory, Redis (ioredis), Memcached (memjs)**      |
-| **Binary Support**         | ❌ JSON only      | ✅ **Automatic** (Images, PDFs, Buffers)               |
-| **Header Preservation**    | ❌ Stripped       | ✅ **Automatic** (CORS, Custom Headers)                |
-| **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `autoInvalidate`)      |
+| Feature                    | Existing Packages | This Library                                       |
+| -------------------------- | ----------------- | -------------------------------------------------- |
+| **Invalidation**           | ❌ `SCAN` / `DEL` | ✅ **O(1) Epoch `INCR`** (Instant, zero blocking)  |
+| **Stale-While-Revalidate** | ❌                | ✅ **Instant Stale Delivery** + Background Refresh |
+| **Stampede Protection**    | ❌                | ✅ **Request Coalescing** (1,000 reqs = 1 DB call) |
+| **Adapters**               | ❌ Locked to one  | ✅ **Memory, Redis (ioredis), Memcached (memjs)**  |
+| **Binary Support**         | ❌ JSON only      | ✅ **Automatic** (Images, PDFs, Buffers)           |
+| **Header Preservation**    | ❌ Stripped       | ✅ **Automatic** (CORS, Custom Headers)            |
+| **Standalone Fetch**       | ❌                | ✅ **`cache.fetch()`** (Manual data caching)       |
+| **Retries**                | ❌                | ✅ **Exponential Backoff** (Built-in)              |
+| **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `autoInvalidate`)  |
 
 ---
 
@@ -101,7 +111,7 @@ To invalidate the entire `/users` tree, we simply increment the `/users` counter
 
 If 5,000 users request `/viral-post` at the exact same millisecond the cache expires, `@express-route-cache` steps in. It holds the 4,999 connection promises in memory and executes your Express handler exactly **one** time. Once the database returns the data, all 5,000 connections are resolved simultaneously.
 
-> 📚 **Deep Dive:** Want to know _why_ we didn't use Redis distributed locks? Or how exactly the `INCR` command guarantees O(1) performance? Read our [Architecture & Trade-offs](./ARCHITECTURE.md) document for detailed diagrams.
+> 📚 **Deep Dive:** Want to know _why_ we didn't use Redis distributed locks? Or how exactly the `INCR` command guarantees O(1) performance? Read our [Architecture & Trade-offs](./ARCHITECTURE.md) and [Comparison with TanStack Query](./docs/guide/comparison.md) documents.
 
 ---
 
@@ -109,24 +119,52 @@ If 5,000 users request `/viral-post` at the exact same millisecond the cache exp
 
 ### `createCache(config)`
 
-| Option      | Type          | Default | Description                                                        |
-| ----------- | ------------- | ------- | ------------------------------------------------------------------ |
-| `adapter`   | `CacheClient` | —       | **Required**. Memory, Redis, or Memcached adapter.                 |
-| `staleTime` | `number`      | `60`    | Seconds data stays fresh.                                          |
-| `gcTime`    | `number`      | `300`   | Seconds stale data stays in cache.                                 |
-| `swr`       | `boolean`     | `false` | Enable background revalidation.                                    |
-| `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                  |
-| `vary`      | `string[]`    | `[]`    | Headers to namespace caches (e.g. `['authorization']`).            |
-| `sortQuery` | `boolean`     | `false` | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`) |
-| `maxBodySize`| `number`     | `2097152` | Max response body size in bytes to cache (default: 2MB). Prevents memory leaks. |
-| `autoInvalidate`| `boolean`   | `false` | Automatically invalidate route patterns on successful `POST/PUT/DELETE`. |
-| `enabled`   | `boolean`     | `true`  | Toggle caching globally.                                           |
+| Option           | Type          | Default   | Description                                                                     |
+| ---------------- | ------------- | --------- | ------------------------------------------------------------------------------- |
+| `adapter`        | `CacheClient` | —         | **Required**. Memory, Redis, or Memcached adapter.                              |
+| `staleTime`      | `number`      | `60`      | Seconds data stays fresh.                                                       |
+| `gcTime`         | `number`      | `300`     | Seconds stale data stays in cache.                                              |
+| `swr`            | `boolean`     | `false`   | Enable background revalidation.                                                 |
+| `stampede`       | `boolean`     | `true`    | Prevent "thundering herd" by coalescing requests.                               |
+| `vary`           | `string[]`    | `[]`      | Headers to namespace caches (e.g. `['authorization']`).                         |
+| `sortQuery`      | `boolean`     | `false`   | Sort query params deterministically (`?a=1&b=2` equals `?b=2&a=1`)              |
+| `maxBodySize`    | `number`      | `2097152` | Max response body size in bytes to cache (default: 2MB). Prevents memory leaks. |
+| `autoInvalidate` | `boolean`     | `false`   | Automatically invalidate route patterns on successful `POST/PUT/DELETE`.        |
+| `retry`          | `number`      | `0`       | Number of retries for failed fetches (fetch only).                              |
+| `enabled`        | `boolean`     | `true`    | Toggle caching globally.                                                        |
 
-Returns `{ middleware(), route(), invalidate(), invalidateRoute(), adapter }`.
+Returns `{ middleware(), route(), fetch(), invalidate(), invalidateRoute(), adapter }`.
 
 ### `cache.route(opts)`
 
-Per-route middleware. Accepts all configuration options (like `staleTime`) as overrides for a specific endpoint.
+Per-route middleware. Accepts all configuration options (like `staleTime` and `retry`) as overrides for a specific endpoint.
+
+**Custom Keys:**
+You can provide a custom string or a function to generate the cache key.
+
+```ts
+app.get(
+  "/user",
+  cache.route({
+    key: (req) => `user-${req.user.id}`,
+  }),
+  handler,
+);
+```
+
+### `cache.fetch(key, fetcher, opts)`
+
+Standalone method for manual data caching. Includes full SWR and Stampede Protection.
+
+```ts
+const data = await cache.fetch(
+  "my-key",
+  async () => {
+    return await db.users.findMany();
+  },
+  { staleTime: 60, swr: true, retry: 3 },
+);
+```
 
 ### `cache.invalidate(...routePatterns)`
 
@@ -143,12 +181,19 @@ Programmatic invalidation for use inside services, cron jobs, or webhooks.
 ## 🛠️ Advanced Features
 
 ### Binary Data Support
+
 Unlike most Express caching libraries that only handle JSON strings, `@express-route-cache` supports binary responses out of the box. You can cache images, PDFs, and ZIP files without corruption.
 
+### Advanced Streaming Support
+
+Unlike many middleware libraries that only work with `res.json()` or `res.send()`, `@express-route-cache` hooks into the low-level `res.write()` and `res.end()` streams. This allows it to cache standard JSON, chunked transfers, and large binary files.
+
 ### Smart Invalidation
+
 Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
 
 ### Comprehensive Header Preservation
+
 We use `res.getHeaders()` to capture the full response state, filtering only for ephemeral headers (like `Set-Cookie` or `X-Express-*`), ensuring a perfect high-fidelity replay of the original response including CORS and custom headers.
 
 ---
@@ -202,26 +247,29 @@ We automatically append headers for CDN and debugging visibility:
 ## 🛠️ Advanced Features
 
 ### Binary Data Support
+
 Unlike most Express caching libraries that only handle JSON strings, `@express-route-cache` supports binary responses out of the box. You can cache images, PDFs, and ZIP files without corruption.
 
 ### Smart Invalidation
+
 Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
 
 ---
 
 ## 🚀 Release Channels & Versioning
 
-This project uses an automated CI/CD pipeline (via [Changesets](https://github.com/changesets/changesets)) to manage NPM distributions directly from GitHub branches. 
+This project uses an automated CI/CD pipeline (via [Changesets](https://github.com/changesets/changesets)) to manage NPM distributions directly from GitHub branches.
 
 Depending on your stability needs, you can install from different channels using NPM `dist-tags`:
 
-| Channel | NPM Tag | Command | GitHub Branch | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| **Stable** | `@latest` | `npm i @express-route-cache/core@latest` | `main` | Production-ready. This is the default. |
-| **Beta/RC** | `@next` | `npm i @express-route-cache/core@next` | `next` | Cutting-edge features currently in development. |
-| **Legacy** | `@vX.Y-lts` | `npm i @express-route-cache/core@v0.1-lts` | `v*` (e.g., `v0.1`) | Old architectural versions maintained solely for critical security/hotfix patches. |
+| Channel     | NPM Tag     | Command                                    | GitHub Branch       | Description                                                                        |
+| :---------- | :---------- | :----------------------------------------- | :------------------ | :--------------------------------------------------------------------------------- |
+| **Stable**  | `@latest`   | `npm i @express-route-cache/core@latest`   | `main`              | Production-ready. This is the default.                                             |
+| **Beta/RC** | `@next`     | `npm i @express-route-cache/core@next`     | `next`              | Cutting-edge features currently in development.                                    |
+| **Legacy**  | `@vX.Y-lts` | `npm i @express-route-cache/core@v0.1-lts` | `v*` (e.g., `v0.1`) | Old architectural versions maintained solely for critical security/hotfix patches. |
 
 ### For Contributors & Maintainers
+
 If you are contributing to this project or managing releases, please read our [Contributing Guide](CONTRIBUTING.md#release-channels--versioning) to understand how we use the `main`, `next`, and `v*` branches to automatically deploy updates to NPM.
 
 ---
