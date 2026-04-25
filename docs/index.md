@@ -13,6 +13,12 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
+      text: 🤖 Ask ChatGPT
+      link: https://chatgpt.com/?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.
+    - theme: alt
+      text: 🧠 Ask Claude
+      link: https://claude.ai/new?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.
+    - theme: alt
       text: ⭐ Star on GitHub
       link: https://github.com/CODE-Y02/express-route-cache
 

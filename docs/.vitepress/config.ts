@@ -8,6 +8,7 @@ export default defineConfig({
   title: "@express-route-cache",
   description: "⚡ TanStack Query for the Backend",
   base: base,
+  cleanUrls: true,
 
   head: [
     ["link", { rel: "icon", href: `${base}logo.svg` }],
@@ -106,15 +107,11 @@ export default defineConfig({
         items: [
           {
             text: "Ask ChatGPT",
-            link: "https://chatgpt.com/?q=Analyze+this+project.+Docs:+https://code-y02.github.io/express-route-cache/+GitHub:+https://github.com/CODE-Y02/express-route-cache+NPM:+https://www.npmjs.com/package/@express-route-cache/core",
+            link: "https://chatgpt.com/?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.",
           },
           {
             text: "Ask Claude",
-            link: "https://claude.ai/new?q=Help+me+with+this+library.+Documentation:+https://code-y02.github.io/express-route-cache/+GitHub:+https://github.com/CODE-Y02/express-route-cache",
-          },
-          {
-            text: "Cursor Context",
-            link: "/llms.txt",
+            link: "https://claude.ai/new?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.",
           },
         ],
       },
