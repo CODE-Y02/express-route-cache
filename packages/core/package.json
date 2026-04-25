@@ -1,6 +1,6 @@
 {
   "name": "@express-route-cache/core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "TanStack Query for the Backend. Production-grade route caching for Express.js with O(1) invalidation, SWR, and Stampede Protection.",
   "author": "Yatharth Lakhate (https://code-y02.github.io/)",
   "license": "MIT",
