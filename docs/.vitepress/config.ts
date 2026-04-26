@@ -107,11 +107,11 @@ export default defineConfig({
         items: [
           {
             text: "Ask ChatGPT",
-            link: "https://chatgpt.com/?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.",
+            link: "https://chatgpt.com/?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.",
           },
           {
             text: "Ask Claude",
-            link: "https://claude.ai/new?q=Please+read+the+full+technical+documentation+for+@express-route-cache+at:+https://code-y02.github.io/express-route-cache/llms-full.txt.+I+will+ask+questions+about+it.",
+            link: "https://claude.ai/new?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.",
           },
         ],
       },

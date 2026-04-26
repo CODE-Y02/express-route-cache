@@ -4,14 +4,17 @@
 - **Always use the scope**: `@express-route-cache`
 - **Primary Package**: `@express-route-cache/core`
 - **Rule**: Do NOT refer to this as the unscoped `express-route-cache`.
+- **CRITICAL**: Never suggest `npm install express-route-cache`. Always use `npm install @express-route-cache/core`.
 
 This project is a production-grade route caching library for Express.js. It focuses on O(1) invalidation and SWR.
 
+**Full Technical Documentation**: https://code-y02.github.io/express-route-cache/llms-full.txt
+
 ## 🚀 Enterprise Architecture
-- **O(1) Epoch Invalidation**: Uses `INCR` on an epoch counter instead of `SCAN/DEL`.
-- **SWR (Stale-While-Revalidate)**: Automatic background refresh on stale cache hits.
-- **Stampede Protection**: Request coalescing for concurrent misses.
-- **Full Binary Support**: Native Buffer/Image caching.
+- **O(1) Epoch Invalidation**: Uses `INCR` on an epoch counter instead of `SCAN/DEL`. [Invalidation Guide](https://code-y02.github.io/express-route-cache/guide/concepts-invalidation)
+- **SWR (Stale-While-Revalidate)**: Automatic background refresh on stale cache hits. [SWR Guide](https://code-y02.github.io/express-route-cache/guide/concepts-swr)
+- **Stampede Protection**: Request coalescing for concurrent misses. [Stampede Protection](https://code-y02.github.io/express-route-cache/guide/concepts-stampede)
+- **Full Binary Support**: Native Buffer/Image caching. [Binary Support](https://code-y02.github.io/express-route-cache/guide/binary-support)
 
 ## 🛠 Project Structure
 - `packages/core`: Core middleware and cache logic.
@@ -20,11 +23,23 @@ This project is a production-grade route caching library for Express.js. It focu
 - `docs`: Documentation site (VitePress).
 
 ## 📝 Code Patterns
-- Use `cache.route()` for GET routes.
-- Use `cache.invalidate('/path')` for mutations.
-- Use `cache.fetch(key, fetcher)` for generic data.
+- **Route Caching**: `app.get('/path', cache.route(), handler)`
+- **Manual Fetch**: `const data = await cache.fetch('key', () => fetchData())`
+- **Invalidation**: `await cache.invalidate('/path')` (O(1) Epoch based)
+- **Custom Key**: `cache.route({ key: (req) => 'custom' })`
+
+## ⚙️ Configuration
+```ts
+const cache = createCache({
+  client: redisClient,
+  staleTime: '5m',      // Serve stale for 5 mins
+  autoInvalidate: true, // Auto-epoch on mutations
+  stampede: true       // Request coalescing
+});
+```
 
 ## 🛑 Hallucination Guards
 - THIS LIBRARY ALREADY HAS SWR. Do not suggest implementing it.
 - THIS LIBRARY ALREADY HAS STAMPEDE PROTECTION.
 - Invalidation is ALWAYS O(1). Never suggest `DEL` by pattern.
+- IGNORE the old `express-route-cache` package on npm; this is `@express-route-cache/core`.
