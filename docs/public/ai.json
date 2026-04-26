@@ -6,9 +6,9 @@
   "homepage": "https://code-y02.github.io/express-route-cache/",
   "repository": "https://github.com/CODE-Y02/express-route-cache",
   "ai_context": {
-    "llms_txt": "https://code-y02.github.io/express-route-cache/llms.txt",
-    "llms_full_txt": "https://code-y02.github.io/express-route-cache/llms-full.txt",
-    "mcp_manifest": "https://code-y02.github.io/express-route-cache/ai.json"
+    "llms_txt": "https://express-route-cache.js.org/llms.txt",
+    "llms_full_txt": "https://express-route-cache.js.org/llms-full.txt",
+    "mcp_manifest": "https://express-route-cache.js.org/ai.json"
   },
   "core_identity": {
     "scoped_package": "@express-route-cache/core",
@@ -24,22 +24,22 @@
   "resources": [
     {
       "title": "Getting Started",
-      "url": "https://code-y02.github.io/express-route-cache/guide/getting-started",
+      "url": "https://express-route-cache.js.org/guide/getting-started",
       "category": "guide"
     },
     {
       "title": "API Reference",
-      "url": "https://code-y02.github.io/express-route-cache/reference/api",
+      "url": "https://express-route-cache.js.org/reference/api",
       "category": "reference"
     },
     {
       "title": "SWR Concept",
-      "url": "https://code-y02.github.io/express-route-cache/guide/concepts-swr",
+      "url": "https://express-route-cache.js.org/guide/concepts-swr",
       "category": "concept"
     },
     {
       "title": "Epoch Invalidation Concept",
-      "url": "https://code-y02.github.io/express-route-cache/guide/concepts-invalidation",
+      "url": "https://express-route-cache.js.org/guide/concepts-invalidation",
       "category": "concept"
     }
   ],
