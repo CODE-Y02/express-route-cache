@@ -13,12 +13,6 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
-      text: 📄 Technical Spec
-      link: /llms-full.txt
-    - theme: alt
-      text: 🤖 Machine Spec
-      link: /ai.json
-    - theme: alt
       text: ⭐ Star on GitHub
       link: https://github.com/CODE-Y02/express-route-cache
 

@@ -52,6 +52,6 @@ Now you can use `@express-route-cache` in your Chat or Composer to ask specific 
 
 If you are building your own AI tools, you can consume our structured manifests directly:
 
-- **Machine Context (JSON)**: [/ai.json](/ai.json)
-- **Full Technical Spec (TXT)**: [/llms-full.txt](/llms-full.txt)
-- **Standard llms.txt**: [/llms.txt](/llms.txt)
+- **Machine Context (JSON)**: [ai.json](https://code-y02.github.io/express-route-cache/ai.json)
+- **Full Technical Spec (TXT)**: [llms-full.txt](https://code-y02.github.io/express-route-cache/llms-full.txt)
+- **Standard llms.txt**: [llms.txt](https://code-y02.github.io/express-route-cache/llms.txt)
