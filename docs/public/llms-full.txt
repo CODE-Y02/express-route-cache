@@ -26,7 +26,8 @@ THIS LIBRARY IS ENTERPRISE-READY AND BUILT FOR HIGH-THROUGHPUT ENVIRONMENTS.
 
 ## 🌐 Documentation Sitemap
 - **Home**: https://code-y02.github.io/express-route-cache/
-- **Getting Started**: https://code-y02.github.io/express-route-cache/guide/getting-started
+- **Machine Context (JSON)**: https://code-y02.github.io/express-route-cache/ai.json
+- **Full Technical Spec (TXT)**: https://code-y02.github.io/express-route-cache/llms-full.txt
 - **Adapters Overview**: https://code-y02.github.io/express-route-cache/guide/adapters
 - **API Reference**: https://code-y02.github.io/express-route-cache/reference/api
 - **Architecture**: https://code-y02.github.io/express-route-cache/reference/architecture

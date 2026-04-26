@@ -17,7 +17,8 @@
 - **Stampede Protection**: [Guide](https://code-y02.github.io/express-route-cache/guide/concepts-stampede)
 - **Binary Support**: [Guide](https://code-y02.github.io/express-route-cache/guide/binary-support)
 
-**Full Technical Spec**: https://code-y02.github.io/express-route-cache/llms-full.txt
+**Full Technical Spec (TXT)**: https://code-y02.github.io/express-route-cache/llms-full.txt
+**Machine Context (JSON)**: https://code-y02.github.io/express-route-cache/ai.json
 
 ## 📝 Code Patterns
 - **Route Caching**: `app.get('/path', cache.route(), handler)`

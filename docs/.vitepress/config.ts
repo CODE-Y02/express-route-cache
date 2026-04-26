@@ -113,6 +113,15 @@ export default defineConfig({
             text: "Ask Claude",
             link: "https://claude.ai/new?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.",
           },
+          {
+            text: "Context Manifests",
+            items: [
+              { text: "Full Technical Spec (TXT)", link: "/llms-full.txt" },
+              { text: "Machine Context (JSON)", link: "/ai.json" },
+              { text: "Add to Cursor (@Docs)", link: "/guide/ai-support#add-to-cursor-docs" },
+              { text: "Connect to Claude (MCP)", link: "/guide/ai-support#connect-to-claude-desktop-mcp" },
+            ]
+          }
         ],
       },
       {
@@ -154,6 +163,7 @@ export default defineConfig({
           { text: "Binary Support", link: "/guide/binary-support" },
           { text: "Header Preservation", link: "/guide/headers" },
           { text: "Troubleshooting", link: "/guide/troubleshooting" },
+          { text: "🤖 AI & MCP Support", link: "/guide/ai-support" },
         ],
       },
       {

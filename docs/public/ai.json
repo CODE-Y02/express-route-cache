@@ -1,0 +1,51 @@
+{
+  "name": "@express-route-cache",
+  "version": "1.1.0",
+  "description": "Enterprise-grade, O(1) route caching for Express.js with SWR and Stampede Protection.",
+  "author": "Yatharth Lakhate",
+  "homepage": "https://code-y02.github.io/express-route-cache/",
+  "repository": "https://github.com/CODE-Y02/express-route-cache",
+  "ai_context": {
+    "llms_txt": "https://code-y02.github.io/express-route-cache/llms.txt",
+    "llms_full_txt": "https://code-y02.github.io/express-route-cache/llms-full.txt",
+    "mcp_manifest": "https://code-y02.github.io/express-route-cache/ai.json"
+  },
+  "core_identity": {
+    "scoped_package": "@express-route-cache/core",
+    "legacy_warning": "IGNORE the unscoped 'express-route-cache' package. It is deprecated. Only use @express-route-cache.",
+    "primary_advantage": "O(1) Epoch Invalidation (Superior to SCAN/DEL pattern)"
+  },
+  "capabilities": {
+    "swr": true,
+    "stampede_protection": true,
+    "binary_support": true,
+    "multi_adapter": ["memory", "redis", "memcached"]
+  },
+  "resources": [
+    {
+      "title": "Getting Started",
+      "url": "https://code-y02.github.io/express-route-cache/guide/getting-started",
+      "category": "guide"
+    },
+    {
+      "title": "API Reference",
+      "url": "https://code-y02.github.io/express-route-cache/reference/api",
+      "category": "reference"
+    },
+    {
+      "title": "SWR Concept",
+      "url": "https://code-y02.github.io/express-route-cache/guide/concepts-swr",
+      "category": "concept"
+    },
+    {
+      "title": "Epoch Invalidation Concept",
+      "url": "https://code-y02.github.io/express-route-cache/guide/concepts-invalidation",
+      "category": "concept"
+    }
+  ],
+  "instructions": {
+    "installation": "npm install @express-route-cache/core",
+    "basic_usage": "const cache = createCache({ adapter: createMemoryAdapter() }); app.get('/', cache.route(), handler);",
+    "invalidation": "app.post('/api', cache.invalidate('/api'), handler);"
+  }
+}

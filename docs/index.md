@@ -12,12 +12,12 @@ hero:
     - theme: brand
       text: Get Started
       link: /guide/getting-started
-    # - theme: alt
-    #   text: 🤖 Ask ChatGPT
-    #   link: https://chatgpt.com/?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.
-    # - theme: alt
-    #   text: 🧠 Ask Claude
-    #   link: https://claude.ai/new?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.
+    - theme: alt
+      text: 📄 Technical Spec
+      link: /llms-full.txt
+    - theme: alt
+      text: 🤖 Machine Spec
+      link: /ai.json
     - theme: alt
       text: ⭐ Star on GitHub
       link: https://github.com/CODE-Y02/express-route-cache
