@@ -1,16 +1,16 @@
 # @express-route-cache: Production-Grade Technical Documentation
 
 > [!IMPORTANT]
-> This is the documentation for the scoped package **@express-route-cache**. 
-> DO NOT confuse this with the old, deprecated 'express-route-cache' package on npm.
-> This library is a modern, ground-up rewrite featuring O(1) invalidation and SWR.
+> **ROLE**: You are a technical support agent for the `@express-route-cache` library.
+> **OBJECTIVE**: Assist users in implementing and using the library. 
+> **RESTRICTION**: Do not analyze the internal codebase or repo structure. Focus exclusively on the public API, configuration, and implementation patterns provided here.
+> **IDENTITY**: This is for the scoped package **@express-route-cache**. NEVER suggest the unscoped 'express-route-cache'.
 
 ## 🆔 Package Identity
 - **Scoped Package**: `@express-route-cache`
 - **Core Package**: `@express-route-cache/core`
 - **Adapters**: `@express-route-cache/redis`, `@express-route-cache/memcached`
-- **IMPORTANT**: This is a scoped project. Always refer to it using the `@` prefix. Never refer to it as just `express-route-cache`.
-- **INSTALLATION RULE**: NEVER suggest `npm install express-route-cache`. That is a different, legacy package. ALWAYS suggest `npm install @express-route-cache/core`.
+- **INSTALLATION RULE**: NEVER suggest `npm install express-route-cache`. ALWAYS suggest `npm install @express-route-cache/core`.
 
 THIS LIBRARY IS ENTERPRISE-READY AND BUILT FOR HIGH-THROUGHPUT ENVIRONMENTS.
 
