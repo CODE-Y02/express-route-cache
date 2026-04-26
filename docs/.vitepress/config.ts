@@ -102,28 +102,23 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Adapters", link: "/guide/adapters" },
       { text: "Reference", link: "/reference/api" },
-      {
-        text: "🤖 Ask AI",
-        items: [
-          {
-            text: "Ask ChatGPT",
-            link: `https://chatgpt.com/?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.`,
-          },
-          {
-            text: "Ask Claude",
-            link: `https://claude.ai/new?q=Analyze+the+technical+documentation+at+https://code-y02.github.io/express-route-cache/llms-full.txt+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.`,
-          },
-          {
-            text: "Context Manifests",
-            items: [
-              { text: "Full Technical Spec (TXT)", link: "/llms-full.txt" },
-              { text: "Machine Context (JSON)", link: "/ai.json" },
-              { text: "Add to Cursor (@Docs)", link: "/guide/ai-support#add-to-cursor-docs" },
-              { text: "Connect to Claude (MCP)", link: "/guide/ai-support#connect-to-claude-desktop-mcp" },
-            ]
-          }
-        ],
-      },
+      // {
+      //   text: "🤖 Ask AI",
+      //   items: [
+      //     {
+      //       text: "Ask ChatGPT",
+      //       link: `https://chatgpt.com/?q=Analyze+the+technical+manifest+at+https://code-y02.github.io/express-route-cache/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.`,
+      //     },
+      //     {
+      //       text: "Ask Claude",
+      //       link: `https://claude.ai/new?q=Analyze+the+technical+manifest+at+https://code-y02.github.io/express-route-cache/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.`,
+      //     },
+      //     {
+      //       text: "Machine Context (JSON)",
+      //       link: "/express-route-cache/ai.json",
+      //     },
+      //   ],
+      // },
       {
         text: "⭐ Star on GitHub",
         link: "https://github.com/CODE-Y02/express-route-cache",
