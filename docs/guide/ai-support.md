@@ -1,6 +1,6 @@
 ---
 title: "AI & MCP Support | @express-route-cache"
-description: "Add @express-route-cache docs to Claude Desktop (MCP), Cursor, ChatGPT, and any AI coding assistant. Structured manifests for hallucination-free help."
+description: "Add @express-route-cache docs to Claude Desktop, Cursor, VS Code Copilot, Windsurf, and Perplexity. Structured manifests for hallucination-free help."
 head:
   - - link
     - rel: canonical
@@ -10,7 +10,7 @@ head:
       content: "AI & MCP Support | @express-route-cache"
   - - meta
     - property: og:description
-      content: "Connect express-route-cache docs to Claude Desktop, Cursor, and ChatGPT. AI-ready manifests: ai.json, llms.txt, and llms-full.txt."
+      content: "Connect @express-route-cache docs to Cursor, VS Code Copilot, Windsurf, Perplexity, and Claude Desktop using native MCP."
   - - meta
     - property: og:url
       content: https://express-route-cache.js.org/guide/ai-support
@@ -18,19 +18,44 @@ head:
 
 # AI & MCP Support
 
-`@express-route-cache` is designed to be AI-first. We provide structured manifests so your AI coding assistants can provide accurate, hallucination-free help.
+`@express-route-cache` provides structured AI manifests so your coding assistant gives accurate, hallucination-free answers about the library.
 
-## 🤖 Connect to Claude Desktop (MCP)
+## Quick Comparison
 
-You can add our documentation as a native resource in Claude Desktop. This allows Claude to browse our API and guides locally.
+| Method | Setup | Best for... |
+| :--- | :--- | :--- |
+| **Perplexity** | ❌ None | Quick one-off questions |
+| **Cursor @Docs** | ✅ Paste URL | Continuous indexing while coding |
+| **Native MCP** | ✅ Config file | Deep research in Claude/Windsurf/VS Code |
 
-### Setup Instructions
+---
 
-1. Open your Claude Desktop configuration file:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+## ✦ Perplexity (Zero Setup)
 
-2. Add the following entry to the `mcpServers` section:
+Perplexity browses our documentation in real-time. No installation needed.
+
+[**Ask Perplexity →**](https://www.perplexity.ai/?q=Using+the+full+documentation+at+https://express-route-cache.js.org/llms-full.txt+answer+my+question+about+%40express-route-cache%2Fcore.)
+
+---
+
+## 🛠️ Cursor — @Docs
+
+1. `Cmd + Shift + J` → **Cursor Settings** → **General** → **Documentation**
+2. Click **+ Add new doc**
+3. Paste: `https://express-route-cache.js.org/llms-full.txt`
+4. Name it `@express-route-cache`
+
+Now type `@express-route-cache` in Cursor Chat to get library-aware answers.
+
+---
+
+## 🤖 Native MCP (Claude, VS Code, Windsurf, Cursor)
+
+We provide a dedicated MCP server that gives your AI live access to our documentation, API reference, and common patterns.
+
+### Configuration
+
+Add the following JSON block to the config file for your tool. No extra installation is needed if you have Node.js.
 
 ```json
 {
@@ -39,37 +64,37 @@ You can add our documentation as a native resource in Claude Desktop. This allow
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-documentation",
-        "https://code-y02.github.io/express-route-cache/ai.json"
+        "@express-route-cache/mcp"
       ]
     }
   }
 }
 ```
 
-3. Restart Claude Desktop. You will now see `@express-route-cache` as a connected tool.
+**Config file locations:**
 
----
+| Tool | File path |
+| :--- | :--- |
+| **Claude Desktop** (macOS) | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Claude Desktop** (Windows) | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Cursor** (global) | `~/.cursor/mcp.json` |
+| **VS Code + Copilot** | `.vscode/mcp.json` — use `"servers"` instead of `"mcpServers"` |
+| **Windsurf** (macOS) | `~/.codeium/windsurf/mcp_config.json` |
 
-## 🛠️ Add to Cursor (@Docs)
+### Capabilities
 
-To get the best experience in Cursor:
-
-1. Press `Cmd + Shift + J` (or `Ctrl + Shift + J`) to open the **Cursor Settings**.
-2. Go to **General** -> **Documentation**.
-3. Click **+ Add new doc**.
-4. Paste the following URL:
-   `https://code-y02.github.io/express-route-cache/llms-full.txt`
-5. Name it `@express-route-cache`.
-
-Now you can use `@express-route-cache` in your Chat or Composer to ask specific questions about the library.
+Once connected, your AI assistant gains these "Tools":
+- `get-docs`: Fetches the entire library documentation for context.
+- `get-page`: Fetches specific deep-dive pages (e.g., `guide/concepts-swr`).
 
 ---
 
 ## 📄 Technical Manifests
 
-If you are building your own AI tools, you can consume our structured manifests directly:
+Consume these directly in your own AI pipelines:
 
-- **Machine Context (JSON)**: [ai.json](https://code-y02.github.io/express-route-cache/ai.json)
-- **Full Technical Spec (TXT)**: [llms-full.txt](https://code-y02.github.io/express-route-cache/llms-full.txt)
-- **Standard llms.txt**: [llms.txt](https://code-y02.github.io/express-route-cache/llms.txt)
+| File | URL | Purpose |
+| :--- | :--- | :--- |
+| `llms.txt` | [/llms.txt](https://express-route-cache.js.org/llms.txt) | Quick context primer |
+| `llms-full.txt` | [/llms-full.txt](https://express-route-cache.js.org/llms-full.txt) | Full API docs + examples |
+| `ai.json` | [/ai.json](https://express-route-cache.js.org/ai.json) | Machine-readable manifest |

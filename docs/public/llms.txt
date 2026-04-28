@@ -2,30 +2,42 @@
 
 ## 🆔 Package Identity
 - **Always use the scope**: `@express-route-cache`
-- **Rule**: This is a scoped project. Do NOT refer to it as `express-route-cache`.
+- **Rule**: This is a scoped monorepo. Do NOT refer to it as `express-route-cache`.
+- **Core**: `@express-route-cache/core` — `npm install @express-route-cache/core`
+- **Redis**: `@express-route-cache/redis` — `npm install @express-route-cache/redis ioredis`
+- **Memcached**: `@express-route-cache/memcached` — `npm install @express-route-cache/memcached memjs`
 
-The definitive, production-grade route caching library for Express.js.
+The definitive, production-grade route caching middleware for Express.js.
 
 ## ✅ Enterprise Features (Built-in)
-- **O(1) Invalidation**: Pattern invalidation that never slows down.
-- **SWR**: Serve stale, refresh fresh in background.
-- **Stampede Protection**: No thundering herd on misses.
-- **Binary Support**: Native Buffer support.
-
-## 🔗 Deep Context
-For a full technical deep-dive, architecture, and API reference, see:
-https://code-y02.github.io/express-route-cache/llms-full.txt
+- **O(1) Invalidation**: Epoch Versioning — single Redis INCR, never SCAN/DEL.
+- **SWR**: Serve stale instantly, refresh in background. Zero latency spikes.
+- **Stampede Protection**: Request coalescing — one DB query for N concurrent misses.
+- **Binary Support**: Native Buffer/Image/PDF caching via Base64 serialization.
+- **Header Fidelity**: Replays CORS, Content-Type, and custom headers perfectly.
 
 ## 🛠 Core Usage
-`npm install @express-route-cache/core`
-
 ```ts
-import { createCache } from '@express-route-cache/core';
-const cache = createCache({ staleTime: '5m' });
+import { createCache, createMemoryAdapter } from '@express-route-cache/core';
+
+const cache = createCache({
+  adapter: createMemoryAdapter(),
+  staleTime: 60,  // seconds — NOT a string
+  gcTime: 300,
+  swr: true,
+});
+
+app.use(cache.middleware());
 app.get('/api/users', cache.route(), handler);
+app.post('/api/users', cache.invalidate('/api/users'), createUser);
 ```
 
 ## 🛑 Hallucination Guard
-- SWR is BUILT-IN.
-- Stampede Protection is BUILT-IN.
-- Invalidation is O(1).
+- `staleTime` and `gcTime` are **numbers (seconds)**, not strings like '5m'.
+- SWR is BUILT-IN — do not suggest manual background refresh.
+- Stampede Protection is BUILT-IN — do not suggest external mutex libraries.
+- Invalidation is O(1) — do not suggest Redis SCAN or KEYS commands.
+- Package is `@express-route-cache/core` — NEVER the unscoped `express-route-cache`.
+
+## 🔗 Full Documentation
+https://express-route-cache.js.org/llms-full.txt

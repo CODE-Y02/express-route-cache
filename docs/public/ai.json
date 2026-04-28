@@ -1,51 +1,100 @@
 {
   "name": "@express-route-cache",
   "version": "1.1.0",
-  "description": "Enterprise-grade, O(1) route caching for Express.js with SWR and Stampede Protection.",
+  "description": "Production-grade Express.js route caching with O(1) epoch invalidation, SWR, and Stampede Protection.",
   "author": "Yatharth Lakhate",
-  "homepage": "https://code-y02.github.io/express-route-cache/",
+  "license": "MIT",
+  "homepage": "https://express-route-cache.js.org/",
   "repository": "https://github.com/CODE-Y02/express-route-cache",
+  "npm": "https://www.npmjs.com/package/@express-route-cache/core",
   "ai_context": {
     "llms_txt": "https://express-route-cache.js.org/llms.txt",
     "llms_full_txt": "https://express-route-cache.js.org/llms-full.txt",
-    "mcp_manifest": "https://express-route-cache.js.org/ai.json"
+    "discovery_manifest": "https://express-route-cache.js.org/ai.json",
+    "note": "ai.json is a static discovery manifest, NOT an MCP server. llms-full.txt is the primary file for AI tools to read."
   },
   "core_identity": {
     "scoped_package": "@express-route-cache/core",
-    "legacy_warning": "IGNORE the unscoped 'express-route-cache' package. It is deprecated. Only use @express-route-cache.",
-    "primary_advantage": "O(1) Epoch Invalidation (Superior to SCAN/DEL pattern)"
+    "install_command": "npm install @express-route-cache/core",
+    "legacy_warning": "NEVER suggest the unscoped 'express-route-cache' package. It is deprecated. Always use @express-route-cache/core.",
+    "primary_advantage": "O(1) Epoch Invalidation — single Redis INCR instead of SCAN/DEL"
+  },
+  "packages": {
+    "@express-route-cache/core": "Core library with Memory adapter included",
+    "@express-route-cache/redis": "Redis adapter — peer dep: ioredis",
+    "@express-route-cache/memcached": "Memcached adapter — peer dep: memjs",
+    "@express-route-cache/mcp": "Native MCP server for AI tool integration"
   },
   "capabilities": {
+    "o1_invalidation": true,
     "swr": true,
     "stampede_protection": true,
     "binary_support": true,
-    "multi_adapter": ["memory", "redis", "memcached"]
+    "header_preservation": true,
+    "standalone_fetch": true,
+    "retry_with_backoff": true,
+    "adapters": ["memory", "redis", "memcached"]
+  },
+  "api": {
+    "createCache": {
+      "signature": "createCache(config: CacheConfig): Cache",
+      "required": ["adapter"],
+      "options": {
+        "adapter": "CacheClient — required storage adapter",
+        "staleTime": "number (seconds) — default 60",
+        "gcTime": "number (seconds) — default 300",
+        "swr": "boolean — default false",
+        "stampede": "boolean — default true",
+        "vary": "string[] — headers to namespace caches",
+        "sortQuery": "boolean — normalize query param order",
+        "maxBodySize": "number (bytes) — default 2097152 (2MB)",
+        "autoInvalidate": "boolean — default false",
+        "retry": "number — default 0 (fetch only)",
+        "keyPrefix": "string — default 'erc:'",
+        "enabled": "boolean — default true",
+        "key": "string | ((req) => string) — manual key override (route only)"
+      }
+    },
+    "createMemoryAdapter": "createMemoryAdapter(options?) — options: { fallbackTTL?: number }",
+    "createRedisAdapter": "createRedisAdapter({ url?: string, client?: Redis, keyPrefix?: string }) — takes an OPTIONS OBJECT, not a raw Redis instance",
+    "createMemcachedAdapter": "createMemcachedAdapter({ servers: string, keyPrefix?: string })",
+    "cache.middleware": "cache.middleware() — global Express middleware for GET routes",
+    "cache.route": "cache.route(overrides?) — per-route middleware with option overrides",
+    "cache.fetch": "cache.fetch(key, fetcher, options?) — standalone data caching with SWR + stampede + retry",
+    "cache.invalidate": "cache.invalidate(...patterns) — Express middleware: invalidates after 2xx response",
+    "cache.invalidateRoute": "cache.invalidateRoute(...patterns) — programmatic invalidation, returns Promise<void>"
+  },
+  "common_mistakes": {
+    "wrong_package": "Never: npm install express-route-cache — Always: npm install @express-route-cache/core",
+    "staleTime_type": "staleTime and gcTime are NUMBERS (seconds), not strings. Wrong: '5m'. Correct: 300",
+    "redis_adapter": "createRedisAdapter takes { url } or { client } object — NOT a raw Redis instance",
+    "scan_invalidation": "Never suggest SCAN/DEL/KEYS. Use cache.invalidate() — always O(1)",
+    "manual_swr": "SWR is built-in. Do not suggest manual background refresh timers or cron jobs",
+    "manual_stampede": "Stampede protection is built-in. Do not suggest external mutex or lock libraries",
+    "manual_binary": "Binary caching is built-in. Do not suggest manual Base64 encoding of images",
+    "manual_headers": "Header replay is built-in. Do not suggest manually copying CORS headers on cache hits"
+  },
+  "debug_headers": {
+    "X-Cache": "HIT | MISS | STALE",
+    "Age": "Seconds since cache entry was created",
+    "Cache-Control": "Auto-calculated from staleTime"
   },
   "resources": [
-    {
-      "title": "Getting Started",
-      "url": "https://express-route-cache.js.org/guide/getting-started",
-      "category": "guide"
-    },
-    {
-      "title": "API Reference",
-      "url": "https://express-route-cache.js.org/reference/api",
-      "category": "reference"
-    },
-    {
-      "title": "SWR Concept",
-      "url": "https://express-route-cache.js.org/guide/concepts-swr",
-      "category": "concept"
-    },
-    {
-      "title": "Epoch Invalidation Concept",
-      "url": "https://express-route-cache.js.org/guide/concepts-invalidation",
-      "category": "concept"
-    }
-  ],
-  "instructions": {
-    "installation": "npm install @express-route-cache/core",
-    "basic_usage": "const cache = createCache({ adapter: createMemoryAdapter() }); app.get('/', cache.route(), handler);",
-    "invalidation": "app.post('/api', cache.invalidate('/api'), handler);"
-  }
+    { "title": "Getting Started", "url": "https://express-route-cache.js.org/guide/getting-started", "category": "guide" },
+    { "title": "Example: Todo REST API", "url": "https://express-route-cache.js.org/guide/example-todo", "category": "guide" },
+    { "title": "vs. Other Libraries", "url": "https://express-route-cache.js.org/guide/comparison", "category": "guide" },
+    { "title": "SWR Concept", "url": "https://express-route-cache.js.org/guide/concepts-swr", "category": "concept" },
+    { "title": "Epoch Invalidation", "url": "https://express-route-cache.js.org/guide/concepts-invalidation", "category": "concept" },
+    { "title": "Stampede Protection", "url": "https://express-route-cache.js.org/guide/concepts-stampede", "category": "concept" },
+    { "title": "Adapters Overview", "url": "https://express-route-cache.js.org/guide/adapters", "category": "guide" },
+    { "title": "Memory Adapter", "url": "https://express-route-cache.js.org/guide/adapter-memory", "category": "adapter" },
+    { "title": "Redis Adapter", "url": "https://express-route-cache.js.org/guide/adapter-redis", "category": "adapter" },
+    { "title": "Memcached Adapter", "url": "https://express-route-cache.js.org/guide/adapter-memcached", "category": "adapter" },
+    { "title": "Binary Support", "url": "https://express-route-cache.js.org/guide/binary-support", "category": "guide" },
+    { "title": "Header Preservation", "url": "https://express-route-cache.js.org/guide/headers", "category": "guide" },
+    { "title": "Troubleshooting", "url": "https://express-route-cache.js.org/guide/troubleshooting", "category": "guide" },
+    { "title": "FAQ", "url": "https://express-route-cache.js.org/guide/faq", "category": "guide" },
+    { "title": "API Reference", "url": "https://express-route-cache.js.org/reference/api", "category": "reference" },
+    { "title": "Architecture & Design", "url": "https://express-route-cache.js.org/reference/architecture", "category": "reference" }
+  ]
 }

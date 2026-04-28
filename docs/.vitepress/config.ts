@@ -252,12 +252,20 @@ export default defineConfig({
         text: "🤖 Ask AI",
         items: [
           {
-            text: "Ask ChatGPT",
-            link: `https://chatgpt.com/?q=Analyze+the+technical+manifest+at+https://express-route-cache.js.org/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.`,
+            text: "✦ Perplexity (Best)",
+            link: `https://www.perplexity.ai/?q=Using+the+full+documentation+at+https://express-route-cache.js.org/llms-full.txt+answer+my+question+about+%40express-route-cache%2Fcore.+It+is+a+scoped+npm+package+%E2%80%94+never+omit+the+%40express-route-cache+scope.`,
           },
           {
             text: "Ask Claude",
-            link: `https://claude.ai/new?q=Analyze+the+technical+manifest+at+https://express-route-cache.js.org/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.`,
+            link: `https://claude.ai/new?q=Read+the+full+docs+for+%40express-route-cache+at+https%3A%2F%2Fexpress-route-cache.js.org%2Fllms-full.txt+then+help+me.+IMPORTANT%3A+The+package+is+scoped+%40express-route-cache%2Fcore+%E2%80%94+never+suggest+the+unscoped+name.`,
+          },
+          {
+            text: "Ask ChatGPT",
+            link: `https://chatgpt.com/?q=Read+the+full+docs+for+%40express-route-cache+at+https%3A%2F%2Fexpress-route-cache.js.org%2Fllms-full.txt+then+help+me.+The+package+is+%40express-route-cache%2Fcore+%E2%80%94+never+omit+the+scope.`,
+          },
+          {
+            text: "📄 Raw AI Context (llms-full.txt)",
+            link: "https://express-route-cache.js.org/llms-full.txt",
           },
         ],
       },
