@@ -1,3 +1,21 @@
+---
+title: "AI & MCP Support | @express-route-cache"
+description: "Add @express-route-cache docs to Claude Desktop (MCP), Cursor, ChatGPT, and any AI coding assistant. Structured manifests for hallucination-free help."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/ai-support
+  - - meta
+    - property: og:title
+      content: "AI & MCP Support | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Connect express-route-cache docs to Claude Desktop, Cursor, and ChatGPT. AI-ready manifests: ai.json, llms.txt, and llms-full.txt."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/ai-support
+---
+
 # AI & MCP Support
 
 `@express-route-cache` is designed to be AI-first. We provide structured manifests so your AI coding assistants can provide accurate, hallucination-free help.

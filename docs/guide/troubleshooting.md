@@ -1,6 +1,19 @@
 ---
-title: "Troubleshooting | @express-route-cache"
-description: "Solutions for common issues like cache zombies, high memory usage, and unexpected cache misses."
+title: "Troubleshooting Express.js Caching Issues | @express-route-cache"
+description: "Fix common express-route-cache problems: cache not updating (zombie entries), high memory usage, unexpected cache MISS, and stale data after mutations. Debug with X-Cache headers."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/troubleshooting
+  - - meta
+    - property: og:title
+      content: "Troubleshooting Express.js Cache Problems | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Diagnose and fix common caching bugs: zombie cache entries, unexpected MISS, high memory usage, and invalidation not working."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/troubleshooting
 ---
 
 # Troubleshooting

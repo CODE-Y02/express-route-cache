@@ -1,6 +1,19 @@
 ---
-title: "Adapters | @express-route-cache"
-description: "Choose the right storage adapter for your Express caching needs—Memory, Redis, or Memcached."
+title: "Cache Adapters Overview | @express-route-cache"
+description: "Compare Memory, Redis (ioredis), and Memcached (memjs) cache adapters for Express.js. Choose the right storage backend for your production environment."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/adapters
+  - - meta
+    - property: og:title
+      content: "Redis, Memcached & Memory Adapters for Express.js Caching | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Compare Memory, Redis, and Memcached adapters for Express route caching. Unified API, adapter-agnostic design."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/adapters
 ---
 
 # Adapters

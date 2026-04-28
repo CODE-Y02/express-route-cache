@@ -1,6 +1,19 @@
 ---
-title: "Memcached Adapter | @express-route-cache"
-description: "Distributed caching using Memcached (memjs) for low-latency production environments."
+title: "Memcached Cache Adapter (memjs) | @express-route-cache"
+description: "Set up Express.js route caching with Memcached using memjs. Fast, simple key-value caching for production environments that already use Memcached."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/adapter-memcached
+  - - meta
+    - property: og:title
+      content: "Memcached Adapter for Express.js Caching | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Add Memcached-backed route caching to Express.js with memjs. Simple, fast, and production-ready."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/adapter-memcached
 ---
 
 # Memcached Adapter

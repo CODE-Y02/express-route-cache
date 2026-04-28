@@ -1,6 +1,19 @@
 ---
-title: "Example: Todo App | @express-route-cache"
-description: A complete walkthrough of building a Todo API with automatic cache invalidation and SWR.
+title: "Express.js Caching Example: Todo REST API | @express-route-cache"
+description: "Complete walkthrough of building a cached Todo REST API with Express.js — featuring automatic cache invalidation with SWR, targeted invalidation, and O(1) performance."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/example-todo
+  - - meta
+    - property: og:title
+      content: "Express.js Caching Example: Todo REST API | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Build a fully cached Express.js REST API from scratch. Covers SWR, auto-invalidation, targeted invalidation, and O(1) operations."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/example-todo
 ---
 
 # Example: Todo App

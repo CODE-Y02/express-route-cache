@@ -1,6 +1,19 @@
 ---
-title: "Memory Adapter | @express-route-cache"
-description: "High-performance in-memory caching for single-instance applications."
+title: "In-Memory Cache Adapter | @express-route-cache"
+description: "High-performance in-memory caching for single-process Express.js applications and local development. Built into @express-route-cache/core, zero dependencies."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/adapter-memory
+  - - meta
+    - property: og:title
+      content: "In-Memory Cache Adapter for Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Built-in memory adapter for Express.js caching. Zero extra dependencies, ideal for local dev and single-instance apps."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/adapter-memory
 ---
 
 # Memory Adapter

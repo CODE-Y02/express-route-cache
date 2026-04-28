@@ -1,6 +1,19 @@
 ---
-title: "Stampede Protection | @express-route-cache"
-description: "How request coalescing prevents the thundering herd problem from crashing your database."
+title: "Stampede Protection & Thundering Herd Prevention | @express-route-cache"
+description: "How express-route-cache prevents the cache stampede (thundering herd) problem using request coalescing. Stop N concurrent DB queries on a cache miss."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/concepts-stampede
+  - - meta
+    - property: og:title
+      content: "Cache Stampede Protection for Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Prevent the thundering herd problem in Express.js with request coalescing. One DB query, N waiting requests resolved simultaneously."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/concepts-stampede
 ---
 
 # Stampede Protection

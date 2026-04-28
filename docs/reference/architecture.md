@@ -1,6 +1,19 @@
 ---
-title: "Architecture & Design | @express-route-cache"
-description: "A deep dive into the design decisions, O(1) invalidation strategy, and the Sequential Integrity pattern."
+title: "Architecture & Design Decisions | @express-route-cache"
+description: "Deep dive into the architecture of express-route-cache: O(1) epoch invalidation, request coalescing for stampede protection, SWR background refresh, header preservation, and binary support."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/reference/architecture
+  - - meta
+    - property: og:title
+      content: "Architecture & Design | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Technical deep-dive: how epoch invalidation, request coalescing, SWR, and header preservation are implemented in express-route-cache."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/reference/architecture
 ---
 
 # Architecture & Design

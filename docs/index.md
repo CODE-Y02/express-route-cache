@@ -1,6 +1,26 @@
 ---
 layout: home
 
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/
+  - - meta
+    - property: og:title
+      content: "@express-route-cache | O(1) Route Caching for Express.js"
+  - - meta
+    - property: og:description
+      content: "Production-grade Express.js route caching with O(1) invalidation, SWR background refresh, and Stampede Protection. Redis, Memcached & Memory adapters."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/
+  - - meta
+    - name: twitter:title
+      content: "@express-route-cache | O(1) Route Caching for Express.js"
+  - - meta
+    - name: twitter:description
+      content: "Drop-in Express.js caching middleware: O(1) invalidation, SWR, Stampede Protection. Works with Redis, Memcached, and Memory."
+
 hero:
   name: "@express-route-cache"
   text: TanStack Query for the Backend.

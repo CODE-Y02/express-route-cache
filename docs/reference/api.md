@@ -1,6 +1,19 @@
 ---
 title: "API Reference | @express-route-cache"
-description: "Detailed documentation for createCache, middleware, route options, and the standalone fetch API."
+description: "Complete API reference for @express-route-cache/core: createCache(), cache.route(), cache.fetch(), cache.invalidate(), and cache.invalidateRoute(). All options documented."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/reference/api
+  - - meta
+    - property: og:title
+      content: "API Reference | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Full API docs for createCache, route middleware, standalone fetch, invalidation middleware, and programmatic invalidation with all config options."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/reference/api
 ---
 
 # API Reference

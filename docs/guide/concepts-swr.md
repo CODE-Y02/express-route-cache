@@ -1,6 +1,19 @@
 ---
-title: "Stale-While-Revalidate (SWR) | @express-route-cache"
-description: "Learn how SWR keeps your API responses instant by refreshing cache in the background."
+title: "Stale-While-Revalidate (SWR) Caching | @express-route-cache"
+description: "How Stale-While-Revalidate (SWR) works in Express.js route caching — serve instant stale responses while refreshing data in the background. Zero latency spikes."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/concepts-swr
+  - - meta
+    - property: og:title
+      content: "Stale-While-Revalidate (SWR) for Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "SWR in Express.js: serve stale cached data instantly while refreshing in the background. Eliminate latency spikes on cache misses."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/concepts-swr
 ---
 
 # Stale-While-Revalidate (SWR)
