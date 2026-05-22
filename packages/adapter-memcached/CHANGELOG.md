@@ -1,5 +1,28 @@
 # @express-route-cache/memcached
 
+## 0.3.0
+
+### Minor Changes
+
+- feat: distributed stampede/SWR locking, SHA-256 key hashing, binary support
+  - Add setNX to CacheClient interface (optional, backward-compatible)
+  - Implement setNX in Memory, Redis, Memcached adapters
+  - Redis adapter: enableOfflineQueue: false to fail-fast on disconnect
+  - Two-tier distributed stampede protection: adapter setNX (cross-server) → LRU fallback (per-process)
+  - Two-tier SWR lock: adapter setNX (cross-server) → localSwrLocks Set (per-process fallback)
+  - Non-leader servers poll cache via waitForCachePopulation (150ms × 10 = 1.5s max)
+  - SHA-256 hash all cache keys (fixes Memcached 250-char limit)
+  - Fix binary data corruption in res.write (encoding passthrough)
+  - Fix client abort releasing stampede lock (req.on close)
+  - Add Buffer base64 serialization in cache.fetch
+  - Auto-invalidation uses getRoutePattern directly (removes MGET overhead)
+  - SWR background revalidation uses route stack direct execution (Express 5 fix)
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/core@1.2.0
+
 ## 0.2.1
 
 ### Patch Changes

@@ -53,5 +53,11 @@ export function createMemoryAdapter(defaultTTLSeconds = 600): CacheClient {
       cache.set(key, String(newVal), 0);
       return newVal;
     },
+
+    async setNX(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+      if (cache.has(key)) return false;
+      cache.set(key, value, ttlSeconds);
+      return true;
+    },
   };
 }

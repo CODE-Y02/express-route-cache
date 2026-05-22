@@ -23,6 +23,9 @@ export interface CacheClient {
   /** Atomically increment a numeric key (creates with value 1 if missing). Returns new value. */
   incr(key: string): Promise<number>;
 
+  /** Atomically set a key only if it does not already exist. Returns true if set, false otherwise. */
+  setNX?(key: string, value: string, ttlSeconds: number): Promise<boolean>;
+
   /** Optional cleanup/disconnect hook. */
   disconnect?(): Promise<void>;
 }

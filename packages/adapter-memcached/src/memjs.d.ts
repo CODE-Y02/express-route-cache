@@ -24,6 +24,7 @@ declare module "memjs" {
     static create(servers?: string, options?: ClientOptions): Client;
     get(key: string): Promise<GetResult>;
     set(key: string, value: string, options?: { expires?: number }): Promise<boolean>;
+    add(key: string, value: string, options?: { expires?: number }): Promise<boolean>;
     delete(key: string): Promise<boolean>;
     increment(
       key: string,
