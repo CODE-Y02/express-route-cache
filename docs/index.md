@@ -78,7 +78,6 @@ app.get('/api/reports', cache.route(), generateReport);
 
 // Auto-invalidate when new data is added
 app.post('/api/reports', cache.route({ autoInvalidate: true }), addReport);
-
 ```
 
 <div class="showcase-cta">
@@ -86,4 +85,3 @@ app.post('/api/reports', cache.route({ autoInvalidate: true }), addReport);
 </div>
   </div>
 </div>
-```

@@ -65,9 +65,9 @@ watch(
   () => route.path,
   (path) => {
     if (path.includes("/v1/")) {
-      currentVersion.value = "v1.0.x";
+      currentVersion.value = "Legacy";
     } else {
-      currentVersion.value = "v1.1.x";
+      currentVersion.value = "Latest";
     }
   },
   { immediate: true },
