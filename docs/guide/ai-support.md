@@ -1,6 +1,6 @@
 ---
 title: "AI & MCP Support | @express-route-cache"
-description: "Add @express-route-cache docs to Claude Desktop, Cursor, VS Code Copilot, Windsurf, and Perplexity. Structured manifests for hallucination-free help."
+description: "Connect your AI coding assistants (Claude, Cursor, ChatGPT) to the express-route-cache documentation for accurate, hallucination-free help."
 head:
   - - link
     - rel: canonical
@@ -10,7 +10,7 @@ head:
       content: "AI & MCP Support | @express-route-cache"
   - - meta
     - property: og:description
-      content: "Connect @express-route-cache docs to Cursor, VS Code Copilot, Windsurf, Perplexity, and Claude Desktop using native MCP."
+      content: "Connect your AI coding assistants (Claude, Cursor, ChatGPT) to the express-route-cache documentation for accurate, hallucination-free help."
   - - meta
     - property: og:url
       content: https://express-route-cache.js.org/guide/ai-support

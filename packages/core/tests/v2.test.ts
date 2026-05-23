@@ -134,4 +134,70 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
       expect(g3.body.count).toBe(2);
     });
   });
+
+  describe("New V2 Fixes (SWR Lock, Hashing, Fetch Buffer, CORS SWR)", () => {
+    it("should hash the cache key to prevent length overflow", async () => {
+      app.get("/very-long-url-path-with-query-parameters", cache.route({ vary: ["X-Vary-Header"] }), (req, res) => {
+        res.json({ ok: true });
+      });
+
+      const res = await request(app).get("/very-long-url-path-with-query-parameters").set("X-Vary-Header", "token-value");
+      expect(res.headers["x-cache"]).toBe("MISS");
+    });
+
+    it("should support Buffer in standalone cache.fetch", async () => {
+      const bufferData = Buffer.from("hello-world-binary");
+      const result = await cache.fetch("binary-fetch-key", async () => {
+        return bufferData;
+      }, { staleTime: 60 });
+
+      expect(Buffer.isBuffer(result)).toBe(true);
+      expect(result.toString()).toBe("hello-world-binary");
+
+      // Verify it retrieves from cache as a Buffer
+      const resultCached = await cache.fetch("binary-fetch-key", async () => {
+        return Buffer.from("should-not-hit");
+      }, { staleTime: 60 });
+      expect(Buffer.isBuffer(resultCached)).toBe(true);
+      expect(resultCached.toString()).toBe("hello-world-binary");
+    });
+
+    it("should copy CORS headers on SWR background revalidation", async () => {
+      const swrCache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 1, // 1 second
+        gcTime: 60,
+        swr: true,
+      });
+
+      let hitCount = 0;
+      app.get("/swr-cors", swrCache.route(), (req, res) => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.json({ hitCount: ++hitCount });
+      });
+
+      // 1st request: MISS (sets header)
+      const res1 = await request(app).get("/swr-cors");
+      expect(res1.headers["access-control-allow-origin"]).toBe("*");
+      expect(res1.body.hitCount).toBe(1);
+
+      // Wait 1.1 seconds for stale
+      await new Promise((r) => setTimeout(r, 1100));
+
+      // 2nd request: STALE HIT (serves stale, triggers background revalidation)
+      const res2 = await request(app).get("/swr-cors");
+      expect(res2.headers["x-cache"]).toBe("STALE");
+      expect(res2.headers["access-control-allow-origin"]).toBe("*");
+      expect(res2.body.hitCount).toBe(1);
+
+      // Wait 100ms for SWR to write back
+      await new Promise((r) => setTimeout(r, 100));
+
+      // 3rd request: HIT (should serve fresh data from SWR revalidation and STILL have CORS header!)
+      const res3 = await request(app).get("/swr-cors");
+      expect(res3.headers["x-cache"]).toBe("HIT");
+      expect(res3.headers["access-control-allow-origin"]).toBe("*");
+      expect(res3.body.hitCount).toBe(2);
+    });
+  });
 });

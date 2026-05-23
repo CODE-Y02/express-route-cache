@@ -1,0 +1,49 @@
+{
+  "name": "@express-route-cache/studio",
+  "version": "1.0.0",
+  "description": "Visual Studio dashboard and CLI for @express-route-cache",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "express-route-cache-studio": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:ui": "cd ui && npm install && npm run build",
+    "build:node": "tsup src/index.ts src/cli.ts --format cjs,esm --dts",
+    "build": "pnpm run build:ui && pnpm run build:node",
+    "dev:ui": "cd ui && npm run dev",
+    "dev:node": "tsup src/index.ts src/cli.ts --format cjs,esm --dts --watch",
+    "dev": "concurrently \"pnpm run dev:ui\" \"pnpm run dev:node\""
+  },
+  "peerDependencies": {
+    "express": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "@express-route-cache/core": "workspace:*",
+    "@express-route-cache/redis": "workspace:*",
+    "@express-route-cache/memcached": "workspace:*",
+    "dotenv": "^16.4.5",
+    "open": "^10.1.0"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.3",
+    "@types/node": "^20.11.24",
+    "concurrently": "^8.2.2",
+    "tsup": "^8.5.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

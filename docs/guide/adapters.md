@@ -36,4 +36,4 @@ head:
 
 ## Creating a Custom Adapter
 
-You can build your own adapter by implementing the `CacheClient` interface. See the [API Reference](../reference/api#cacheclient-interface) for details.
+You can build your own adapter by implementing the `CacheClient` interface. See the [API Reference](../reference/api#cacheclient-interface) for the full method signatures and requirements.

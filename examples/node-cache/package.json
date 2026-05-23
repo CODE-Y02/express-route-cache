@@ -1,6 +1,6 @@
 {
   "name": "cache-example",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "private": "true",
   "scripts": {
     "lint": "eslint . --max-warnings 0",
@@ -17,6 +17,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "portfinder": "^1.0.38",
-    "@express-route-cache/core": "workspace:*"
+    "@express-route-cache/core": "workspace:*",
+    "@express-route-cache/studio": "workspace:*"
   }
 }

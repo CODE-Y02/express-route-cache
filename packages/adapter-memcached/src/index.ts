@@ -88,6 +88,19 @@ export function createMemcachedAdapter(
       }
     },
 
+    async setNX(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+      try {
+        const result = await client.add(key, value, { expires: ttlSeconds });
+        return !!result;
+      } catch {
+        return false;
+      }
+    },
+
+    async keys(): Promise<string[]> {
+      return [];
+    },
+
     async disconnect(): Promise<void> {
       if (!opts.client) {
         client.close();

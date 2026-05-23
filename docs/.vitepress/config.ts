@@ -17,6 +17,7 @@ export default defineConfig({
     "Production-grade Express.js route caching with O(1) invalidation, Stale-While-Revalidate (SWR), and Stampede Protection. Supports Redis, Memcached, and in-memory adapters.",
   base: base,
   cleanUrls: true,
+  appearance: "dark",
 
   head: [
     ["link", { rel: "icon", href: `${base}logo.svg` }],
@@ -33,6 +34,22 @@ export default defineConfig({
     ["meta", { name: "author", content: "Yatharth Lakhate" }],
     ["meta", { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" }],
     ["meta", { name: "googlebot", content: "index, follow" }],
+
+    // Theme initialization script to prevent FOUC
+    [
+      "script",
+      {},
+      `
+      (function() {
+        try {
+          var theme = localStorage.getItem('erc-theme') || 'ember';
+          if (theme === 'enver') theme = 'ember';
+          if (theme === 'space') theme = 'night';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+      `
+    ],
 
     // Open Graph
     ["meta", { property: "og:type", content: "website" }],
@@ -248,41 +265,79 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Adapters", link: "/guide/adapters" },
       { text: "Reference", link: "/reference/api" },
-      {
-        text: "🤖 Ask AI",
-        items: [
-          {
-            text: "✦ Perplexity (Best)",
-            link: `https://www.perplexity.ai/?q=Using+the+full+documentation+at+https://express-route-cache.js.org/llms-full.txt+answer+my+question+about+%40express-route-cache%2Fcore.+It+is+a+scoped+npm+package+%E2%80%94+never+omit+the+%40express-route-cache+scope.`,
-          },
-          {
-            text: "Ask Claude",
-            link: `https://claude.ai/new?q=Read+the+full+docs+for+%40express-route-cache+at+https%3A%2F%2Fexpress-route-cache.js.org%2Fllms-full.txt+then+help+me.+IMPORTANT%3A+The+package+is+scoped+%40express-route-cache%2Fcore+%E2%80%94+never+suggest+the+unscoped+name.`,
-          },
-          {
-            text: "Ask ChatGPT",
-            link: `https://chatgpt.com/?q=Read+the+full+docs+for+%40express-route-cache+at+https%3A%2F%2Fexpress-route-cache.js.org%2Fllms-full.txt+then+help+me.+The+package+is+%40express-route-cache%2Fcore+%E2%80%94+never+omit+the+scope.`,
-          },
-          {
-            text: "📄 Raw AI Context (llms-full.txt)",
-            link: "https://express-route-cache.js.org/llms-full.txt",
-          },
-        ],
-      },
-      {
-        text: "⭐ Star on GitHub",
-        link: "https://github.com/CODE-Y02/express-route-cache",
-      },
+      // {
+      //   text: "🤖 Ask AI",
+      //   items: [
+      //     {
+      //       text: "Ask ChatGPT",
+      //       link: `https://chatgpt.com/?q=Analyze+the+technical+manifest+at+https://code-y02.github.io/express-route-cache/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+NEVER+suggest+npm+install+express-route-cache+without+the+scope.+Use+only+the+scoped+package+name.`,
+      //     },
+      //     {
+      //       text: "Ask Claude",
+      //       link: `https://claude.ai/new?q=Analyze+the+technical+manifest+at+https://code-y02.github.io/express-route-cache/ai.json+IMPORTANT:+This+is+for+@express-route-cache/core.+Never+suggest+installing+the+unscoped+express-route-cache+package.`,
+      //     },
+      //     {
+      //       text: "Machine Context (JSON)",
+      //       link: "/express-route-cache/ai.json",
+      //     },
+      //   ],
+      // },
     ],
 
-    sidebar: [
+    sidebar: {
+      "/v1/": [
+        {
+          text: "Introduction",
+          items: [
+            { text: "What is express-route-cache?", link: "/v1/" },
+            { text: "Getting Started", link: "/v1/guide/getting-started" },
+            { text: "Example: Todo App", link: "/v1/guide/example-todo" },
+            { text: "vs. Other Libraries", link: "/v1/guide/comparison" },
+          ],
+        },
+        {
+          text: "Core Concepts",
+          items: [
+            { text: "Fresh vs Stale (SWR)", link: "/v1/guide/concepts-swr" },
+            { text: "Epoch Invalidation", link: "/v1/guide/concepts-invalidation" },
+            { text: "Stampede Protection", link: "/v1/guide/concepts-stampede" },
+          ],
+        },
+        {
+          text: "Adapters",
+          collapsed: false,
+          items: [
+            { text: "Overview", link: "/v1/guide/adapters" },
+            { text: "Memory", link: "/v1/guide/adapter-memory" },
+            { text: "Redis", link: "/v1/guide/adapter-redis" },
+            { text: "Memcached", link: "/v1/guide/adapter-memcached" },
+          ],
+        },
+        {
+          text: "Advanced",
+          items: [
+            { text: "Binary Support", link: "/v1/guide/binary-support" },
+            { text: "Header Preservation", link: "/v1/guide/headers" },
+            { text: "Troubleshooting", link: "/v1/guide/troubleshooting" },
+          ],
+        },
+        {
+          text: "Reference",
+          items: [
+            { text: "API Reference", link: "/v1/reference/api" },
+            { text: "Architecture", link: "/v1/reference/architecture" },
+            { text: "FAQ", link: "/v1/guide/faq" },
+          ],
+        },
+      ],
+      "/": [
       {
         text: "Introduction",
         items: [
-          { text: "What is express-route-cache?", link: "/" },
+          { text: "Why express-route-cache?", link: "/guide/why" },
           { text: "Getting Started", link: "/guide/getting-started" },
-          { text: "Example: Todo App", link: "/guide/example-todo" },
-          { text: "vs. Other Libraries", link: "/guide/comparison" },
+          { text: "Cache Studio", link: "/guide/studio" },
+          { text: "Example: Todo API", link: "/guide/example-todo" },
         ],
       },
       {
@@ -291,6 +346,7 @@ export default defineConfig({
           { text: "Fresh vs Stale (SWR)", link: "/guide/concepts-swr" },
           { text: "Epoch Invalidation", link: "/guide/concepts-invalidation" },
           { text: "Stampede Protection", link: "/guide/concepts-stampede" },
+          { text: "Standalone Fetch", link: "/guide/cache-fetch" },
         ],
       },
       {
@@ -304,11 +360,13 @@ export default defineConfig({
         ],
       },
       {
-        text: "Advanced",
+        text: "Guides",
         items: [
+          { text: "Recipes", link: "/guide/recipes" },
+          { text: "Testing", link: "/guide/testing" },
+          { text: "Deployment", link: "/guide/deployment" },
           { text: "Binary Support", link: "/guide/binary-support" },
           { text: "Header Preservation", link: "/guide/headers" },
-          { text: "Troubleshooting", link: "/guide/troubleshooting" },
           { text: "🤖 AI & MCP Support", link: "/guide/ai-support" },
         ],
       },
@@ -317,10 +375,11 @@ export default defineConfig({
         items: [
           { text: "API Reference", link: "/reference/api" },
           { text: "Architecture", link: "/reference/architecture" },
-          { text: "FAQ", link: "/guide/faq" },
+          { text: "Troubleshooting", link: "/guide/troubleshooting" },
         ],
       },
-    ],
+      ],
+    },
 
     socialLinks: [
       {

@@ -29,10 +29,12 @@
 ## ⚙️ Configuration
 ```ts
 const cache = createCache({
-  client: redisClient,
-  staleTime: '5m',      // Serve stale for 5 mins
-  autoInvalidate: true, // Auto-epoch on mutations
-  stampede: true       // Request coalescing
+  adapter: createRedisAdapter({ client: redisClient }),
+  staleTime: 60,         // Serve stale for 60 seconds
+  autoInvalidate: true,  // Auto-epoch on mutations
+  stampede: true,        // Request coalescing
+  metrics: true,         // Enable Cache Studio charts telemetry
+  studio: { port: 3001 } // Starts standalone dashboard server automatically
 });
 ```
 

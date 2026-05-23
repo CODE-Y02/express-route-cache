@@ -200,6 +200,36 @@ We use `res.getHeaders()` to capture the full response state, filtering only for
 
 ---
 
+## 📊 Cache Studio (Visual Dashboard)
+
+Monitor cache hits, misses, SWR revalidations, memory usage, and scan/purge cache keys dynamically via a dark-mode web console.
+
+```bash
+# Install the dashboard package
+npm install @express-route-cache/studio
+```
+
+### 1. Auto-Start (Standalone Server)
+Just specify a `port` in your cache options. It will automatically spin up a dedicated dashboard server on startup:
+```ts
+const cache = createCache({
+  adapter: createMemoryAdapter(),
+  metrics: true, // Enables telemetry charts
+  studio: { port: 3001 } // Launches visual dashboard on http://localhost:3001/studio
+});
+```
+
+### 2. Mount on your existing Express app
+```ts
+import { createStudio } from "@express-route-cache/studio";
+
+app.use("/studio", createStudio({ cache }));
+```
+
+For CLI runners, config files, and using Studio to monitor generic Redis databases (even without route caching), check out the [Cache Studio Guide](https://code-y02.github.io/express-route-cache/guide/studio).
+
+---
+
 ## 🔌 Adapters
 
 ### Memory (Built-in)

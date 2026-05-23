@@ -1,5 +1,6 @@
 ---
 layout: home
+sidebar: false
 
 head:
   - - link
@@ -27,10 +28,10 @@ hero:
   tagline: Production-grade, drop-in route caching for Express.js with O(1) invalidation, SWR, and Stampede Protection.
   image:
     src: /logo.svg
-    alt: express-route-cache Logo
+    alt: express-route-cache
   actions:
     - theme: brand
-      text: Get Started
+      text: Get Started →
       link: /guide/getting-started
     - theme: alt
       text: ⭐ Star on GitHub
@@ -52,32 +53,36 @@ features:
   - icon: 🖼️
     title: Binary Support
     details: Cache images, PDFs, and ZIP files perfectly. Automatic Base64 serialization for non-JSON data.
-  - icon: 📜
-    title: Header Preservation
-    details: Automatically preserves CORS, custom headers, and response metadata for a perfect replay.
-  - icon: 🛠️
-    title: Standalone Fetch
-    details: Manual data caching with full SWR and Stampede Protection. Not just for Express routes.
-  - icon: 🔁
-    title: Built-in Retries
-    details: Exponential backoff retries for your data fetchers. Handle flaky APIs with ease.
+  - icon: 📊
+    title: Visual Dashboard
+    details: Monitor hits, misses, and SWR revalidations in real-time with the Cache Studio visual dashboard.
 ---
 
-### 🚀 Why express-route-cache?
+<div class="custom-home-content">
+  <div class="code-showcase">
+    <h2>Less boilerplate. More speed.</h2>
+    <p>O(1) invalidation and Stale-While-Revalidate means your APIs stay blazingly fast without the nightmare of managing stale keys or writing manual cache-busting logic.</p>
+    
+```ts
+import { createCache } from '@express-route-cache/core';
+import { createRedisAdapter } from '@express-route-cache/redis';
 
-Existing Express caching middlewares often fail in production because they lack critical features like efficient invalidation or background refreshing. `@express-route-cache` solves these by bringing modern data-fetching patterns to the server.
+const cache = createCache({
+  adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
+  staleTime: 60, // Serve fresh for 60s
+  swr: true,     // Serve stale instantly, refresh in bg
+});
 
-- **Zero Configuration**: Sensible defaults that work out of the box.
-- **Enterprise Ready**: Designed for high-throughput, distributed environments.
-- **Developer Experience**: Modern TypeScript API with predictable behavior.
-- **Performance First**: O(1) operations ensure your Node.js event loop stays responsive.
+// Cache this slow endpoint
+app.get('/api/reports', cache.route(), generateReport);
 
-### 🛠 Built With
+// Auto-invalidate when new data is added
+app.post('/api/reports', cache.route({ autoInvalidate: true }), addReport);
 
-TypeScript · Express.js · Redis · Memcached · Ioredis · Memjs
+```
 
----
-
-### ❤️ Support the Project
-
-If `@express-route-cache` has saved you time, please consider giving us a star on [GitHub](https://github.com/CODE-Y02/express-route-cache)! It helps us reach more developers and continue improving the project.
+<div class="showcase-cta">
+  <a class="VPButton brand" href="./guide/getting-started">Read the Quick Start →</a>
+</div>
+  </div>
+</div>

@@ -32,25 +32,23 @@
 ---
 
 ## 🌐 Documentation Sitemap
-
-- **Home**: https://express-route-cache.js.org/
-- **Getting Started**: https://express-route-cache.js.org/guide/getting-started
-- **Example (Todo API)**: https://express-route-cache.js.org/guide/example-todo
-- **vs. Other Libraries**: https://express-route-cache.js.org/guide/comparison
-- **SWR Concept**: https://express-route-cache.js.org/guide/concepts-swr
-- **Epoch Invalidation**: https://express-route-cache.js.org/guide/concepts-invalidation
-- **Stampede Protection**: https://express-route-cache.js.org/guide/concepts-stampede
-- **Adapters Overview**: https://express-route-cache.js.org/guide/adapters
-- **Memory Adapter**: https://express-route-cache.js.org/guide/adapter-memory
-- **Redis Adapter**: https://express-route-cache.js.org/guide/adapter-redis
-- **Memcached Adapter**: https://express-route-cache.js.org/guide/adapter-memcached
-- **Binary Support**: https://express-route-cache.js.org/guide/binary-support
-- **Header Preservation**: https://express-route-cache.js.org/guide/headers
-- **Troubleshooting**: https://express-route-cache.js.org/guide/troubleshooting
-- **FAQ**: https://express-route-cache.js.org/guide/faq
-- **API Reference**: https://express-route-cache.js.org/reference/api
-- **Architecture**: https://express-route-cache.js.org/reference/architecture
-- **AI Context (JSON)**: https://express-route-cache.js.org/ai.json
+- **Home**: https://code-y02.github.io/express-route-cache/
+- **Machine Context (JSON)**: https://code-y02.github.io/express-route-cache/ai.json
+- **Full Technical Spec (TXT)**: https://code-y02.github.io/express-route-cache/llms-full.txt
+- **Adapters Overview**: https://code-y02.github.io/express-route-cache/guide/adapters
+- **API Reference**: https://code-y02.github.io/express-route-cache/reference/api
+- **Architecture**: https://code-y02.github.io/express-route-cache/reference/architecture
+- **SWR Guide**: https://code-y02.github.io/express-route-cache/guide/concepts-swr
+- **Invalidation Guide**: https://code-y02.github.io/express-route-cache/guide/concepts-invalidation
+- **Stampede Protection**: https://code-y02.github.io/express-route-cache/guide/concepts-stampede
+- **Header Preservation**: https://code-y02.github.io/express-route-cache/guide/headers
+- **Binary Support**: https://code-y02.github.io/express-route-cache/guide/binary-support
+- **Why express-route-cache?**: https://code-y02.github.io/express-route-cache/guide/why
+- **Standalone Fetch**: https://code-y02.github.io/express-route-cache/guide/cache-fetch
+- **Recipes & Patterns**: https://code-y02.github.io/express-route-cache/guide/recipes
+- **Testing Guide**: https://code-y02.github.io/express-route-cache/guide/testing
+- **Deployment Guide**: https://code-y02.github.io/express-route-cache/guide/deployment
+- **Todo Example**: https://code-y02.github.io/express-route-cache/guide/example-todo
 
 ---
 

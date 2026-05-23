@@ -18,16 +18,8 @@ The definitive, production-grade route caching middleware for Express.js.
 
 ## 🛠 Core Usage
 ```ts
-import { createCache, createMemoryAdapter } from '@express-route-cache/core';
-
-const cache = createCache({
-  adapter: createMemoryAdapter(),
-  staleTime: 60,  // seconds — NOT a string
-  gcTime: 300,
-  swr: true,
-});
-
-app.use(cache.middleware());
+import { createCache } from '@express-route-cache/core';
+const cache = createCache({ staleTime: 300 }); // 300 seconds (5m)
 app.get('/api/users', cache.route(), handler);
 app.post('/api/users', cache.invalidate('/api/users'), createUser);
 ```

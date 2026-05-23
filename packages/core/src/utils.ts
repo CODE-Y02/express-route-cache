@@ -123,7 +123,9 @@ export function buildVersionedKey(opts: {
         .join("|");
   }
 
-  return `${prefix}${method}:${url}${queryHash ? `?${queryHash}` : ""}|${versionSegments}${varySegment}`;
+  const rawKey = `${prefix}${method}:${url}${queryHash ? `?${queryHash}` : ""}|${versionSegments}${varySegment}`;
+  const hash = crypto.createHash("sha256").update(rawKey).digest("hex");
+  return `${prefix}hash:${hash}`;
 }
 
 /**

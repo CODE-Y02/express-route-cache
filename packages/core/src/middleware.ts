@@ -5,6 +5,7 @@ import type {
   CacheEntry,
   CacheInstance,
   RouteOptions,
+  CacheMetrics,
 } from "./types";
 import {
   buildCacheKey,
@@ -14,8 +15,14 @@ import {
   getAgeSeconds,
   getParentRoutePatterns,
   getEpochKey,
+  getRoutePattern,
 } from "./utils";
 import { LRUCache } from "lru-cache";
+
+interface SWRRequest extends Request {
+  __is_swr?: boolean;
+  __swr_cache_key?: string;
+}
 
 // ─── Defaults ───────────────────────────────────────────────────────────────
 
@@ -39,10 +46,25 @@ const DEFAULTS = {
  * Key = cache key, Value = in-flight Promise of the data/response.
  * Ensures that if 1,000 requests hit a cold cache simultaneously,
  * only 1 handler executes while the others wait for the result.
+ *
+ * ⚠️ This is process-local. In distributed deployments (multiple servers),
+ * each server has its own map. For cross-server stampede protection during
+ * initial cache MISS, a distributed adapter (Redis/Memcached) is required.
  */
-const inflightRequests = new LRUCache<string, Promise<any>>({
+const inflightRequests = new LRUCache<string, Promise<unknown>>({
   max: 5000, // Maximum pending locks to prevent memory leaks from massive unique key attacks
 });
+
+/**
+ * Per-process SWR revalidation lock.
+ * Used as a fallback when the cache adapter does not implement `setNX`.
+ * Prevents the same process from firing multiple concurrent background
+ * revalidations for the same cache key.
+ *
+ * In distributed deployments, adapters with `setNX` (Redis, Memcached)
+ * provide cluster-wide SWR locking, making this Set redundant for those adapters.
+ */
+const localSwrLocks = new Set<string>();
 
 // ─── createCache ────────────────────────────────────────────────────────────
 
@@ -79,33 +101,57 @@ export function createCache(config: CacheConfig): CacheInstance {
     retry: config.retry ?? DEFAULTS.retry,
   };
 
+  const metrics = config.metrics
+    ? {
+        hits: 0,
+        misses: 0,
+        swrHits: 0,
+        swrFailures: 0,
+        stampedeCoalesces: 0,
+        stampedePolls: 0,
+      }
+    : undefined;
+
   const client = config.adapter;
 
   // ── Shared cache logic ──────────────────────────────────────────────
 
   function createCacheHandler(routeOpts?: RouteOptions) {
-    return async function cacheHandler(
+    const handler = async function cacheHandler(
       req: Request,
       res: Response,
       next: NextFunction,
     ): Promise<void> {
+      // Bypass cache read for background SWR revalidation requests
+      if ((req as SWRRequest).__is_swr) {
+        const staleTime = routeOpts?.staleTime ?? globalOpts.staleTime;
+        const gcTime = routeOpts?.gcTime ?? globalOpts.gcTime;
+        const maxBodySize = routeOpts?.maxBodySize ?? globalOpts.maxBodySize;
+        const totalTTL = staleTime + gcTime;
+        const cacheKey = (req as SWRRequest).__swr_cache_key || "";
+
+        interceptResponse(
+          req,
+          res,
+          next,
+          client,
+          cacheKey,
+          totalTTL,
+          staleTime,
+          maxBodySize,
+        ).catch(() => {
+          /* Fail silently */
+        });
+        return;
+      }
+
       // Handle auto-invalidation for non-GET mutation methods
       if (req.method !== "GET") {
         const autoInv = routeOpts?.autoInvalidate ?? globalOpts.autoInvalidate;
         if (autoInv) {
           res.on("finish", async () => {
             if (res.statusCode >= 200 && res.statusCode < 300) {
-              const pattern = routeOpts?.key
-                ? null
-                : (
-                    await buildCacheKey(
-                      client,
-                      req,
-                      globalOpts.keyPrefix,
-                      [],
-                      false,
-                    )
-                  ).routePattern;
+              const pattern = routeOpts?.key ? null : getRoutePattern(req);
               if (pattern) {
                 await invalidateRoutes([pattern]);
               }
@@ -166,25 +212,52 @@ export function createCache(config: CacheConfig): CacheInstance {
 
             if (freshness === "fresh") {
               // ⚡ Fresh HIT — serve immediately
+              if (metrics) metrics.hits++;
               sendCachedResponse(res, entry, age, staleTime, "HIT");
               return;
             }
 
             if (freshness === "stale" && swr) {
               // 🔄 Stale + SWR — serve stale, revalidate in background
+              if (metrics) metrics.swrHits++;
               sendCachedResponse(res, entry, age, staleTime, "STALE");
 
-              // Background revalidation (fire-and-forget)
-              revalidateInBackground(
-                client,
-                cacheKey,
-                req,
-                res,
-                next,
-                totalTTL,
-                staleTime,
-                maxBodySize,
-              );
+              // ── Two-tier SWR Lock ────────────────────────────────────
+              // Tier 1: Distributed lock via adapter setNX (Redis/Memcached).
+              //         Prevents multiple servers from revalidating the same key.
+              // Tier 2: Local in-process Set fallback for adapters without setNX.
+              //         Prevents the same server from double-firing per process.
+              let acquired: boolean;
+
+              if (client.setNX) {
+                // Distributed lock — adapter handles cross-server coordination
+                const lockTime = Math.max(10, staleTime);
+                acquired = await client.setNX(`swr-lock:${cacheKey}`, "1", lockTime);
+              } else {
+                // Local fallback — per-process lock only
+                acquired = !localSwrLocks.has(cacheKey);
+                if (acquired) {
+                  localSwrLocks.add(cacheKey);
+                }
+              }
+
+              if (acquired) {
+                // Background revalidation (fire-and-forget)
+                revalidateInBackground(
+                  client,
+                  cacheKey,
+                  req,
+                  res,
+                  next,
+                  totalTTL,
+                  staleTime,
+                  maxBodySize,
+                  metrics,
+                ).finally(() => {
+                  // Release local lock when done (adapter lock expires via TTL)
+                  localSwrLocks.delete(cacheKey);
+                });
+              }
               return;
             }
 
@@ -194,11 +267,60 @@ export function createCache(config: CacheConfig): CacheInstance {
 
         // ── Cache MISS ────────────────────────────────────────────────
 
-        // Stampede protection: coalesce concurrent requests
+        // ── Tier 1: Distributed Stampede Protection ──────────────────
+        // If the adapter supports setNX, use it to elect one server as
+        // the leader. All other servers poll the cache until the leader
+        // populates it, preventing N simultaneous DB queries.
+        if (client.setNX && !inflightRequests.has(cacheKey)) {
+          const stampedeLockKey = `stampede:${cacheKey}`;
+          const isLeader = await client.setNX(stampedeLockKey, "1", totalTTL + 30);
+
+          if (!isLeader) {
+            // Another server holds the lock — poll the cache and serve when ready
+            await waitForCachePopulation(
+              client,
+              cacheKey,
+              res,
+              staleTime,
+              next,
+              metrics,
+            );
+            return;
+          }
+
+          // We are the leader — run the handler and release lock when done
+          if (metrics) metrics.misses++;
+          const entryPromise = interceptResponse(
+            req,
+            res,
+            next,
+            client,
+            cacheKey,
+            totalTTL,
+            staleTime,
+            maxBodySize,
+          );
+
+          // Also register in local LRU so same-process concurrent requests coalesce
+          if (globalOpts.stampede) {
+            inflightRequests.set(cacheKey, entryPromise);
+          }
+          entryPromise.finally(() => {
+            inflightRequests.delete(cacheKey);
+            // Release the distributed lock so followers can proceed if polling timed out
+            client.del(stampedeLockKey).catch(() => {});
+          });
+          return;
+        }
+
+        // ── Tier 2: Local Stampede Protection (no distributed adapter) ──
+        // Coalesce same-process concurrent requests into a single in-flight
+        // Promise. Works per-server only.
         if (globalOpts.stampede && inflightRequests.has(cacheKey)) {
-          const entry = await inflightRequests.get(cacheKey)!;
+          const entry = await inflightRequests.get(cacheKey) as CacheEntry | null;
           if (entry) {
             const age = getAgeSeconds(entry);
+            if (metrics) metrics.stampedeCoalesces++;
             sendCachedResponse(res, entry, age, staleTime, "HIT");
             return;
           }
@@ -206,6 +328,7 @@ export function createCache(config: CacheConfig): CacheInstance {
         }
 
         // Intercept res.json / res.send to capture the response
+        if (metrics) metrics.misses++;
         const entryPromise = interceptResponse(
           req,
           res,
@@ -228,6 +351,8 @@ export function createCache(config: CacheConfig): CacheInstance {
         next();
       }
     };
+    Object.defineProperty(handler, "isCacheMiddleware", { value: true });
+    return handler;
   }
 
   // ── Invalidation ────────────────────────────────────────────────────
@@ -241,7 +366,7 @@ export function createCache(config: CacheConfig): CacheInstance {
 
   // ── Return the CacheInstance ────────────────────────────────────────
 
-  return {
+  const instance: CacheInstance = {
     middleware: () => createCacheHandler(),
     route: (opts?: RouteOptions) => createCacheHandler(opts),
     invalidate: (...routePatterns: string[]) => {
@@ -301,23 +426,35 @@ export function createCache(config: CacheConfig): CacheInstance {
           const entry = JSON.parse(cached);
           if (entry && typeof entry.createdAt === "number") {
             const ageSeconds = (Date.now() - entry.createdAt) / 1000;
+            const parsedData = entry.isBuffer
+              ? Buffer.from(entry.data, "base64")
+              : (entry.data ?? entry.body);
             if (ageSeconds < staleTime) {
-              return (entry.data ?? entry.body) as T;
+              if (metrics) metrics.hits++;
+              return parsedData as T;
             }
             if (ageSeconds < totalTTL && swr) {
+              if (metrics) metrics.swrHits++;
               // 🔄 Stale + SWR — serve stale, revalidate in background
               executeFetcherWithRetry(fetcher, retryCount)
                 .then(async (data) => {
+                  const isBuffer = Buffer.isBuffer(data);
+                  const payload = {
+                    data: isBuffer ? (data as Buffer).toString("base64") : data,
+                    isBuffer,
+                    createdAt: Date.now(),
+                  };
                   await client.set(
                     cacheKey,
-                    JSON.stringify({ data, createdAt: Date.now() }),
+                    JSON.stringify(payload),
                     totalTTL,
                   );
                 })
                 .catch(() => {
+                  if (metrics) metrics.swrFailures++;
                   /* Background fail stays silent */
                 });
-              return (entry.data ?? entry.body) as T;
+              return parsedData as T;
             }
           }
         } catch {
@@ -327,14 +464,22 @@ export function createCache(config: CacheConfig): CacheInstance {
 
       // ── Cache MISS ────────────────────────────────────────────────
       if (globalOpts.stampede && inflightRequests.has(cacheKey)) {
-        return await inflightRequests.get(cacheKey);
+        if (metrics) metrics.stampedeCoalesces++;
+        return (await inflightRequests.get(cacheKey)) as T;
       }
 
+      if (metrics) metrics.misses++;
       const promise = executeFetcherWithRetry(fetcher, retryCount).then(
         async (data) => {
+          const isBuffer = Buffer.isBuffer(data);
+          const payload = {
+            data: isBuffer ? (data as Buffer).toString("base64") : data,
+            isBuffer,
+            createdAt: Date.now(),
+          };
           await client.set(
             cacheKey,
-            JSON.stringify({ data, createdAt: Date.now() }),
+            JSON.stringify(payload),
             totalTTL,
           );
           return data;
@@ -349,7 +494,37 @@ export function createCache(config: CacheConfig): CacheInstance {
       return await promise;
     },
     adapter: client,
+    metrics,
+    studio: config.studio,
   };
+
+  // ── Auto-start Cache Studio Standalone Server if port is specified ──
+  const studioOpts = config.studio === true ? {} : config.studio;
+  if (studioOpts && studioOpts.enabled !== false && typeof studioOpts.port === "number") {
+    const port = studioOpts.port;
+    const pathStr = studioOpts.path || "/studio";
+    const hostname = studioOpts.hostname || "localhost";
+
+    process.nextTick(() => {
+      try {
+        const { createStudio } = require("@express-route-cache/studio");
+        const express = require("express");
+        const app = express();
+        app.use(express.json());
+        
+        const cleanPath = pathStr.startsWith("/") ? pathStr : `/${pathStr}`;
+        app.use(cleanPath, createStudio({ cache: instance }));
+        
+        app.listen(port, () => {
+          console.log(`Cache Studio visible at --> http://${hostname}:${port}${cleanPath}`);
+        });
+      } catch (err) {
+        console.error("Failed to auto-start standalone Cache Studio server:", err);
+      }
+    });
+  }
+
+  return instance;
 }
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
@@ -411,10 +586,19 @@ function interceptResponse(
     const originalWrite = res.write.bind(res);
     const chunks: Buffer[] = [];
 
-    // Capture writes
-    res.write = function (chunk: any, ...args: any[]): boolean {
+    // Capture client abort/disconnect to release stampede locks
+    req.on("close", () => {
+      if (!intercepted) {
+        intercepted = true;
+        resolve(null);
+      }
+    });
+
+    // Capture writes with encoding support
+    res.write = function (chunk: any, encodingOrCb?: any, cb?: any): boolean {
+      const encoding = typeof encodingOrCb === "string" ? encodingOrCb as BufferEncoding : undefined;
       if (chunk && !sizeExceeded) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
         currentSize += buffer.length;
         if (currentSize > maxBodySize) {
           sizeExceeded = true;
@@ -423,18 +607,19 @@ function interceptResponse(
           chunks.push(buffer);
         }
       }
-      return originalWrite(chunk, ...args);
+      return originalWrite(chunk, encodingOrCb, cb);
     } as typeof res.write;
 
-    // Capture end
-    res.end = function (chunk?: any, ...args: any[]): Response {
+    // Capture end with encoding support
+    res.end = function (chunk?: any, encodingOrCb?: any, cb?: any): Response {
+      const encoding = typeof encodingOrCb === "string" ? encodingOrCb as BufferEncoding : undefined;
       if (intercepted) {
-        return originalEnd(chunk, ...args);
+        return originalEnd(chunk, encodingOrCb, cb);
       }
       intercepted = true;
 
       if (chunk && !sizeExceeded) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
         currentSize += buffer.length;
         if (currentSize > maxBodySize) {
           sizeExceeded = true;
@@ -447,7 +632,7 @@ function interceptResponse(
       if (sizeExceeded) {
         // Fallback: Skip caching to protect memory limits
         resolve(null);
-        return originalEnd(chunk, ...args);
+        return originalEnd(chunk, encodingOrCb, cb);
       }
 
       const bodyBuffer = Buffer.concat(chunks);
@@ -485,7 +670,7 @@ function interceptResponse(
         resolve(null);
       }
 
-      return originalEnd(chunk, ...args);
+      return originalEnd(chunk, encodingOrCb, cb);
     } as typeof res.end;
 
     next();
@@ -505,42 +690,149 @@ async function revalidateInBackground(
   totalTTL: number,
   staleTime: number,
   maxBodySize: number,
+  metrics?: CacheMetrics,
 ): Promise<void> {
-  // Create a Mock Response object inheriting from the real one but disabling network output
-  const mockRes = Object.create(res);
-  mockRes.statusCode = 200;
-  Object.defineProperty(mockRes, "headersSent", {
-    value: false,
-    writable: true,
-  });
-  Object.defineProperty(mockRes, "finished", { value: false, writable: true });
+  // Safe execution of remaining route stack in background if route metadata is available
+  if (req.route && Array.isArray(req.route.stack)) {
+    const stack = req.route.stack as {
+      handle?: ((req: Request, res: Response, next: NextFunction) => void) & {
+        isCacheMiddleware?: boolean;
+      };
+      handle_request?: (req: Request, res: Response, next: NextFunction) => void;
+    }[];
 
-  // Isolate headers
-  const localHeaders = new Map<string, string | string[]>();
-  mockRes.setHeader = (name: string, value: string | string[]) => {
-    localHeaders.set(name.toLowerCase(), value);
-    return mockRes;
-  };
-  mockRes.getHeader = (name: string) => localHeaders.get(name.toLowerCase());
-  mockRes.removeHeader = (name: string) =>
-    localHeaders.delete(name.toLowerCase());
-  mockRes.getHeaders = () => Object.fromEntries(localHeaders);
+    let currentIndex = -1;
+    for (let i = 0; i < stack.length; i++) {
+      const layer = stack[i];
+      if (layer && layer.handle && layer.handle.isCacheMiddleware) {
+        currentIndex = i;
+        break;
+      }
+    }
 
-  // Override output methods to prevent writing to real socket
-  mockRes.write = () => true;
-  mockRes.end = () => mockRes;
+    if (currentIndex !== -1) {
+      // Create a Mock Request object inheriting from the real one
+      const mockReq = Object.create(req) as SWRRequest;
+      mockReq.__is_swr = true;
+      mockReq.__swr_cache_key = cacheKey;
+      mockReq.headers = { ...req.headers };
+      mockReq.unpipe = () => mockReq;
 
-  // Now capture this fake output
-  interceptResponse(
-    req,
-    mockRes as Response,
-    next,
-    client,
-    cacheKey,
-    totalTTL,
-    staleTime,
-    maxBodySize,
-  ).catch(() => {});
+      // Create a Mock Response object inheriting from the real one but disabling network output
+      const mockRes = Object.create(res);
+      mockRes.statusCode = 200;
+      Object.defineProperty(mockRes, "headersSent", {
+        value: false,
+        writable: true,
+      });
+      Object.defineProperty(mockRes, "finished", { value: false, writable: true });
+
+      // Isolate headers by copying existing ones safely
+      const localHeaders = new Map<string, string | string[]>();
+      for (const [key, value] of Object.entries(res.getHeaders())) {
+        if (value !== undefined) {
+          if (typeof value === "number") {
+            localHeaders.set(key, String(value));
+          } else {
+            localHeaders.set(key, value);
+          }
+        }
+      }
+      mockRes.setHeader = (name: string, value: string | string[]) => {
+        localHeaders.set(name.toLowerCase(), value);
+        return mockRes;
+      };
+      mockRes.getHeader = (name: string) => localHeaders.get(name.toLowerCase());
+      mockRes.removeHeader = (name: string) =>
+        localHeaders.delete(name.toLowerCase());
+      mockRes.getHeaders = () => Object.fromEntries(localHeaders);
+
+      // Override output methods to prevent writing to real socket
+      mockRes.write = () => true;
+      mockRes.end = () => {
+        // Clean up SWR lock
+        client.del(`swr-lock:${cacheKey}`).catch(() => {});
+        return mockRes;
+      };
+
+      // Set up the response interceptor for this mock request/response first!
+      interceptResponse(
+        mockReq,
+        mockRes as Response,
+        () => {}, // no-op next
+        client,
+        cacheKey,
+        totalTTL,
+        staleTime,
+        maxBodySize,
+      ).catch(() => {});
+
+      // Run the remaining layers in the route stack
+      let index = currentIndex + 1;
+      const runNext = (err?: unknown) => {
+        if (err) {
+          console.error("[@express-route-cache] SWR background revalidation failed. Check your route handler for errors.");
+          if (metrics) metrics.swrFailures++;
+          return;
+        }
+        if (index >= stack.length) {
+          return;
+        }
+        const layer = stack[index++];
+        if (layer && typeof layer.handle === "function") {
+          try {
+            layer.handle(mockReq, mockRes, runNext);
+          } catch (e) {
+            runNext(e);
+          }
+        }
+      };
+
+      runNext();
+      return;
+    }
+  }
+
+  // Fallback: If route stack is not available (e.g. registered differently), delete lock to avoid lock starvation
+  client.del(`swr-lock:${cacheKey}`).catch(() => {});
+}
+
+/**
+ * Poll the cache store until a fresh entry appears or the maximum wait time elapses.
+ * Used by non-leader servers during distributed stampede protection: instead of
+ * executing the handler themselves, they wait for the leader to populate the cache.
+ *
+ * If the leader fails or the timeout expires, we fall through to `next()` so the
+ * request is served normally (accepting the cost of one extra DB query).
+ */
+async function waitForCachePopulation(
+  client: CacheClient,
+  cacheKey: string,
+  res: Response,
+  staleTime: number,
+  next: NextFunction,
+  metrics?: CacheMetrics,
+  maxAttempts = 10,
+  intervalMs = 150,
+): Promise<void> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise<void>((resolve) => setTimeout(resolve, intervalMs));
+    try {
+      const cached = await client.get(cacheKey);
+      if (cached) {
+        const entry = deserializeEntry(cached);
+        if (entry) {
+          if (metrics) metrics.stampedePolls++;
+          sendCachedResponse(res, entry, getAgeSeconds(entry), staleTime, "HIT");
+          return;
+        }
+      }
+    } catch {
+      /* Ignore transient read errors during polling */
+    }
+  }
+  // Timed out — let this request run the handler itself as a safety fallback
+  next();
 }
 
 /** Extract headers worth caching from the response. */
@@ -576,7 +868,7 @@ async function executeFetcherWithRetry<T>(
   fetcher: () => Promise<T>,
   retries: number,
 ): Promise<T> {
-  let lastError: any;
+  let lastError: unknown;
   for (let i = 0; i <= retries; i++) {
     try {
       return await fetcher();
