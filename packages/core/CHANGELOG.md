@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 2.0.0
+
+### Major Changes
+
+- a295b9d: Welcome to v2.0.0! This major release solidifies the caching API, introduces the new Cache Studio interface, and finalizes the documentation overhaul.
+
 ## 1.3.0
 
 ### Minor Changes

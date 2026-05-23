@@ -1,5 +1,16 @@
 # @express-route-cache/memcached
 
+## 1.0.0
+
+### Major Changes
+
+- a295b9d: Welcome to v2.0.0! This major release solidifies the caching API, introduces the new Cache Studio interface, and finalizes the documentation overhaul.
+
+### Patch Changes
+
+- Updated dependencies [a295b9d]
+  - @express-route-cache/core@2.0.0
+
 ## 0.4.0
 
 ### Minor Changes
