@@ -24,10 +24,12 @@
     "docs:preview": "pnpm --filter docs preview",
     "version-packages": "changeset version",
     "changeset": "changeset",
-    "release": "pnpm run build && pnpm run test && changeset publish"
+    "release": "pnpm run build && pnpm run test && changeset publish",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
     "typescript": "5.9.2"
