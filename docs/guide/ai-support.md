@@ -22,11 +22,11 @@ head:
 
 ## Quick Comparison
 
-| Method | Setup | Best for... |
-| :--- | :--- | :--- |
-| **Perplexity** | ❌ None | Quick one-off questions |
-| **Cursor @Docs** | ✅ Paste URL | Continuous indexing while coding |
-| **Native MCP** | ✅ Config file | Deep research in Claude/Windsurf/VS Code |
+| Method           | Setup          | Best for...                              |
+| :--------------- | :------------- | :--------------------------------------- |
+| **Perplexity**   | ❌ None        | Quick one-off questions                  |
+| **Cursor @Docs** | ✅ Paste URL   | Continuous indexing while coding         |
+| **Native MCP**   | ✅ Config file | Deep research in Claude/Windsurf/VS Code |
 
 ---
 
@@ -62,10 +62,7 @@ Add the following JSON block to the config file for your tool. No extra installa
   "mcpServers": {
     "express-route-cache": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@express-route-cache/mcp"
-      ]
+      "args": ["-y", "@express-route-cache/mcp"]
     }
   }
 }
@@ -73,17 +70,18 @@ Add the following JSON block to the config file for your tool. No extra installa
 
 **Config file locations:**
 
-| Tool | File path |
-| :--- | :--- |
-| **Claude Desktop** (macOS) | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| **Claude Desktop** (Windows) | `%APPDATA%\Claude\claude_desktop_config.json` |
-| **Cursor** (global) | `~/.cursor/mcp.json` |
-| **VS Code + Copilot** | `.vscode/mcp.json` — use `"servers"` instead of `"mcpServers"` |
-| **Windsurf** (macOS) | `~/.codeium/windsurf/mcp_config.json` |
+| Tool                         | File path                                                         |
+| :--------------------------- | :---------------------------------------------------------------- |
+| **Claude Desktop** (macOS)   | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Claude Desktop** (Windows) | `%APPDATA%\Claude\claude_desktop_config.json`                     |
+| **Cursor** (global)          | `~/.cursor/mcp.json`                                              |
+| **VS Code + Copilot**        | `.vscode/mcp.json` — use `"servers"` instead of `"mcpServers"`    |
+| **Windsurf** (macOS)         | `~/.codeium/windsurf/mcp_config.json`                             |
 
 ### Capabilities
 
 Once connected, your AI assistant gains these "Tools":
+
 - `get-docs`: Fetches the entire library documentation for context.
 - `get-page`: Fetches specific deep-dive pages (e.g., `guide/concepts-swr`).
 
@@ -93,8 +91,8 @@ Once connected, your AI assistant gains these "Tools":
 
 Consume these directly in your own AI pipelines:
 
-| File | URL | Purpose |
-| :--- | :--- | :--- |
-| `llms.txt` | [/llms.txt](https://express-route-cache.js.org/llms.txt) | Quick context primer |
-| `llms-full.txt` | [/llms-full.txt](https://express-route-cache.js.org/llms-full.txt) | Full API docs + examples |
-| `ai.json` | [/ai.json](https://express-route-cache.js.org/ai.json) | Machine-readable manifest |
+| File            | URL                                                                | Purpose                   |
+| :-------------- | :----------------------------------------------------------------- | :------------------------ |
+| `llms.txt`      | [/llms.txt](https://express-route-cache.js.org/llms.txt)           | Quick context primer      |
+| `llms-full.txt` | [/llms-full.txt](https://express-route-cache.js.org/llms-full.txt) | Full API docs + examples  |
+| `ai.json`       | [/ai.json](https://express-route-cache.js.org/ai.json)             | Machine-readable manifest |

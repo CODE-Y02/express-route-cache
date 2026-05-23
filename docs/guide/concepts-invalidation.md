@@ -34,17 +34,17 @@ Invalidating cached data is notoriously difficult. Most libraries struggle with 
 
 ```ts
 // Increment epoch for /users — O(1) INCR operation
-await cache.invalidateRoute('/users');
+await cache.invalidateRoute("/users");
 
 // Invalidate multiple patterns at once
-await cache.invalidateRoute('/api/users', '/api/posts');
+await cache.invalidateRoute("/api/users", "/api/posts");
 ```
 
 ### Middleware Invalidation
 
 ```ts
 // Automatically invalidate after a successful POST
-app.post('/users', cache.invalidate('/users'), createUser);
+app.post("/users", cache.invalidate("/users"), createUser);
 ```
 
 ### Auto Invalidation
@@ -55,7 +55,7 @@ Set `autoInvalidate: true` to automatically increment epochs for the current rou
 const cache = createCache({ autoInvalidate: true });
 
 // Or per-route:
-app.post('/users', cache.route({ autoInvalidate: true }), createUser);
+app.post("/users", cache.route({ autoInvalidate: true }), createUser);
 ```
 
 > [!NOTE]
@@ -63,6 +63,12 @@ app.post('/users', cache.route({ autoInvalidate: true }), createUser);
 
 > [!CAUTION]
 > When a custom `key` override is set on the same route (e.g. `cache.route({ key: 'my-key', autoInvalidate: true })`), `autoInvalidate` **has no effect** and is silently skipped. This is because custom keys bypass route pattern detection — there is no epoch to increment. Use `cache.invalidate()` middleware or `cache.invalidateRoute()` programmatically instead:
+>
 > ```ts
-> app.post('/users', cache.invalidate('/users'), cache.route({ key: 'my-key' }), createUser);
+> app.post(
+>   "/users",
+>   cache.invalidate("/users"),
+>   cache.route({ key: "my-key" }),
+>   createUser,
+> );
 > ```

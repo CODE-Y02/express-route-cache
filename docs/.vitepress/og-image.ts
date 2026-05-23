@@ -97,7 +97,7 @@ function buildElement(title: string, description: string) {
               el(
                 "div",
                 { fontSize: "20px", fontWeight: 700, color: "#818cf8" },
-                "@express-route-cache"
+                "@express-route-cache",
               ),
               el("div", {
                 width: "5px",
@@ -109,9 +109,9 @@ function buildElement(title: string, description: string) {
               el(
                 "div",
                 { fontSize: "20px", fontWeight: 400, color: "#475569" },
-                "Docs"
+                "Docs",
               ),
-            ]
+            ],
           ),
           // Page title
           el(
@@ -125,7 +125,7 @@ function buildElement(title: string, description: string) {
               maxWidth: "950px",
               marginBottom: "20px",
             },
-            display
+            display,
           ),
           // Description
           ...(desc
@@ -139,7 +139,7 @@ function buildElement(title: string, description: string) {
                     lineHeight: "1.4",
                     maxWidth: "860px",
                   },
-                  desc
+                  desc,
                 ),
               ]
             : []),
@@ -159,7 +159,7 @@ function buildElement(title: string, description: string) {
               el(
                 "div",
                 { fontSize: "17px", color: "#475569", fontWeight: 500 },
-                "express-route-cache.js.org"
+                "express-route-cache.js.org",
               ),
               el(
                 "div",
@@ -176,21 +176,21 @@ function buildElement(title: string, description: string) {
                       borderRadius: "999px",
                       border: "1px solid rgba(99,102,241,0.25)",
                     },
-                    t
-                  )
-                )
+                    t,
+                  ),
+                ),
               ),
-            ]
+            ],
           ),
-        ]
+        ],
       ),
-    ]
+    ],
   );
 }
 
 export async function generateOgImages(
   outDir: string,
-  pages: OgPageInfo[]
+  pages: OgPageInfo[],
 ): Promise<void> {
   const { default: satori } = await import("satori");
   const { Resvg } = await import("@resvg/resvg-js");
@@ -199,10 +199,10 @@ export async function generateOgImages(
   let fonts: any[];
   try {
     const reg = require.resolve(
-      "@fontsource/inter/files/inter-latin-400-normal.woff"
+      "@fontsource/inter/files/inter-latin-400-normal.woff",
     );
     const bold = require.resolve(
-      "@fontsource/inter/files/inter-latin-800-normal.woff"
+      "@fontsource/inter/files/inter-latin-800-normal.woff",
     );
     fonts = [
       {
@@ -219,7 +219,10 @@ export async function generateOgImages(
       },
     ];
   } catch (e) {
-    console.warn("[og-image] Could not load fonts — skipping OG generation:", e);
+    console.warn(
+      "[og-image] Could not load fonts — skipping OG generation:",
+      e,
+    );
     return;
   }
 

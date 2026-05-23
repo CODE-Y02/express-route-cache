@@ -23,6 +23,7 @@ Unlike many Express caching libraries that only handle JSON, `@express-route-cac
 ## Supported Formats
 
 You can cache any response that Express can send, including:
+
 - **Images** (PNG, JPEG, SVG)
 - **PDFs**
 - **Zipped files**

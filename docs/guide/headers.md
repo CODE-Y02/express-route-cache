@@ -23,6 +23,7 @@ head:
 ## Automatic Preservation
 
 The following are automatically captured and replayed on every cache HIT:
+
 - **CORS Headers**: `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods`, etc.
 - **Content-Type**: Ensures the client knows how to parse the data.
 - **Custom Headers**: Any headers your middleware or handlers set.
@@ -30,6 +31,7 @@ The following are automatically captured and replayed on every cache HIT:
 ## Excluded Headers
 
 We intentionally strip ephemeral or session-specific headers to prevent security issues or incorrect behavior:
+
 - `Set-Cookie` — cookies must not be replayed from a shared cache
 - `X-Express-*` — internal Express framework headers
 
@@ -59,7 +61,7 @@ If your response changes based on a header (like `Authorization` or `Accept-Lang
 
 ```ts
 const cache = createCache({
-  vary: ['authorization', 'accept-language'],
+  vary: ["authorization", "accept-language"],
 });
 ```
 

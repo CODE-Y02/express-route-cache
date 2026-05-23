@@ -51,6 +51,7 @@ If you see the following message in your logs:
 ```
 
 This means your route handler threw an error during a background SWR refresh. Common causes:
+
 - An unhandled `async` rejection inside the route handler.
 - A missing database connection or service dependency that is only available during normal request flow.
 - Middleware that inspects `req.socket` and throws when it detects the mock/background request object.
@@ -66,6 +67,7 @@ curl -I http://localhost:3000/api/data
 ```
 
 Look for:
+
 - `X-Cache: HIT` — Serving a fresh entry from cache
 - `X-Cache: MISS` — Fetched from the handler (cache was cold or expired)
 - `X-Cache: STALE` — Serving stale data; a background revalidation was triggered

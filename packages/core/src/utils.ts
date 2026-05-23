@@ -60,7 +60,7 @@ export function getEpochKey(routePattern: string): string {
  */
 export async function fetchEpochs(
   client: CacheClient,
-  patterns: string[]
+  patterns: string[],
 ): Promise<number[]> {
   if (patterns.length === 0) return [];
   const keys = patterns.map(getEpochKey);
@@ -105,7 +105,10 @@ export function buildVersionedKey(opts: {
   // Query hash (deterministic if sortQuery is enabled)
   const queryKeys = sortQuery ? Object.keys(query).sort() : Object.keys(query);
   const queryHash = queryKeys.length
-    ? crypto.createHash("md5").update(JSON.stringify(query, sortQuery ? queryKeys : undefined)).digest("hex")
+    ? crypto
+        .createHash("md5")
+        .update(JSON.stringify(query, sortQuery ? queryKeys : undefined))
+        .digest("hex")
     : "";
 
   // Epoch version segments
@@ -117,10 +120,7 @@ export function buildVersionedKey(opts: {
   let varySegment = "";
   if (vary?.length && varyValues) {
     varySegment =
-      "|" +
-      vary
-        .map((h) => `vary:${h}=${varyValues[h] || ""}`)
-        .join("|");
+      "|" + vary.map((h) => `vary:${h}=${varyValues[h] || ""}`).join("|");
   }
 
   const rawKey = `${prefix}${method}:${url}${queryHash ? `?${queryHash}` : ""}|${versionSegments}${varySegment}`;
@@ -137,7 +137,7 @@ export async function buildCacheKey(
   req: Request,
   prefix: string,
   vary?: string[],
-  sortQuery?: boolean
+  sortQuery?: boolean,
 ): Promise<{ key: string; routePattern: string; parentPatterns: string[] }> {
   const routePattern = getRoutePattern(req);
   const parentPatterns = getParentRoutePatterns(routePattern);
@@ -180,7 +180,11 @@ export function serializeEntry(entry: CacheEntry): string {
 export function deserializeEntry(raw: string): CacheEntry | null {
   try {
     const parsed = JSON.parse(raw) as CacheEntry;
-    if (parsed && typeof parsed.createdAt === "number" && parsed.body !== undefined) {
+    if (
+      parsed &&
+      typeof parsed.createdAt === "number" &&
+      parsed.body !== undefined
+    ) {
       return parsed;
     }
     return null;
@@ -196,7 +200,7 @@ export function deserializeEntry(raw: string): CacheEntry | null {
 export function getFreshness(
   entry: CacheEntry,
   staleTime: number,
-  gcTime: number
+  gcTime: number,
 ): "fresh" | "stale" | "expired" {
   const ageMs = Date.now() - entry.createdAt;
   const ageSeconds = ageMs / 1000;

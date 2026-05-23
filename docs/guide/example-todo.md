@@ -23,8 +23,8 @@ A complete, realistic walkthrough of integrating `@express-route-cache` into an 
 ## Setup
 
 ```ts
-import express from 'express';
-import { createCache, createMemoryAdapter } from '@express-route-cache/core';
+import express from "express";
+import { createCache, createMemoryAdapter } from "@express-route-cache/core";
 
 const app = express();
 app.use(express.json());
@@ -32,18 +32,18 @@ app.use(express.json());
 // In-process "database" — replace with your real DB calls
 const db = {
   todos: [
-    { id: 1, text: 'Buy groceries', completed: false },
-    { id: 2, text: 'Ship the feature', completed: true },
+    { id: 1, text: "Buy groceries", completed: false },
+    { id: 2, text: "Ship the feature", completed: true },
   ],
   nextId: 3,
 };
 
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  staleTime: 30,  // Fresh for 30 seconds
-  gcTime: 300,    // Keep stale for 5 more minutes
-  swr: true,      // Serve stale instantly while refreshing in background
-  metrics: true,  // Enable for the health endpoint below
+  staleTime: 30, // Fresh for 30 seconds
+  gcTime: 300, // Keep stale for 5 more minutes
+  swr: true, // Serve stale instantly while refreshing in background
+  metrics: true, // Enable for the health endpoint below
 });
 ```
 
@@ -54,13 +54,14 @@ const cache = createCache({
 The first request executes the handler (MISS). Every subsequent request within `staleTime` returns instantly from cache (HIT).
 
 ```ts
-app.get('/api/todos', cache.route(), (_req, res) => {
+app.get("/api/todos", cache.route(), (_req, res) => {
   // Simulates a slow DB query
   res.json(db.todos);
 });
 ```
 
 Verify it's working:
+
 ```bash
 curl -I http://localhost:3000/api/todos
 # X-Cache: MISS   ← first request
@@ -76,9 +77,9 @@ curl -I http://localhost:3000/api/todos
 Each item gets its own cache entry, keyed by its ID.
 
 ```ts
-app.get('/api/todos/:id', cache.route({ staleTime: 60 }), (req, res) => {
-  const todo = db.todos.find(t => t.id === Number(req.params.id));
-  if (!todo) return res.status(404).json({ error: 'Not found' });
+app.get("/api/todos/:id", cache.route({ staleTime: 60 }), (req, res) => {
+  const todo = db.todos.find((t) => t.id === Number(req.params.id));
+  if (!todo) return res.status(404).json({ error: "Not found" });
   res.json(todo);
 });
 ```
@@ -90,7 +91,7 @@ app.get('/api/todos/:id', cache.route({ staleTime: 60 }), (req, res) => {
 When a new todo is created, the cached list at `/api/todos` must be cleared. `autoInvalidate: true` handles this automatically after any successful 2xx response.
 
 ```ts
-app.post('/api/todos', cache.route({ autoInvalidate: true }), (req, res) => {
+app.post("/api/todos", cache.route({ autoInvalidate: true }), (req, res) => {
   const newTodo = { id: db.nextId++, text: req.body.text, completed: false };
   db.todos.push(newTodo);
 
@@ -107,17 +108,17 @@ When updating a specific item, we need to invalidate both the **item's own cache
 
 ```ts
 app.patch(
-  '/api/todos/:id',
-  cache.invalidate('/api/todos/:id', '/api/todos'), // invalidates both on 2xx
+  "/api/todos/:id",
+  cache.invalidate("/api/todos/:id", "/api/todos"), // invalidates both on 2xx
   (req, res) => {
-    const todo = db.todos.find(t => t.id === Number(req.params.id));
-    if (!todo) return res.status(404).json({ error: 'Not found' });
+    const todo = db.todos.find((t) => t.id === Number(req.params.id));
+    if (!todo) return res.status(404).json({ error: "Not found" });
 
     todo.text = req.body.text ?? todo.text;
     todo.completed = req.body.completed ?? todo.completed;
 
     res.json(todo);
-  }
+  },
 );
 ```
 
@@ -127,15 +128,15 @@ app.patch(
 
 ```ts
 app.delete(
-  '/api/todos/:id',
-  cache.invalidate('/api/todos/:id', '/api/todos'),
+  "/api/todos/:id",
+  cache.invalidate("/api/todos/:id", "/api/todos"),
   (req, res) => {
-    const idx = db.todos.findIndex(t => t.id === Number(req.params.id));
-    if (idx === -1) return res.status(404).json({ error: 'Not found' });
+    const idx = db.todos.findIndex((t) => t.id === Number(req.params.id));
+    if (idx === -1) return res.status(404).json({ error: "Not found" });
 
     db.todos.splice(idx, 1);
     res.status(204).send();
-  }
+  },
 );
 ```
 
@@ -144,9 +145,9 @@ app.delete(
 ## GET /health — Cache Metrics
 
 ```ts
-app.get('/health', (_req, res) => {
+app.get("/health", (_req, res) => {
   res.json({
-    status: 'ok',
+    status: "ok",
     cache: cache.metrics,
   });
 });
@@ -188,10 +189,10 @@ curl http://localhost:3000/health
 
 ## Key Takeaways
 
-| Pattern | Method |
-| :--- | :--- |
-| Cache a GET route | `cache.route()` |
-| Auto-invalidate on mutation | `cache.route({ autoInvalidate: true })` |
-| Invalidate specific patterns | `cache.invalidate('/pattern1', '/pattern2')` |
-| Zero-latency after first miss | `swr: true` |
-| Debug cache behaviour | `X-Cache` header + `/health` metrics endpoint |
+| Pattern                       | Method                                        |
+| :---------------------------- | :-------------------------------------------- |
+| Cache a GET route             | `cache.route()`                               |
+| Auto-invalidate on mutation   | `cache.route({ autoInvalidate: true })`       |
+| Invalidate specific patterns  | `cache.invalidate('/pattern1', '/pattern2')`  |
+| Zero-latency after first miss | `swr: true`                                   |
+| Debug cache behaviour         | `X-Cache` header + `/health` metrics endpoint |

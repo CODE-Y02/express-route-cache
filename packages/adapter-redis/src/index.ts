@@ -34,8 +34,14 @@ export interface RedisAdapterOptions {
  * });
  * ```
  */
-export function createRedisAdapter(opts: RedisAdapterOptions = {}): CacheClient {
-  const redis = opts.client ?? (opts.url ? new Redis(opts.url, { enableOfflineQueue: false }) : new Redis({ enableOfflineQueue: false, ...opts.options }));
+export function createRedisAdapter(
+  opts: RedisAdapterOptions = {},
+): CacheClient {
+  const redis =
+    opts.client ??
+    (opts.url
+      ? new Redis(opts.url, { enableOfflineQueue: false })
+      : new Redis({ enableOfflineQueue: false, ...opts.options }));
 
   return {
     async get(key: string): Promise<string | null> {
@@ -65,7 +71,11 @@ export function createRedisAdapter(opts: RedisAdapterOptions = {}): CacheClient 
       return redis.incr(key);
     },
 
-    async setNX(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+    async setNX(
+      key: string,
+      value: string,
+      ttlSeconds: number,
+    ): Promise<boolean> {
       const result = await redis.set(key, value, "EX", ttlSeconds, "NX");
       return result === "OK";
     },

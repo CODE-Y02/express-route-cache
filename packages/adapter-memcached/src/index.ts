@@ -37,11 +37,14 @@ export interface MemcachedAdapterOptions {
  * ```
  */
 export function createMemcachedAdapter(
-  opts: MemcachedAdapterOptions = {}
+  opts: MemcachedAdapterOptions = {},
 ): CacheClient {
   const client =
     opts.client ??
-    memjs.Client.create(opts.servers ?? "localhost:11211", opts.options as any ?? {});
+    memjs.Client.create(
+      opts.servers ?? "localhost:11211",
+      (opts.options as any) ?? {},
+    );
 
   return {
     async get(key: string): Promise<string | null> {
@@ -55,15 +58,11 @@ export function createMemcachedAdapter(
         keys.map(async (key) => {
           const { value } = await client.get(key);
           return value ? value.toString("utf-8") : null;
-        })
+        }),
       );
     },
 
-    async set(
-      key: string,
-      value: string,
-      ttlSeconds?: number
-    ): Promise<void> {
+    async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
       await client.set(key, value, {
         expires: ttlSeconds ?? 0,
       });
@@ -88,7 +87,11 @@ export function createMemcachedAdapter(
       }
     },
 
-    async setNX(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+    async setNX(
+      key: string,
+      value: string,
+      ttlSeconds: number,
+    ): Promise<boolean> {
       try {
         const result = await client.add(key, value, { expires: ttlSeconds });
         return !!result;

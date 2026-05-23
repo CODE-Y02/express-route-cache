@@ -26,15 +26,17 @@ The recommended pattern is to drive your adapter choice from environment variabl
 
 ```ts
 // cache.ts
-import { createCache, createMemoryAdapter } from '@express-route-cache/core';
-import { createRedisAdapter } from '@express-route-cache/redis';
+import { createCache, createMemoryAdapter } from "@express-route-cache/core";
+import { createRedisAdapter } from "@express-route-cache/redis";
 
 function createAdapter() {
   if (process.env.REDIS_URL) {
     return createRedisAdapter({ url: process.env.REDIS_URL });
   }
-  if (process.env.NODE_ENV === 'production') {
-    console.warn('WARNING: Using in-process Memory adapter in production. Set REDIS_URL for distributed caching.');
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "WARNING: Using in-process Memory adapter in production. Set REDIS_URL for distributed caching.",
+    );
   }
   return createMemoryAdapter();
 }
@@ -44,7 +46,7 @@ export const cache = createCache({
   staleTime: 60,
   gcTime: 300,
   swr: true,
-  metrics: true,  // Enable for health endpoint
+  metrics: true, // Enable for health endpoint
 });
 ```
 
@@ -85,7 +87,7 @@ Set `REDIS_URL` from a Kubernetes Secret:
 apiVersion: apps/v1
 kind: Deployment
 spec:
-  replicas: 4  # Multiple pods share the same Redis cache
+  replicas: 4 # Multiple pods share the same Redis cache
   template:
     spec:
       containers:
@@ -121,16 +123,18 @@ PM2 cluster mode forks multiple Node.js processes on the same machine. Each fork
 ```js
 // ecosystem.config.js
 module.exports = {
-  apps: [{
-    name: 'api',
-    script: './dist/server.js',
-    instances: 'max',  // One per CPU core
-    exec_mode: 'cluster',
-    env_production: {
-      NODE_ENV: 'production',
-      REDIS_URL: 'redis://localhost:6379',
+  apps: [
+    {
+      name: "api",
+      script: "./dist/server.js",
+      instances: "max", // One per CPU core
+      exec_mode: "cluster",
+      env_production: {
+        NODE_ENV: "production",
+        REDIS_URL: "redis://localhost:6379",
+      },
     },
-  }],
+  ],
 };
 ```
 
@@ -141,20 +145,21 @@ module.exports = {
 Expose `cache.metrics` in a health endpoint so your load balancer and monitoring systems can observe cache performance:
 
 ```ts
-import { cache } from './cache';
+import { cache } from "./cache";
 
-app.get('/health', (_req, res) => {
+app.get("/health", (_req, res) => {
   res.json({
-    status: 'ok',
+    status: "ok",
     cache: {
       metricsEnabled: !!cache.metrics,
-      ...cache.metrics,  // hits, misses, swrHits, swrFailures, etc.
+      ...cache.metrics, // hits, misses, swrHits, swrFailures, etc.
     },
   });
 });
 ```
 
 Example response:
+
 ```json
 {
   "status": "ok",
@@ -184,9 +189,9 @@ const cache = createCache({
   adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
   metrics: true,
   studio: {
-    port: 3001,       // Internal port — do not expose publicly
-    path: '/studio',
-    hostname: 'localhost',
+    port: 3001, // Internal port — do not expose publicly
+    path: "/studio",
+    hostname: "localhost",
   },
 });
 ```
@@ -205,10 +210,10 @@ kubectl port-forward deploy/api 3001:3001
 Disconnect the Redis adapter cleanly on SIGTERM to avoid connection leaks:
 
 ```ts
-import { cache } from './cache';
+import { cache } from "./cache";
 
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down...');
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down...");
   await cache.adapter.disconnect?.();
   process.exit(0);
 });
@@ -226,19 +231,19 @@ export const cache = createCache({
   adapter: createRedisAdapter({
     url: process.env.REDIS_URL!,
     options: {
-      enableOfflineQueue: false,  // Don't queue commands if Redis is down
-      connectTimeout: 5000,       // 5s connection timeout
+      enableOfflineQueue: false, // Don't queue commands if Redis is down
+      connectTimeout: 5000, // 5s connection timeout
       maxRetriesPerRequest: 2,
     },
   }),
-  staleTime: 60,         // 1 minute fresh
-  gcTime: 3600,          // Keep stale for 1 hour
-  swr: true,             // Serve stale, refresh in background
-  stampede: true,        // Default — keep enabled
+  staleTime: 60, // 1 minute fresh
+  gcTime: 3600, // Keep stale for 1 hour
+  swr: true, // Serve stale, refresh in background
+  stampede: true, // Default — keep enabled
   maxBodySize: 5_242_880, // 5MB max response size
-  metrics: true,         // Required for health endpoint + Studio
+  metrics: true, // Required for health endpoint + Studio
   studio: {
-    port: parseInt(process.env.STUDIO_PORT || '3001'),
+    port: parseInt(process.env.STUDIO_PORT || "3001"),
   },
 });
 ```

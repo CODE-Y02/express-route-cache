@@ -136,7 +136,7 @@ export interface CacheConfig {
   sortQuery?: boolean;
 
   /**
-   * Maximum response body size (in bytes) to cache. 
+   * Maximum response body size (in bytes) to cache.
    * Protects Node.js memory limits during large streaming downloads.
    * If a response exceeds this size, it serves normally but skips the cache.
    * @default 2097152 (2MB)
@@ -144,7 +144,7 @@ export interface CacheConfig {
   maxBodySize?: number;
 
   /**
-   * Automatically invalidate the cache for the current route pattern 
+   * Automatically invalidate the cache for the current route pattern
    * when a mutation request (POST, PUT, DELETE, PATCH) is successful.
    * @default false
    */
@@ -212,7 +212,7 @@ export interface CacheInstance {
   fetch: <T>(
     key: string,
     fetcher: () => Promise<T>,
-    opts?: Omit<RouteOptions, "key" | "autoInvalidate" | "vary" | "sortQuery">
+    opts?: Omit<RouteOptions, "key" | "autoInvalidate" | "vary" | "sortQuery">,
   ) => Promise<T>;
 
   /** Access the underlying adapter. */
@@ -229,5 +229,5 @@ export interface CacheInstance {
 export type ExpressMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => void;

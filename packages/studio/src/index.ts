@@ -8,8 +8,12 @@ export interface StudioConfig {
 }
 
 export function createStudio(
-  config: StudioConfig
-): (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => void {
+  config: StudioConfig,
+): (
+  req: IncomingMessage,
+  res: ServerResponse,
+  next: (err?: unknown) => void,
+) => void {
   const router = Router();
   const cache = config.cache;
 
@@ -146,5 +150,9 @@ export function createStudio(
     }
   });
 
-  return router as unknown as (req: IncomingMessage, res: ServerResponse, next: (err?: unknown) => void) => void;
+  return router as unknown as (
+    req: IncomingMessage,
+    res: ServerResponse,
+    next: (err?: unknown) => void,
+  ) => void;
 }

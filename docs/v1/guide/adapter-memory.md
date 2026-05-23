@@ -32,9 +32,9 @@ const cache = createCache({
 
 ## Options
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `fallbackTTL` | `number` | `600` | Strict TTL in seconds to prevent memory leaks if items are never accessed. |
+| Option        | Type     | Default | Description                                                                |
+| :------------ | :------- | :------ | :------------------------------------------------------------------------- |
+| `fallbackTTL` | `number` | `600`   | Strict TTL in seconds to prevent memory leaks if items are never accessed. |
 
 ## Limitations
 

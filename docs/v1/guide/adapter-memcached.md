@@ -39,10 +39,10 @@ const cache = createCache({ adapter });
 
 ## Options
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `servers` | `string` | Memcached server address (e.g., `localhost:11211`). |
-| `keyPrefix` | `string` | Prefix for all cache keys (default: `erc:`). |
+| Option      | Type     | Description                                         |
+| :---------- | :------- | :-------------------------------------------------- |
+| `servers`   | `string` | Memcached server address (e.g., `localhost:11211`). |
+| `keyPrefix` | `string` | Prefix for all cache keys (default: `erc:`).        |
 
 ## Performance
 

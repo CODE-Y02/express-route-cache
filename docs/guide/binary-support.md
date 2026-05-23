@@ -28,34 +28,34 @@ A flag (`isBase64: true`) is stored alongside the entry so the cache knows to de
 
 ## Supported Response Types
 
-| Response Method | Binary-Safe? |
-| :--- | :---: |
-| `res.json(...)` | ✅ (JSON) |
-| `res.send(Buffer)` | ✅ |
-| `res.sendFile(path)` | ✅ |
-| `res.download(path)` | ✅ |
+| Response Method       |           Binary-Safe?            |
+| :-------------------- | :-------------------------------: |
+| `res.json(...)`       |             ✅ (JSON)             |
+| `res.send(Buffer)`    |                ✅                 |
+| `res.sendFile(path)`  |                ✅                 |
+| `res.download(path)`  |                ✅                 |
 | Stream piped to `res` | ✅ (buffered up to `maxBodySize`) |
 
 ## Example: Caching an Image Endpoint
 
 ```ts
-import express from 'express';
-import fs from 'fs';
-import path from 'path';
-import { createCache, createMemoryAdapter } from '@express-route-cache/core';
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { createCache, createMemoryAdapter } from "@express-route-cache/core";
 
 const app = express();
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  staleTime: 3600,  // Images don't change often — 1 hour fresh
-  gcTime: 86400,    // Keep stale for 24 hours
+  staleTime: 3600, // Images don't change often — 1 hour fresh
+  gcTime: 86400, // Keep stale for 24 hours
   swr: true,
 });
 
 // This route sends a PNG — the cache stores it as Base64 and replays it perfectly
-app.get('/images/:name', cache.route(), (req, res) => {
-  const imgPath = path.join(__dirname, 'public/images', req.params.name);
-  res.setHeader('Content-Type', 'image/png');
+app.get("/images/:name", cache.route(), (req, res) => {
+  const imgPath = path.join(__dirname, "public/images", req.params.name);
+  res.setHeader("Content-Type", "image/png");
   res.sendFile(imgPath);
 });
 ```
@@ -66,17 +66,21 @@ On subsequent requests: `X-Cache: HIT` — image served from cache in memory, ze
 ## Example: Caching a PDF Generation Endpoint
 
 ```ts
-app.get('/api/invoices/:id/pdf',
+app.get(
+  "/api/invoices/:id/pdf",
   cache.route({
-    staleTime: 300,         // Cache for 5 minutes
+    staleTime: 300, // Cache for 5 minutes
     maxBodySize: 10_485_760, // Allow up to 10MB PDFs
   }),
   async (req, res) => {
     const pdf = await generateInvoicePDF(req.params.id); // returns Buffer
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="invoice-${req.params.id}.pdf"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="invoice-${req.params.id}.pdf"`,
+    );
     res.send(pdf);
-  }
+  },
 );
 ```
 
@@ -92,15 +96,19 @@ const cache = createCache({
 });
 
 // Override per-route for a large-file endpoint
-app.get('/api/exports/:id', cache.route({
-  maxBodySize: 50 * 1024 * 1024, // Allow up to 50MB for exports
-}), generateExport);
+app.get(
+  "/api/exports/:id",
+  cache.route({
+    maxBodySize: 50 * 1024 * 1024, // Allow up to 50MB for exports
+  }),
+  generateExport,
+);
 ```
 
-| File Size | Default Behaviour |
-| :--- | :--- |
-| ≤ 2MB | Cached normally |
-| > 2MB | Skipped — served fresh, not cached |
+| File Size | Default Behaviour                  |
+| :-------- | :--------------------------------- |
+| ≤ 2MB     | Cached normally                    |
+| > 2MB     | Skipped — served fresh, not cached |
 
 > [!TIP]
 > For very large files that should never be cached, set `maxBodySize: 0` on the route to always bypass the cache.
