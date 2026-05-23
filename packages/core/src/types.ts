@@ -39,6 +39,14 @@ export interface CacheEntry {
   headers: Record<string, string>;
   /** Unix timestamp (ms) when this entry was created. */
   createdAt: number;
+  /** Whether the body is base64 encoded. */
+  isBase64?: boolean;
+}
+
+/** Generic structure for manual fetch caching. */
+export interface DataEntry<T = any> {
+  data: T;
+  createdAt: number;
 }
 
 // ─── Configuration Types ────────────────────────────────────────────────────
@@ -116,6 +124,19 @@ export interface CacheConfig {
    * @default 2097152 (2MB)
    */
   maxBodySize?: number;
+
+  /**
+   * Automatically invalidate the cache for the current route pattern 
+   * when a mutation request (POST, PUT, DELETE, PATCH) is successful.
+   * @default false
+   */
+  autoInvalidate?: boolean;
+
+  /**
+   * Number of times to retry a failed fetch before giving up.
+   * @default 0
+   */
+  retry?: number;
 }
 
 /**
@@ -130,6 +151,8 @@ export interface RouteOptions {
   vary?: string[];
   sortQuery?: boolean;
   maxBodySize?: number;
+  autoInvalidate?: boolean;
+  retry?: number;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
 }
@@ -147,6 +170,13 @@ export interface CacheInstance {
 
   /** Programmatic invalidation — call from anywhere (service layer, cron, webhook). */
   invalidateRoute: (...routePatterns: string[]) => Promise<void>;
+
+  /** Standalone fetch with SWR and Stampede protection. */
+  fetch: <T>(
+    key: string,
+    fetcher: () => Promise<T>,
+    opts?: Omit<RouteOptions, "key" | "autoInvalidate" | "vary" | "sortQuery">
+  ) => Promise<T>;
 
   /** Access the underlying adapter. */
   adapter: CacheClient;

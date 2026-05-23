@@ -3,14 +3,19 @@ name: CI
 on:
   push:
     branches:
-      - main
-      - "v*"
-      - next
+      - "!main"
+      - "!next"
+      - "!v*"
+      - "**" # This tells CI to run on all other feature branches
+    paths-ignore:
+      - 'docs/**'
   pull_request:
     branches:
       - main
       - "v*"
       - next
+    paths-ignore:
+      - 'docs/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
