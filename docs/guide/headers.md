@@ -1,6 +1,19 @@
 ---
-title: "Header Preservation | @express-route-cache"
-description: "How we replay CORS and custom headers to ensure your API behaves identically when cached."
+title: "HTTP Header Preservation in Cached Express Responses | @express-route-cache"
+description: "How express-route-cache preserves CORS headers, Content-Type, and custom HTTP headers in cached responses. Includes X-Cache debug headers and vary-based cache namespacing."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/headers
+  - - meta
+    - property: og:title
+      content: "HTTP Header Preservation for Express.js Caching | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Preserve CORS, Content-Type, and custom headers in cached Express.js responses. Debug with X-Cache HIT/MISS/STALE headers."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/headers
 ---
 
 # Header Preservation

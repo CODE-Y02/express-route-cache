@@ -1,6 +1,19 @@
 ---
-title: "Epoch Invalidation | @express-route-cache"
-description: "Understand the O(1) invalidation system that makes this library production-ready for large datasets."
+title: "O(1) Epoch Cache Invalidation | @express-route-cache"
+description: "How express-route-cache achieves O(1) cache invalidation using Epoch Versioning — no Redis SCAN, no KEYS command. Instantly invalidate any route pattern in production."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/concepts-invalidation
+  - - meta
+    - property: og:title
+      content: "O(1) Cache Invalidation in Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Instantly invalidate Express.js route cache using Epoch Versioning. O(1) performance — no Redis SCAN or KEYS. Scales to millions of cached entries."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/concepts-invalidation
 ---
 
 # Epoch Invalidation

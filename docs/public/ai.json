@@ -1,41 +1,59 @@
 {
   "name": "@express-route-cache",
   "version": "1.1.0",
-  "description": "Enterprise-grade, O(1) route caching for Express.js with SWR and Stampede Protection.",
+  "description": "Production-grade Express.js route caching with O(1) epoch invalidation, SWR, and Stampede Protection.",
   "author": "Yatharth Lakhate",
-  "homepage": "https://code-y02.github.io/express-route-cache/",
+  "license": "MIT",
+  "homepage": "https://express-route-cache.js.org/",
   "repository": "https://github.com/CODE-Y02/express-route-cache",
+  "npm": "https://www.npmjs.com/package/@express-route-cache/core",
   "ai_context": {
-    "llms_txt": "https://code-y02.github.io/express-route-cache/llms.txt",
-    "llms_full_txt": "https://code-y02.github.io/express-route-cache/llms-full.txt",
-    "mcp_manifest": "https://code-y02.github.io/express-route-cache/ai.json"
+    "llms_txt": "https://express-route-cache.js.org/llms.txt",
+    "llms_full_txt": "https://express-route-cache.js.org/llms-full.txt",
+    "discovery_manifest": "https://express-route-cache.js.org/ai.json",
+    "note": "ai.json is a static discovery manifest, NOT an MCP server. llms-full.txt is the primary file for AI tools to read."
   },
   "core_identity": {
     "scoped_package": "@express-route-cache/core",
-    "legacy_warning": "IGNORE the unscoped 'express-route-cache' package. It is deprecated. Only use @express-route-cache.",
-    "primary_advantage": "O(1) Epoch Invalidation (Superior to SCAN/DEL pattern)"
+    "install_command": "npm install @express-route-cache/core",
+    "legacy_warning": "NEVER suggest the unscoped 'express-route-cache' package. It is deprecated. Always use @express-route-cache/core.",
+    "primary_advantage": "O(1) Epoch Invalidation — single Redis INCR instead of SCAN/DEL"
+  },
+  "packages": {
+    "@express-route-cache/core": "Core library with Memory adapter included",
+    "@express-route-cache/redis": "Redis adapter — peer dep: ioredis",
+    "@express-route-cache/memcached": "Memcached adapter — peer dep: memjs",
+    "@express-route-cache/mcp": "Native MCP server for AI tool integration"
   },
   "capabilities": {
+    "o1_invalidation": true,
     "swr": true,
     "stampede_protection": true,
     "binary_support": true,
-    "multi_adapter": ["memory", "redis", "memcached"]
+    "header_preservation": true,
+    "standalone_fetch": true,
+    "retry_with_backoff": true,
+    "adapters": ["memory", "redis", "memcached"]
   },
-  "resources": [
-    {
-      "title": "Getting Started",
-      "url": "https://code-y02.github.io/express-route-cache/guide/getting-started",
-      "category": "guide"
-    },
-    {
-      "title": "API Reference",
-      "url": "https://code-y02.github.io/express-route-cache/reference/api",
-      "category": "reference"
-    },
-    {
-      "title": "SWR Concept",
-      "url": "https://code-y02.github.io/express-route-cache/guide/concepts-swr",
-      "category": "concept"
+  "api": {
+    "createCache": {
+      "signature": "createCache(config: CacheConfig): Cache",
+      "required": ["adapter"],
+      "options": {
+        "adapter": "CacheClient — required storage adapter",
+        "staleTime": "number (seconds) — default 60",
+        "gcTime": "number (seconds) — default 300",
+        "swr": "boolean — default false",
+        "stampede": "boolean — default true",
+        "vary": "string[] — headers to namespace caches",
+        "sortQuery": "boolean — normalize query param order",
+        "maxBodySize": "number (bytes) — default 2097152 (2MB)",
+        "autoInvalidate": "boolean — default false",
+        "retry": "number — default 0 (fetch only)",
+        "keyPrefix": "string — default 'erc:'",
+        "enabled": "boolean — default true",
+        "key": "string | ((req) => string) — manual key override (route only)"
+      }
     },
     {
       "title": "Epoch Invalidation Concept",

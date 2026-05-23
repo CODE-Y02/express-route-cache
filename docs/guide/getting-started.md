@@ -1,6 +1,25 @@
 ---
 title: Getting Started | @express-route-cache
-description: Learn how to set up production-grade route caching for Express.js in less than a minute.
+description: Step-by-step guide to setting up production-grade route caching for Express.js in under a minute. Covers installation, quick start, Redis, SWR, and cache invalidation.
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/getting-started
+  - - meta
+    - property: og:title
+      content: Getting Started | @express-route-cache
+  - - meta
+    - property: og:description
+      content: Add production-grade route caching to your Express.js API in under a minute. O(1) invalidation, SWR, and Stampede Protection out of the box.
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/getting-started
+  - - meta
+    - name: twitter:title
+      content: Getting Started | @express-route-cache
+  - - meta
+    - name: twitter:description
+      content: Install @express-route-cache/core and add production-grade caching to Express.js routes in under a minute.
 ---
 
 # Getting Started

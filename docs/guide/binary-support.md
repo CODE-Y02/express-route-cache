@@ -1,6 +1,19 @@
 ---
 title: "Binary Support | @express-route-cache"
 description: "Cache images, PDFs, ZIP files and any binary response with automatic Base64 serialization — no configuration needed."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/binary-support
+  - - meta
+    - property: og:title
+      content: "Binary Caching Support in Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Cache images, PDFs, and binary buffers in Express.js. Automatic Base64 serialization prevents data corruption in Redis and Memcached."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/binary-support
 ---
 
 # Binary Support

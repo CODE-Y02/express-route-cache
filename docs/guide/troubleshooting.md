@@ -1,6 +1,19 @@
 ---
 title: "Troubleshooting | @express-route-cache"
 description: "Solutions for common issues like cache zombies, high memory usage, SWR failures, and unexpected cache misses."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/troubleshooting
+  - - meta
+    - property: og:title
+      content: "Troubleshooting Express.js Cache Problems | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Diagnose and fix common caching bugs: zombie cache entries, unexpected MISS, high memory usage, and invalidation not working."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/troubleshooting
 ---
 
 # Troubleshooting

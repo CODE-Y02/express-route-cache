@@ -1,6 +1,19 @@
 ---
-title: "Redis Adapter | @express-route-cache"
-description: "Distributed caching using Redis (ioredis) for multi-instance production environments."
+title: "Redis Cache Adapter (ioredis) | @express-route-cache"
+description: "Set up distributed Express.js route caching with Redis using ioredis. Supports URL connection, existing client reuse, and key prefixing. Recommended for production."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/adapter-redis
+  - - meta
+    - property: og:title
+      content: "Redis Cache Adapter for Express.js | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Use Redis with ioredis for distributed Express.js caching. O(1) performance with MGET and INCR. Supports multiple server instances."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/adapter-redis
 ---
 
 # Redis Adapter

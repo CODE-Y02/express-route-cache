@@ -1,6 +1,19 @@
 ---
 title: "Architecture & Design | @express-route-cache"
 description: "A deep dive into the design decisions, O(1) invalidation strategy, two-tier stampede protection, and the SWR implementation."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/reference/architecture
+  - - meta
+    - property: og:title
+      content: "Architecture & Design | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Technical deep-dive: how epoch invalidation, request coalescing, SWR, and header preservation are implemented in express-route-cache."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/reference/architecture
 ---
 
 # Architecture & Design

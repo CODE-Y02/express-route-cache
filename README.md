@@ -7,9 +7,10 @@
 [![NPM Version](https://img.shields.io/npm/v/@express-route-cache/core.svg)](https://www.npmjs.com/package/@express-route-cache/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![CI](https://github.com/CODE-Y02/express-route-cache/actions/workflows/release.yml/badge.svg)](https://github.com/CODE-Y02/express-route-cache/actions)
-[![ChatGPT](https://img.shields.io/badge/Chat--GPT-Support-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/?q=Analyze+this+library.+Docs:+https://code-y02.github.io/express-route-cache/+GitHub:+https://github.com/CODE-Y02/express-route-cache+NPM:+https://www.npmjs.com/package/@express-route-cache/core)
-[![Claude](https://img.shields.io/badge/Claude-Support-d97757?logo=anthropic&logoColor=white)](https://claude.ai/new?q=Help+me+with+this+library.+Docs:+https://code-y02.github.io/express-route-cache/+LLM+Context:+https://code-y02.github.io/express-route-cache/llms.txt)
-[![Cursor](https://img.shields.io/badge/Cursor-Context-519aba?logo=cursor&logoColor=white)](https://code-y02.github.io/express-route-cache/llms.txt)
+[![AI Support](https://img.shields.io/badge/🤖-AI--Native-purple)](https://express-route-cache.js.org/guide/ai-support)
+[![ChatGPT](https://img.shields.io/badge/Chat--GPT-Support-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/?q=Analyze+this+library.+Docs:+https://express-route-cache.js.org/+GitHub:+https://github.com/CODE-Y02/express-route-cache+NPM:+https://www.npmjs.com/package/@express-route-cache/core)
+[![Claude](https://img.shields.io/badge/Claude-Support-d97757?logo=anthropic&logoColor=white)](https://claude.ai/new?q=Help+me+with+this+library.+Docs:+https://express-route-cache.js.org/+LLM+Context:+https://express-route-cache.js.org/llms.txt)
+[![Cursor](https://img.shields.io/badge/Cursor-Context-519aba?logo=cursor&logoColor=white)](https://express-route-cache.js.org/llms.txt)
 
 </div>
 
@@ -40,6 +41,7 @@ Meet `@express-route-cache`. We brought the modern conveniences of frontend data
 | **Adapters**               | ❌ Locked to one  | ✅ **Memory, Redis (ioredis), Memcached (memjs)**  |
 | **Binary Support**         | ❌ JSON only      | ✅ **Automatic** (Images, PDFs, Buffers)           |
 | **Header Preservation**    | ❌ Stripped       | ✅ **Automatic** (CORS, Custom Headers)            |
+| **AI Support**             | ❌                | ✅ **Native MCP Server & AI-Ready Manifests**      |
 | **Standalone Fetch**       | ❌                | ✅ **`cache.fetch()`** (Manual data caching)       |
 | **Retries**                | ❌                | ✅ **Exponential Backoff** (Built-in)              |
 | **DX**                     | ❌ Callbacks      | ✅ **Modern API** (`staleTime`, `autoInvalidate`)  |
@@ -111,7 +113,7 @@ To invalidate the entire `/users` tree, we simply increment the `/users` counter
 
 If 5,000 users request `/viral-post` at the exact same millisecond the cache expires, `@express-route-cache` steps in. It holds the 4,999 connection promises in memory and executes your Express handler exactly **one** time. Once the database returns the data, all 5,000 connections are resolved simultaneously.
 
-> 📚 **Deep Dive:** Want to know _why_ we didn't use Redis distributed locks? Or how exactly the `INCR` command guarantees O(1) performance? Read our [Architecture & Trade-offs](./ARCHITECTURE.md) and [Comparison with TanStack Query](./docs/guide/comparison.md) documents.
+> 📚 **Deep Dive:** Want to know _why_ we didn't use Redis distributed locks? Or how exactly the `INCR` command guarantees O(1) performance? Read our [Architecture & Trade-offs](./docs/reference/architecture.md), [AI Support Guide](./docs/guide/ai-support.md), and [Comparison with TanStack Query](./docs/guide/comparison.md) documents.
 
 ---
 
