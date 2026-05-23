@@ -1,18 +1,34 @@
 <template>
   <div class="version-switcher-wrapper">
-    <button class="version-btn" @click.stop="isOpen = !isOpen" aria-label="Switch Version">
+    <button
+      class="version-btn"
+      @click.stop="isOpen = !isOpen"
+      aria-label="Switch Version"
+    >
       <span class="version-name">{{ currentVersionName }}</span>
-      <svg class="chevron" :class="{ open: isOpen }" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m6 9 6 6 6-6"/>
+      <svg
+        class="chevron"
+        :class="{ open: isOpen }"
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m6 9 6 6 6-6" />
       </svg>
     </button>
-    
+
     <div v-if="isOpen" class="dropdown-menu">
-      <a 
-        v-for="ver in versions" 
-        :key="ver.id" 
+      <a
+        v-for="ver in versions"
+        :key="ver.id"
         :href="withBase(ver.link)"
-        class="dropdown-item" 
+        class="dropdown-item"
         :class="{ active: currentVersion === ver.id }"
         @click="close"
       >
@@ -23,41 +39,47 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute, withBase } from 'vitepress'
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
+import { useRoute, withBase } from "vitepress";
 
-const route = useRoute()
-const isOpen = ref(false)
-const currentVersion = ref('v1.1.x')
+const route = useRoute();
+const isOpen = ref(false);
+const currentVersion = ref("v2.x");
 
 const versions = [
-  { id: 'v1.1.x', name: 'v1.1.x (Latest)', link: '/' },
-  { id: 'v1.0.x', name: 'v1.0.x (Legacy)', link: '/v1/' }
-]
+  { id: "Latest", name: "Latest", link: "/" },
+  { id: "Legacy", name: "Legacy", link: "/v1/" },
+];
 
 const currentVersionName = computed(() => {
-  return versions.find(v => v.id === currentVersion.value)?.name || 'Versions'
-})
+  return (
+    versions.find((v) => v.id === currentVersion.value)?.name || "Versions"
+  );
+});
 
 function close() {
-  isOpen.value = false
+  isOpen.value = false;
 }
 
-watch(() => route.path, (path) => {
-  if (path.includes('/v1/')) {
-    currentVersion.value = 'v1.0.x'
-  } else {
-    currentVersion.value = 'v1.1.x'
-  }
-}, { immediate: true })
+watch(
+  () => route.path,
+  (path) => {
+    if (path.includes("/v1/")) {
+      currentVersion.value = "v1.0.x";
+    } else {
+      currentVersion.value = "v1.1.x";
+    }
+  },
+  { immediate: true },
+);
 
 onMounted(() => {
-  window.addEventListener('click', close)
-})
+  window.addEventListener("click", close);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('click', close)
-})
+  window.removeEventListener("click", close);
+});
 </script>
 
 <style scoped>
@@ -82,7 +104,9 @@ onUnmounted(() => {
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
-  transition: color 0.2s, background-color 0.2s;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
 }
 
 .version-btn:hover {
