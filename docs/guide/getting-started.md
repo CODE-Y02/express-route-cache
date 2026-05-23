@@ -13,7 +13,7 @@ Install the core package along with any adapters you need:
 # Core package (includes Memory adapter)
 npm install @express-route-cache/core
 
-# Redis adapter
+# Redis adapter (recommended for production)
 npm install @express-route-cache/redis ioredis
 
 # Memcached adapter
@@ -64,7 +64,7 @@ app.listen(3000);
 
 ### Invalidation
 
-Invalidation is **O(1)**. Instead of searching for keys to delete, we use "Epoch Versioning". Incrementing a version number makes all old cache entries instantly obsolete.
+Invalidation is **O(1)**. Instead of searching for keys to delete, we use "Epoch Versioning". Incrementing a version number makes all old cache entries instantly obsolete. See [Epoch Invalidation](./concepts-invalidation) for details.
 
 ## 🛠️ Advanced Patterns
 
@@ -92,7 +92,7 @@ cache.route({ sortQuery: true });
 ```
 
 ### 4. Automatic Invalidation
-You can tell the cache to automatically increment the version for a route pattern whenever a successful `POST`, `PUT`, or `DELETE` request is made:
+You can tell the cache to automatically increment the version for a route pattern whenever a successful `POST`, `PUT`, `PATCH`, or `DELETE` request is made:
 ```ts
 // Globally
 const cache = createCache({ autoInvalidate: true, ... });
@@ -106,3 +106,28 @@ To prevent large responses (like 500MB videos) from crashing your Node process o
 ```ts
 cache.route({ maxBodySize: 1024 * 1024 * 5 }); // 5MB limit
 ```
+
+### 6. Standalone Data Caching
+`cache.fetch()` lets you cache any async data — not just Express routes — with SWR, Stampede Protection, and retry support:
+```ts
+const users = await cache.fetch('all-users', () => db.users.findMany(), {
+  staleTime: 60,
+  swr: true,
+  retry: 2,
+});
+```
+See the [Standalone Fetch guide](./cache-fetch) for full details.
+
+---
+
+## What's Next?
+
+| Topic | Link |
+| :--- | :--- |
+| Full worked example with GET/POST/PATCH/DELETE | [Example: Todo API](./example-todo) |
+| Real-world patterns (per-user, webhooks, warming) | [Recipes](./recipes) |
+| Production: Docker, K8s, health checks | [Deployment](./deployment) |
+| Testing your cached routes | [Testing](./testing) |
+| Understanding fresh/stale windows visually | [SWR Concepts](./concepts-swr) |
+| How O(1) invalidation works | [Epoch Invalidation](./concepts-invalidation) |
+| Building a custom adapter | [CacheClient Interface](../reference/api#cacheclient-interface) |

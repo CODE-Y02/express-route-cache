@@ -1,6 +1,6 @@
 ---
 title: "Troubleshooting | @express-route-cache"
-description: "Solutions for common issues like cache zombies, high memory usage, and unexpected cache misses."
+description: "Solutions for common issues like cache zombies, high memory usage, SWR failures, and unexpected cache misses."
 ---
 
 # Troubleshooting
@@ -11,7 +11,7 @@ description: "Solutions for common issues like cache zombies, high memory usage,
 
 If you find that your cache isn't updating after a mutation, check the following:
 
-1. **Epoch Mismatch**: Ensure you are invalidating the correct route pattern.
+1. **Epoch Mismatch**: Ensure you are invalidating the correct route pattern. The pattern must match what `getRoutePattern()` returns (e.g. `/api/users/:id`, not `/api/users/123`).
 2. **Success Status**: Invalidation only triggers on **2xx** responses. If your POST/PUT fails, the cache won't be invalidated.
 3. **Race Conditions**: SWR can sometimes serve stale data if a refresh is still pending.
 
@@ -26,7 +26,23 @@ If your Node.js process is consuming too much memory:
 ### Unexpected MISS on GET requests
 
 1. **Vary Headers**: If you use `vary`, any change in those headers will cause a MISS.
-2. **Query Params**: If `sortQuery` is false, `?a=1&b=2` and `?b=2&a=1` are treated as different routes.
+2. **Query Params**: If `sortQuery` is false (default), `?a=1&b=2` and `?b=2&a=1` are treated as different routes.
+3. **Enabled flag**: Check that `enabled` is not set to `false` globally or per-route.
+
+### SWR Background Revalidation Failing
+
+If you see the following message in your logs:
+
+```
+[@express-route-cache] SWR background revalidation failed. Check your route handler for errors.
+```
+
+This means your route handler threw an error during a background SWR refresh. Common causes:
+- An unhandled `async` rejection inside the route handler.
+- A missing database connection or service dependency that is only available during normal request flow.
+- Middleware that inspects `req.socket` and throws when it detects the mock/background request object.
+
+The stale cache entry will continue to be served until the next successful revalidation attempt.
 
 ## Debugging
 
@@ -37,6 +53,8 @@ curl -I http://localhost:3000/api/data
 ```
 
 Look for:
-- `X-Cache: HIT` (Serving from cache)
-- `X-Cache: MISS` (Fetched from source)
-- `X-Cache: STALE` (Serving stale, refreshing in background)
+- `X-Cache: HIT` — Serving a fresh entry from cache
+- `X-Cache: MISS` — Fetched from the handler (cache was cold or expired)
+- `X-Cache: STALE` — Serving stale data; a background revalidation was triggered
+
+Also useful: the `Age` header tells you how many seconds old the cached entry is.

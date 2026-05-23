@@ -21,7 +21,7 @@ https://code-y02.github.io/express-route-cache/llms-full.txt
 
 ```ts
 import { createCache } from '@express-route-cache/core';
-const cache = createCache({ staleTime: '5m' });
+const cache = createCache({ staleTime: 300 }); // 300 seconds (5m)
 app.get('/api/users', cache.route(), handler);
 ```
 

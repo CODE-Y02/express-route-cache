@@ -1,15 +1,13 @@
 ---
-title: "Example: Todo App | @express-route-cache"
-description: A complete walkthrough of building a Todo API with automatic cache invalidation and SWR.
+title: "Example: Todo API | @express-route-cache"
+description: "A realistic walkthrough of building a cached Todo API with SWR, auto-invalidation, and targeted cache purging."
 ---
 
-# Example: Todo App
+# Example: Todo API
 
-This example demonstrates how to build a production-ready Todo API using `@express-route-cache`. We will focus on **Automatic Invalidation** and **SWR**.
+A complete, realistic walkthrough of integrating `@express-route-cache` into an Express REST API. This example uses a simple in-process data store to simulate a database so you can focus on the caching patterns.
 
-## 1. Setup
-
-First, initialize your cache with an adapter (we'll use Memory for this example).
+## Setup
 
 ```ts
 import express from 'express';
@@ -18,61 +16,169 @@ import { createCache, createMemoryAdapter } from '@express-route-cache/core';
 const app = express();
 app.use(express.json());
 
+// In-process "database" — replace with your real DB calls
+const db = {
+  todos: [
+    { id: 1, text: 'Buy groceries', completed: false },
+    { id: 2, text: 'Ship the feature', completed: true },
+  ],
+  nextId: 3,
+};
+
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  staleTime: 60, // 1 minute fresh
-  swr: true      // Background refresh
+  staleTime: 30,  // Fresh for 30 seconds
+  gcTime: 300,    // Keep stale for 5 more minutes
+  swr: true,      // Serve stale instantly while refreshing in background
+  metrics: true,  // Enable for the health endpoint below
 });
 ```
 
-## 2. Listing Todos (Cached)
+---
 
-We use `cache.route()` without any arguments to use the global defaults. This route will be cached at `/api/todos`.
+## GET /api/todos — Cached List
+
+The first request executes the handler (MISS). Every subsequent request within `staleTime` returns instantly from cache (HIT).
 
 ```ts
-app.get('/api/todos', cache.route(), (req, res) => {
-  // Imagine a slow DB call here
-  res.json([
-    { id: 1, text: 'Buy milk', completed: false },
-    { id: 2, text: 'Build cache library', completed: true }
-  ]);
+app.get('/api/todos', cache.route(), (_req, res) => {
+  // Simulates a slow DB query
+  res.json(db.todos);
 });
 ```
 
-## 3. Adding a Todo (Auto-Invalidate)
+Verify it's working:
+```bash
+curl -I http://localhost:3000/api/todos
+# X-Cache: MISS   ← first request
 
-When we add a new todo, we want the list cache (`/api/todos`) to be cleared immediately. By setting `autoInvalidate: true`, the library will automatically increment the version for this route pattern after a successful `POST`.
+curl -I http://localhost:3000/api/todos
+# X-Cache: HIT    ← served from cache
+```
+
+---
+
+## GET /api/todos/:id — Per-Item Cache
+
+Each item gets its own cache entry, keyed by its ID.
+
+```ts
+app.get('/api/todos/:id', cache.route({ staleTime: 60 }), (req, res) => {
+  const todo = db.todos.find(t => t.id === Number(req.params.id));
+  if (!todo) return res.status(404).json({ error: 'Not found' });
+  res.json(todo);
+});
+```
+
+---
+
+## POST /api/todos — Create with Auto-Invalidation
+
+When a new todo is created, the cached list at `/api/todos` must be cleared. `autoInvalidate: true` handles this automatically after any successful 2xx response.
 
 ```ts
 app.post('/api/todos', cache.route({ autoInvalidate: true }), (req, res) => {
-  // 1. Save to DB...
-  // 2. Cache for '/api/todos' is automatically invalidated!
-  res.status(201).json({ id: 3, ...req.body });
+  const newTodo = { id: db.nextId++, text: req.body.text, completed: false };
+  db.todos.push(newTodo);
+
+  // The cache for '/api/todos' is automatically invalidated after this response
+  res.status(201).json(newTodo);
 });
 ```
 
-## 4. Updating a Todo (Targeted Invalidation)
+---
 
-When updating a specific todo, we want to invalidate both the **item** and the **list**. 
+## PATCH /api/todos/:id — Update with Targeted Invalidation
+
+When updating a specific item, we need to invalidate both the **item's own cache entry** and the **parent list** (since it shows the item's data). Use `cache.invalidate()` middleware to specify exactly which patterns to clear.
 
 ```ts
-app.patch('/api/todos/:id', (req, res) => {
-  const { id } = req.params;
+app.patch(
+  '/api/todos/:id',
+  cache.invalidate('/api/todos/:id', '/api/todos'), // invalidates both on 2xx
+  (req, res) => {
+    const todo = db.todos.find(t => t.id === Number(req.params.id));
+    if (!todo) return res.status(404).json({ error: 'Not found' });
 
-  // Manual programmatic invalidation
-  res.on('finish', async () => {
-    if (res.statusCode === 200) {
-      // Invalidate both the specific item and the parent list
-      await cache.invalidateRoute(`/api/todos/${id}`, '/api/todos');
-    }
+    todo.text = req.body.text ?? todo.text;
+    todo.completed = req.body.completed ?? todo.completed;
+
+    res.json(todo);
+  }
+);
+```
+
+---
+
+## DELETE /api/todos/:id — Delete with Targeted Invalidation
+
+```ts
+app.delete(
+  '/api/todos/:id',
+  cache.invalidate('/api/todos/:id', '/api/todos'),
+  (req, res) => {
+    const idx = db.todos.findIndex(t => t.id === Number(req.params.id));
+    if (idx === -1) return res.status(404).json({ error: 'Not found' });
+
+    db.todos.splice(idx, 1);
+    res.status(204).send();
+  }
+);
+```
+
+---
+
+## GET /health — Cache Metrics
+
+```ts
+app.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    cache: cache.metrics,
   });
-
-  res.json({ id, ...req.body });
 });
 ```
 
-## 💡 Key Takeaways
+---
 
-1.  **Zero Work on GET**: Just add `cache.route()` and your API is instantly faster.
-2.  **Safe Mutations**: Using `autoInvalidate` or `res.on('finish')` ensures you never serve stale data after a database change.
-3.  **High Performance**: All invalidations shown here are **O(1)** operations.
+## Full Request Flow
+
+```bash
+# 1. Create a todo (POST → creates todo + invalidates /api/todos cache)
+curl -X POST http://localhost:3000/api/todos \
+  -H "Content-Type: application/json" \
+  -d '{"text":"Read the docs"}'
+# → 201 { id: 3, text: "Read the docs", completed: false }
+
+# 2. List todos (cache was just invalidated — MISS)
+curl -I http://localhost:3000/api/todos
+# X-Cache: MISS
+
+# 3. List todos again (HIT)
+curl -I http://localhost:3000/api/todos
+# X-Cache: HIT
+
+# 4. Wait 30 seconds for staleTime to pass, then list again
+# X-Cache: STALE  ← served instantly, background refresh fires
+
+# 5. Update a todo (invalidates /api/todos/:id AND /api/todos)
+curl -X PATCH http://localhost:3000/api/todos/3 \
+  -H "Content-Type: application/json" \
+  -d '{"completed":true}'
+
+# 6. Check metrics
+curl http://localhost:3000/health
+# → { status: "ok", cache: { hits: 2, misses: 2, swrHits: 1, ... } }
+```
+
+---
+
+## Key Takeaways
+
+| Pattern | Method |
+| :--- | :--- |
+| Cache a GET route | `cache.route()` |
+| Auto-invalidate on mutation | `cache.route({ autoInvalidate: true })` |
+| Invalidate specific patterns | `cache.invalidate('/pattern1', '/pattern2')` |
+| Zero-latency after first miss | `swr: true` |
+| Debug cache behaviour | `X-Cache` header + `/health` metrics endpoint |

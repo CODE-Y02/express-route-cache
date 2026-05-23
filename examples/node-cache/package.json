@@ -17,6 +17,7 @@
   "dependencies": {
     "express": "^5.1.0",
     "portfinder": "^1.0.38",
-    "@express-route-cache/core": "workspace:*"
+    "@express-route-cache/core": "workspace:*",
+    "@express-route-cache/studio": "workspace:*"
   }
 }

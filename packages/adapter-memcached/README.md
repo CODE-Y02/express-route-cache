@@ -14,14 +14,12 @@ npm install @express-route-cache/memcached memjs
 import { createCache } from "@express-route-cache/core";
 import { createMemcachedAdapter } from "@express-route-cache/memcached";
 
+import memjs from "memjs";
+
+const memcachedClient = memjs.Client.create("localhost:11211");
+
 const cache = createCache({
-  adapter: createMemcachedAdapter({
-    servers: "localhost:11211",
-    // OR pass memjs options
-    options: {
-      retries: 2,
-    },
-  }),
+  adapter: createMemcachedAdapter({ client: memcachedClient }),
   staleTime: 60,
 });
 ```
@@ -35,7 +33,7 @@ const cache = createCache({
 
 ## Documentation
 
-For full configuration options and caching logic, see the [Core Documentation](https://github.com/CODE-Y02/express-route-cache/tree/main/packages/core).
+For full configuration options and caching logic, see the [Core Documentation](https://code-y02.github.io/express-route-cache).
 
 ## License
 

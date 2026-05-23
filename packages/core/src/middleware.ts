@@ -5,6 +5,7 @@ import type {
   CacheEntry,
   CacheInstance,
   RouteOptions,
+  CacheMetrics,
 } from "./types";
 import {
   buildCacheKey,
@@ -99,6 +100,17 @@ export function createCache(config: CacheConfig): CacheInstance {
     autoInvalidate: config.autoInvalidate ?? DEFAULTS.autoInvalidate,
     retry: config.retry ?? DEFAULTS.retry,
   };
+
+  const metrics = config.metrics
+    ? {
+        hits: 0,
+        misses: 0,
+        swrHits: 0,
+        swrFailures: 0,
+        stampedeCoalesces: 0,
+        stampedePolls: 0,
+      }
+    : undefined;
 
   const client = config.adapter;
 
@@ -200,12 +212,14 @@ export function createCache(config: CacheConfig): CacheInstance {
 
             if (freshness === "fresh") {
               // ⚡ Fresh HIT — serve immediately
+              if (metrics) metrics.hits++;
               sendCachedResponse(res, entry, age, staleTime, "HIT");
               return;
             }
 
             if (freshness === "stale" && swr) {
               // 🔄 Stale + SWR — serve stale, revalidate in background
+              if (metrics) metrics.swrHits++;
               sendCachedResponse(res, entry, age, staleTime, "STALE");
 
               // ── Two-tier SWR Lock ────────────────────────────────────
@@ -238,6 +252,7 @@ export function createCache(config: CacheConfig): CacheInstance {
                   totalTTL,
                   staleTime,
                   maxBodySize,
+                  metrics,
                 ).finally(() => {
                   // Release local lock when done (adapter lock expires via TTL)
                   localSwrLocks.delete(cacheKey);
@@ -268,11 +283,13 @@ export function createCache(config: CacheConfig): CacheInstance {
               res,
               staleTime,
               next,
+              metrics,
             );
             return;
           }
 
           // We are the leader — run the handler and release lock when done
+          if (metrics) metrics.misses++;
           const entryPromise = interceptResponse(
             req,
             res,
@@ -303,6 +320,7 @@ export function createCache(config: CacheConfig): CacheInstance {
           const entry = await inflightRequests.get(cacheKey) as CacheEntry | null;
           if (entry) {
             const age = getAgeSeconds(entry);
+            if (metrics) metrics.stampedeCoalesces++;
             sendCachedResponse(res, entry, age, staleTime, "HIT");
             return;
           }
@@ -310,6 +328,7 @@ export function createCache(config: CacheConfig): CacheInstance {
         }
 
         // Intercept res.json / res.send to capture the response
+        if (metrics) metrics.misses++;
         const entryPromise = interceptResponse(
           req,
           res,
@@ -347,7 +366,7 @@ export function createCache(config: CacheConfig): CacheInstance {
 
   // ── Return the CacheInstance ────────────────────────────────────────
 
-  return {
+  const instance: CacheInstance = {
     middleware: () => createCacheHandler(),
     route: (opts?: RouteOptions) => createCacheHandler(opts),
     invalidate: (...routePatterns: string[]) => {
@@ -411,9 +430,11 @@ export function createCache(config: CacheConfig): CacheInstance {
               ? Buffer.from(entry.data, "base64")
               : (entry.data ?? entry.body);
             if (ageSeconds < staleTime) {
+              if (metrics) metrics.hits++;
               return parsedData as T;
             }
             if (ageSeconds < totalTTL && swr) {
+              if (metrics) metrics.swrHits++;
               // 🔄 Stale + SWR — serve stale, revalidate in background
               executeFetcherWithRetry(fetcher, retryCount)
                 .then(async (data) => {
@@ -430,6 +451,7 @@ export function createCache(config: CacheConfig): CacheInstance {
                   );
                 })
                 .catch(() => {
+                  if (metrics) metrics.swrFailures++;
                   /* Background fail stays silent */
                 });
               return parsedData as T;
@@ -442,9 +464,11 @@ export function createCache(config: CacheConfig): CacheInstance {
 
       // ── Cache MISS ────────────────────────────────────────────────
       if (globalOpts.stampede && inflightRequests.has(cacheKey)) {
+        if (metrics) metrics.stampedeCoalesces++;
         return (await inflightRequests.get(cacheKey)) as T;
       }
 
+      if (metrics) metrics.misses++;
       const promise = executeFetcherWithRetry(fetcher, retryCount).then(
         async (data) => {
           const isBuffer = Buffer.isBuffer(data);
@@ -470,7 +494,37 @@ export function createCache(config: CacheConfig): CacheInstance {
       return await promise;
     },
     adapter: client,
+    metrics,
+    studio: config.studio,
   };
+
+  // ── Auto-start Cache Studio Standalone Server if port is specified ──
+  const studioOpts = config.studio === true ? {} : config.studio;
+  if (studioOpts && studioOpts.enabled !== false && typeof studioOpts.port === "number") {
+    const port = studioOpts.port;
+    const pathStr = studioOpts.path || "/studio";
+    const hostname = studioOpts.hostname || "localhost";
+
+    process.nextTick(() => {
+      try {
+        const { createStudio } = require("@express-route-cache/studio");
+        const express = require("express");
+        const app = express();
+        app.use(express.json());
+        
+        const cleanPath = pathStr.startsWith("/") ? pathStr : `/${pathStr}`;
+        app.use(cleanPath, createStudio({ cache: instance }));
+        
+        app.listen(port, () => {
+          console.log(`Cache Studio visible at --> http://${hostname}:${port}${cleanPath}`);
+        });
+      } catch (err) {
+        console.error("Failed to auto-start standalone Cache Studio server:", err);
+      }
+    });
+  }
+
+  return instance;
 }
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
@@ -636,6 +690,7 @@ async function revalidateInBackground(
   totalTTL: number,
   staleTime: number,
   maxBodySize: number,
+  metrics?: CacheMetrics,
 ): Promise<void> {
   // Safe execution of remaining route stack in background if route metadata is available
   if (req.route && Array.isArray(req.route.stack)) {
@@ -717,6 +772,7 @@ async function revalidateInBackground(
       const runNext = (err?: unknown) => {
         if (err) {
           console.error("[@express-route-cache] SWR background revalidation failed. Check your route handler for errors.");
+          if (metrics) metrics.swrFailures++;
           return;
         }
         if (index >= stack.length) {
@@ -755,6 +811,7 @@ async function waitForCachePopulation(
   res: Response,
   staleTime: number,
   next: NextFunction,
+  metrics?: CacheMetrics,
   maxAttempts = 10,
   intervalMs = 150,
 ): Promise<void> {
@@ -765,6 +822,7 @@ async function waitForCachePopulation(
       if (cached) {
         const entry = deserializeEntry(cached);
         if (entry) {
+          if (metrics) metrics.stampedePolls++;
           sendCachedResponse(res, entry, getAgeSeconds(entry), staleTime, "HIT");
           return;
         }

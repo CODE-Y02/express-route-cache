@@ -97,6 +97,10 @@ export function createMemcachedAdapter(
       }
     },
 
+    async keys(): Promise<string[]> {
+      return [];
+    },
+
     async disconnect(): Promise<void> {
       if (!opts.client) {
         client.close();

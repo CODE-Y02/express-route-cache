@@ -66,6 +66,8 @@ const data = await cache.fetch('custom-key', () => fetchData(), { retry: 3 });
 | `keyPrefix` | `string`      | `"erc:"`| Prefix for all cache keys.                                         |
 | `vary`      | `string[]`    | `[]`    | Headers to namespace caches.                                       |
 | `autoInvalidate`| `boolean` | `false` | Auto-invalidate on POST/PUT/DELETE.                                |
+| `metrics`   | `boolean`     | `false` | Enable real-time telemetry metrics collection.                     |
+| `studio`    | `boolean \| Object`| `false`| Enable the Cache Studio visual dashboard.                          |
 
 ### `cache.fetch(key, fetcher, opts)`
 
@@ -78,7 +80,7 @@ const data = await cache.fetch('my-key', async () => {
 ```
 
 ## 🔍 In-Depth
-For a full comparison with TanStack Query and deep dives into the architecture, visit our [Main Documentation](https://github.com/CODE-Y02/express-route-cache).
+For a full comparison with TanStack Query and deep dives into the architecture, visit our [Main Documentation](https://code-y02.github.io/express-route-cache).
 
 ## License
 MIT

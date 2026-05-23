@@ -41,6 +41,31 @@
       "title": "Epoch Invalidation Concept",
       "url": "https://code-y02.github.io/express-route-cache/guide/concepts-invalidation",
       "category": "concept"
+    },
+    {
+      "title": "Why express-route-cache?",
+      "url": "https://code-y02.github.io/express-route-cache/guide/why",
+      "category": "guide"
+    },
+    {
+      "title": "Standalone Fetch",
+      "url": "https://code-y02.github.io/express-route-cache/guide/cache-fetch",
+      "category": "guide"
+    },
+    {
+      "title": "Recipes & Patterns",
+      "url": "https://code-y02.github.io/express-route-cache/guide/recipes",
+      "category": "guide"
+    },
+    {
+      "title": "Testing",
+      "url": "https://code-y02.github.io/express-route-cache/guide/testing",
+      "category": "guide"
+    },
+    {
+      "title": "Deployment",
+      "url": "https://code-y02.github.io/express-route-cache/guide/deployment",
+      "category": "guide"
     }
   ],
   "instructions": {

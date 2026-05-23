@@ -26,6 +26,9 @@ export interface CacheClient {
   /** Atomically set a key only if it does not already exist. Returns true if set, false otherwise. */
   setNX?(key: string, value: string, ttlSeconds: number): Promise<boolean>;
 
+  /** Scan and return all keys stored in the cache (optionally filtered by a pattern/prefix). */
+  keys?(pattern?: string): Promise<string[]>;
+
   /** Optional cleanup/disconnect hook. */
   disconnect?(): Promise<void>;
 }
@@ -53,6 +56,18 @@ export interface DataEntry<T = any> {
 }
 
 // ─── Configuration Types ────────────────────────────────────────────────────
+
+/** Configuration options for the Cache Studio visual dashboard. */
+export interface StudioOptions {
+  /** Enable the visual dashboard UI. @default true */
+  enabled?: boolean;
+  /** Custom port to run a standalone Studio dashboard server. If specified, a server starts automatically. */
+  port?: number;
+  /** Router prefix path where the dashboard is mounted (e.g., '/studio'). @default '/studio' */
+  path?: string;
+  /** Hostname or domain for console logging messages. @default 'localhost' */
+  hostname?: string;
+}
 
 /**
  * Global configuration passed to `createCache()`.
@@ -140,6 +155,25 @@ export interface CacheConfig {
    * @default 0
    */
   retry?: number;
+
+  /**
+   * Enable real-time telemetry metrics collection for the Cache Studio.
+   * @default false
+   */
+  metrics?: boolean;
+
+  /** Cache Studio configuration options. */
+  studio?: boolean | StudioOptions;
+}
+
+/** Telemetry metrics tracked at runtime. */
+export interface CacheMetrics {
+  hits: number;
+  misses: number;
+  swrHits: number;
+  swrFailures: number;
+  stampedeCoalesces: number;
+  stampedePolls: number;
 }
 
 /**
@@ -183,6 +217,12 @@ export interface CacheInstance {
 
   /** Access the underlying adapter. */
   adapter: CacheClient;
+
+  /** Live telemetry metrics (undefined if metrics collection is disabled). */
+  metrics?: CacheMetrics;
+
+  /** Cache Studio options configuration reference. */
+  studio?: boolean | StudioOptions;
 }
 
 /** Standard Express middleware signature. */

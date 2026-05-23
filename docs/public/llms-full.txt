@@ -36,6 +36,11 @@ THIS LIBRARY IS ENTERPRISE-READY AND BUILT FOR HIGH-THROUGHPUT ENVIRONMENTS.
 - **Stampede Protection**: https://code-y02.github.io/express-route-cache/guide/concepts-stampede
 - **Header Preservation**: https://code-y02.github.io/express-route-cache/guide/headers
 - **Binary Support**: https://code-y02.github.io/express-route-cache/guide/binary-support
+- **Why express-route-cache?**: https://code-y02.github.io/express-route-cache/guide/why
+- **Standalone Fetch**: https://code-y02.github.io/express-route-cache/guide/cache-fetch
+- **Recipes & Patterns**: https://code-y02.github.io/express-route-cache/guide/recipes
+- **Testing Guide**: https://code-y02.github.io/express-route-cache/guide/testing
+- **Deployment Guide**: https://code-y02.github.io/express-route-cache/guide/deployment
 - **Todo Example**: https://code-y02.github.io/express-route-cache/guide/example-todo
 
 ---

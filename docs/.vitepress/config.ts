@@ -9,6 +9,7 @@ export default defineConfig({
   description: "⚡ TanStack Query for the Backend",
   base: base,
   cleanUrls: true,
+  appearance: "dark",
 
   head: [
     ["link", { rel: "icon", href: `${base}logo.svg` }],
@@ -22,6 +23,22 @@ export default defineConfig({
     ],
     ["meta", { name: "author", content: "Yatharth Lakhate" }],
     ["meta", { name: "robots", content: "index, follow" }],
+
+    // Theme initialization script to prevent FOUC
+    [
+      "script",
+      {},
+      `
+      (function() {
+        try {
+          var theme = localStorage.getItem('erc-theme') || 'ember';
+          if (theme === 'enver') theme = 'ember';
+          if (theme === 'space') theme = 'night';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+      `
+    ],
 
     // Open Graph
     ["meta", { property: "og:type", content: "website" }],
@@ -129,9 +146,10 @@ export default defineConfig({
       {
         text: "Introduction",
         items: [
-          { text: "What is express-route-cache?", link: "/" },
+          { text: "Why express-route-cache?", link: "/guide/why" },
           { text: "Getting Started", link: "/guide/getting-started" },
-          { text: "Example: Todo App", link: "/guide/example-todo" },
+          { text: "Cache Studio", link: "/guide/studio" },
+          { text: "Example: Todo API", link: "/guide/example-todo" },
         ],
       },
       {
@@ -140,6 +158,7 @@ export default defineConfig({
           { text: "Fresh vs Stale (SWR)", link: "/guide/concepts-swr" },
           { text: "Epoch Invalidation", link: "/guide/concepts-invalidation" },
           { text: "Stampede Protection", link: "/guide/concepts-stampede" },
+          { text: "Standalone Fetch", link: "/guide/cache-fetch" },
         ],
       },
       {
@@ -153,11 +172,13 @@ export default defineConfig({
         ],
       },
       {
-        text: "Advanced",
+        text: "Guides",
         items: [
+          { text: "Recipes", link: "/guide/recipes" },
+          { text: "Testing", link: "/guide/testing" },
+          { text: "Deployment", link: "/guide/deployment" },
           { text: "Binary Support", link: "/guide/binary-support" },
           { text: "Header Preservation", link: "/guide/headers" },
-          { text: "Troubleshooting", link: "/guide/troubleshooting" },
           { text: "🤖 AI & MCP Support", link: "/guide/ai-support" },
         ],
       },
@@ -166,6 +187,7 @@ export default defineConfig({
         items: [
           { text: "API Reference", link: "/reference/api" },
           { text: "Architecture", link: "/reference/architecture" },
+          { text: "Troubleshooting", link: "/guide/troubleshooting" },
         ],
       },
     ],

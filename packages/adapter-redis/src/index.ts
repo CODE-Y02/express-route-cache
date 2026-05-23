@@ -70,6 +70,24 @@ export function createRedisAdapter(opts: RedisAdapterOptions = {}): CacheClient 
       return result === "OK";
     },
 
+    async keys(pattern = "*"): Promise<string[]> {
+      const keys: string[] = [];
+      let cursor = "0";
+      do {
+        const [nextCursor, scannedKeys] = await redis.scan(
+          cursor,
+          "MATCH",
+          pattern,
+          "COUNT",
+          100,
+        );
+        cursor = nextCursor;
+        keys.push(...scannedKeys);
+        if (keys.length >= 1000) break;
+      } while (cursor !== "0");
+      return keys;
+    },
+
     async disconnect(): Promise<void> {
       if (!opts.client) {
         await redis.quit();

@@ -1,3 +1,8 @@
+---
+title: "AI & MCP Support | @express-route-cache"
+description: "Connect your AI coding assistants (Claude, Cursor, ChatGPT) to the express-route-cache documentation for accurate, hallucination-free help."
+---
+
 # AI & MCP Support
 
 `@express-route-cache` is designed to be AI-first. We provide structured manifests so your AI coding assistants can provide accurate, hallucination-free help.

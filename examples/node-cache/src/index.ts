@@ -1,4 +1,5 @@
 import { createCache, createMemoryAdapter } from "@express-route-cache/core";
+import { createStudio } from "@express-route-cache/studio";
 import express, { Request, Response } from "express";
 import portfinder from "portfinder";
 
@@ -12,7 +13,12 @@ const cache = createCache({
   gcTime: 300,     // stale data lives 5 more minutes
   swr: true,       // serve stale, revalidate in background
   stampede: true,   // coalesce concurrent cold-cache requests
+  metrics: true,    // enable telemetry & stats
+  studio: true,     // enable Studio configuration reference
 });
+
+// ── Mount Cache Studio ──
+app.use("/studio", createStudio({ cache }));
 
 // ── Per-route caching ──
 
@@ -58,6 +64,7 @@ portfinder.getPort((err, port) => {
   } else {
     app.listen(port, () => {
       console.log(`Server listening on http://localhost:${port}`);
+      console.log(`Cache Studio visible at --> http://localhost:${port}/studio`);
       console.log("");
       console.log("Try these:");
       console.log(`  GET  http://localhost:${port}/v1/users/john  (1st: MISS + 2s delay, 2nd: HIT instant)`);

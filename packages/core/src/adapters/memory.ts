@@ -59,5 +59,15 @@ export function createMemoryAdapter(defaultTTLSeconds = 600): CacheClient {
       cache.set(key, value, ttlSeconds);
       return true;
     },
+
+    async keys(pattern?: string): Promise<string[]> {
+      const allKeys = cache.keys();
+      if (!pattern) return allKeys;
+      // Convert redis-like glob pattern to simple regex if pattern is provided
+      // Since NodeCache only provides keys list, we filter it in-memory
+      const regexStr = "^" + pattern.replace(/\*/g, ".*") + "$";
+      const regex = new RegExp(regexStr);
+      return allKeys.filter((k) => regex.test(k));
+    },
   };
 }
