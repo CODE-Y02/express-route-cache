@@ -1,6 +1,19 @@
 ---
 title: "Why express-route-cache? | @express-route-cache"
 description: "Understand what makes @express-route-cache different from other Express caching solutions, and why it was built."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/why
+  - - meta
+    - property: og:title
+      content: "Why express-route-cache? | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Understand what makes @express-route-cache different from other Express caching solutions, and why it was built."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/why
 ---
 
 # Why `@express-route-cache`?

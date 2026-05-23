@@ -319,7 +319,6 @@ export default defineConfig({
             { text: "Binary Support", link: "/v1/guide/binary-support" },
             { text: "Header Preservation", link: "/v1/guide/headers" },
             { text: "Troubleshooting", link: "/v1/guide/troubleshooting" },
-            { text: "🤖 AI & MCP Support", link: "/v1/guide/ai-support" },
           ],
         },
         {

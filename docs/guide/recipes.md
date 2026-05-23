@@ -1,6 +1,19 @@
 ---
 title: "Recipes | @express-route-cache"
 description: "Real-world caching patterns: per-user caching, cache warming, webhook invalidation, conditional caching, multi-tenant setups, and more."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/recipes
+  - - meta
+    - property: og:title
+      content: "Recipes | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Real-world caching patterns: per-user caching, cache warming, webhook invalidation, conditional caching, multi-tenant setups, and more."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/recipes
 ---
 
 # Recipes

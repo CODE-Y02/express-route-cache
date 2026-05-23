@@ -1,6 +1,19 @@
 ---
 title: Cache Studio | @express-route-cache
 description: Learn how to set up, configure, and run the real-time visual monitoring dashboard for your cache.
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/studio
+  - - meta
+    - property: og:title
+      content: "Cache Studio | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Learn how to set up, configure, and run the real-time visual monitoring dashboard for your cache."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/studio
 ---
 
 # Cache Studio 📊

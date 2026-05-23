@@ -1,6 +1,19 @@
 ---
 title: "Deployment | @express-route-cache"
 description: "How to configure @express-route-cache for production: Docker, Kubernetes, PM2 clusters, health checks, and environment-aware setup."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/deployment
+  - - meta
+    - property: og:title
+      content: "Deployment | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "How to configure @express-route-cache for production: Docker, Kubernetes, PM2 clusters, health checks, and environment-aware setup."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/deployment
 ---
 
 # Deployment

@@ -4,7 +4,7 @@ layout: home
 head:
   - - link
     - rel: canonical
-      href: https://express-route-cache.js.org/
+      href: https://express-route-cache.js.org/v1/
   - - meta
     - property: og:title
       content: "@express-route-cache | O(1) Route Caching for Express.js"
@@ -13,7 +13,7 @@ head:
       content: "Production-grade Express.js route caching with O(1) invalidation, SWR background refresh, and Stampede Protection. Redis, Memcached & Memory adapters."
   - - meta
     - property: og:url
-      content: https://express-route-cache.js.org/
+      content: https://express-route-cache.js.org/v1/
   - - meta
     - name: twitter:title
       content: "@express-route-cache | O(1) Route Caching for Express.js"

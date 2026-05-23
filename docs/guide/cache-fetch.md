@@ -1,6 +1,19 @@
 ---
 title: "Standalone Fetch | @express-route-cache"
 description: "Use cache.fetch() for manual data caching with SWR, Stampede Protection, and exponential backoff retries — not just for Express routes."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/cache-fetch
+  - - meta
+    - property: og:title
+      content: "Standalone Fetch | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Use cache.fetch() for manual data caching with SWR, Stampede Protection, and exponential backoff retries — not just for Express routes."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/cache-fetch
 ---
 
 # Standalone Fetch

@@ -1,6 +1,19 @@
 ---
 title: "Testing | @express-route-cache"
 description: "How to write unit and integration tests for routes that use @express-route-cache, including adapter mocking and cache bypass strategies."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/testing
+  - - meta
+    - property: og:title
+      content: "Testing | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "How to write unit and integration tests for routes that use @express-route-cache, including adapter mocking and cache bypass strategies."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/testing
 ---
 
 # Testing

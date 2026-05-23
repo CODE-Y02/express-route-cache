@@ -1,6 +1,19 @@
 ---
 title: "AI & MCP Support | @express-route-cache"
 description: "Connect your AI coding assistants (Claude, Cursor, ChatGPT) to the express-route-cache documentation for accurate, hallucination-free help."
+head:
+  - - link
+    - rel: canonical
+      href: https://express-route-cache.js.org/guide/ai-support
+  - - meta
+    - property: og:title
+      content: "AI & MCP Support | @express-route-cache"
+  - - meta
+    - property: og:description
+      content: "Connect your AI coding assistants (Claude, Cursor, ChatGPT) to the express-route-cache documentation for accurate, hallucination-free help."
+  - - meta
+    - property: og:url
+      content: https://express-route-cache.js.org/guide/ai-support
 ---
 
 # AI & MCP Support
