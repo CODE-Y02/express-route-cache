@@ -119,6 +119,7 @@ export default defineConfig({
       { text: "Guide", link: "/guide/getting-started" },
       { text: "Adapters", link: "/guide/adapters" },
       { text: "Reference", link: "/reference/api" },
+
       // {
       //   text: "🤖 Ask AI",
       //   items: [
@@ -136,13 +137,56 @@ export default defineConfig({
       //     },
       //   ],
       // },
-      {
-        text: "⭐ Star on GitHub",
-        link: "https://github.com/CODE-Y02/express-route-cache",
-      },
     ],
 
-    sidebar: [
+    sidebar: {
+      "/v1/": [
+        {
+          text: "Introduction",
+          items: [
+            { text: "What is express-route-cache?", link: "/v1/" },
+            { text: "Getting Started", link: "/v1/guide/getting-started" },
+            { text: "Example: Todo App", link: "/v1/guide/example-todo" },
+            { text: "vs. Other Libraries", link: "/v1/guide/comparison" },
+          ],
+        },
+        {
+          text: "Core Concepts",
+          items: [
+            { text: "Fresh vs Stale (SWR)", link: "/v1/guide/concepts-swr" },
+            { text: "Epoch Invalidation", link: "/v1/guide/concepts-invalidation" },
+            { text: "Stampede Protection", link: "/v1/guide/concepts-stampede" },
+          ],
+        },
+        {
+          text: "Adapters",
+          collapsed: false,
+          items: [
+            { text: "Overview", link: "/v1/guide/adapters" },
+            { text: "Memory", link: "/v1/guide/adapter-memory" },
+            { text: "Redis", link: "/v1/guide/adapter-redis" },
+            { text: "Memcached", link: "/v1/guide/adapter-memcached" },
+          ],
+        },
+        {
+          text: "Advanced",
+          items: [
+            { text: "Binary Support", link: "/v1/guide/binary-support" },
+            { text: "Header Preservation", link: "/v1/guide/headers" },
+            { text: "Troubleshooting", link: "/v1/guide/troubleshooting" },
+            { text: "🤖 AI & MCP Support", link: "/v1/guide/ai-support" },
+          ],
+        },
+        {
+          text: "Reference",
+          items: [
+            { text: "API Reference", link: "/v1/reference/api" },
+            { text: "Architecture", link: "/v1/reference/architecture" },
+            { text: "FAQ", link: "/v1/guide/faq" },
+          ],
+        },
+      ],
+      "/": [
       {
         text: "Introduction",
         items: [
@@ -190,7 +234,8 @@ export default defineConfig({
           { text: "Troubleshooting", link: "/guide/troubleshooting" },
         ],
       },
-    ],
+      ],
+    },
 
     socialLinks: [
       {

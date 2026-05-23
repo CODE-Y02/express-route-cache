@@ -1,79 +1,67 @@
 <template>
-  <div class="theme-switcher-wrapper">
-    <button class="theme-btn" @click.stop="isOpen = !isOpen" aria-label="Switch Theme">
-      <span class="theme-icon">{{ currentThemeIcon }}</span>
-      <span class="theme-name">{{ currentThemeName }}</span>
+  <div class="version-switcher-wrapper">
+    <button class="version-btn" @click.stop="isOpen = !isOpen" aria-label="Switch Version">
+      <span class="version-name">{{ currentVersionName }}</span>
       <svg class="chevron" :class="{ open: isOpen }" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="m6 9 6 6 6-6"/>
       </svg>
     </button>
     
     <div v-if="isOpen" class="dropdown-menu">
-      <button 
-        v-for="theme in themes" 
-        :key="theme.id" 
+      <a 
+        v-for="ver in versions" 
+        :key="ver.id" 
+        :href="withBase(ver.link)"
         class="dropdown-item" 
-        :class="{ active: currentTheme === theme.id }"
-        @click.stop="applyTheme(theme.id)"
+        :class="{ active: currentVersion === ver.id }"
+        @click="close"
       >
-        <span class="dropdown-icon">{{ theme.icon }}</span>
-        {{ theme.name }}
-      </button>
+        {{ ver.name }}
+      </a>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute, withBase } from 'vitepress'
 
+const route = useRoute()
 const isOpen = ref(false)
-const currentTheme = ref('ember')
+const currentVersion = ref('v1.1.x')
 
-const themes = [
-  { id: 'ember', name: 'Ember', icon: '🔥' },
-  { id: 'thunder', name: 'Thunder', icon: '⚡' },
-  { id: 'sea', name: 'Sea', icon: '🐋' },
-  { id: 'night', name: 'Night', icon: '🌙' }
+const versions = [
+  { id: 'v1.1.x', name: 'v1.1.x (Latest)', link: '/' },
+  { id: 'v1.0.x', name: 'v1.0.x (Legacy)', link: '/v1/' }
 ]
 
-const currentThemeName = computed(() => {
-  return themes.find(t => t.id === currentTheme.value)?.name || 'Ember'
+const currentVersionName = computed(() => {
+  return versions.find(v => v.id === currentVersion.value)?.name || 'Versions'
 })
 
-const currentThemeIcon = computed(() => {
-  return themes.find(t => t.id === currentTheme.value)?.icon || '🔥'
-})
-
-function close(e) {
+function close() {
   isOpen.value = false
 }
 
-onMounted(() => {
-  const savedTheme = localStorage.getItem('erc-theme') || 'ember'
-  // Migrate old 'enver' to 'ember'
-  if (savedTheme === 'enver') currentTheme.value = 'ember'
-  // Migrate old 'space' to 'night'
-  else if (savedTheme === 'space') currentTheme.value = 'night'
-  else currentTheme.value = savedTheme
+watch(() => route.path, (path) => {
+  if (path.includes('/v1/')) {
+    currentVersion.value = 'v1.0.x'
+  } else {
+    currentVersion.value = 'v1.1.x'
+  }
+}, { immediate: true })
 
-  document.documentElement.setAttribute('data-theme', currentTheme.value)
+onMounted(() => {
   window.addEventListener('click', close)
 })
 
 onUnmounted(() => {
   window.removeEventListener('click', close)
 })
-
-function applyTheme(themeId) {
-  currentTheme.value = themeId
-  document.documentElement.setAttribute('data-theme', themeId)
-  localStorage.setItem('erc-theme', themeId)
-  isOpen.value = false
-}
 </script>
 
 <style scoped>
-.theme-switcher-wrapper {
+.version-switcher-wrapper {
   position: relative;
   display: flex;
   align-items: center;
@@ -82,33 +70,35 @@ function applyTheme(themeId) {
   border-left: 1px solid var(--vp-c-divider);
 }
 
-.theme-btn {
+.version-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: transparent;
   border: none;
-  color: var(--vp-c-text-2);
+  color: var(--vp-c-text-1);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 6px;
   transition: color 0.2s, background-color 0.2s;
 }
 
-.theme-btn:hover {
-  color: var(--vp-c-text-1);
+.version-btn:hover {
+  color: var(--vp-c-brand-1);
   background-color: var(--vp-c-bg-soft);
 }
 
-.theme-name {
+.version-name {
   min-width: 50px;
   text-align: left;
 }
 
 .chevron {
   transition: transform 0.2s ease;
+  width: 14px;
+  height: 14px;
 }
 
 .chevron.open {
@@ -134,7 +124,6 @@ function applyTheme(themeId) {
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 10px;
   width: 100%;
   padding: 8px 12px;
   background: transparent;
@@ -142,10 +131,11 @@ function applyTheme(themeId) {
   border-radius: 8px;
   color: var(--vp-c-text-2);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   text-align: left;
   transition: all 0.15s ease;
+  text-decoration: none;
 }
 
 .dropdown-item:hover {
@@ -158,15 +148,8 @@ function applyTheme(themeId) {
   background: var(--vp-c-bg-mute);
 }
 
-.swatch {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
 @media (max-width: 768px) {
-  .theme-switcher-wrapper {
+  .version-switcher-wrapper {
     margin-left: 0;
     padding-left: 0;
     border-left: none;
