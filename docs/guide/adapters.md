@@ -22,11 +22,11 @@ head:
 
 ## Available Adapters
 
-| Adapter | Best For | Requirement |
-| :--- | :--- | :--- |
-| [**Memory**](./adapter-memory) | Local dev / Single-instance | None (Built-in) |
-| [**Redis**](./adapter-redis) | Production / Distributed | `ioredis` |
-| [**Memcached**](./adapter-memcached) | Production / Distributed | `memjs` |
+| Adapter                              | Best For                    | Requirement     |
+| :----------------------------------- | :-------------------------- | :-------------- |
+| [**Memory**](./adapter-memory)       | Local dev / Single-instance | None (Built-in) |
+| [**Redis**](./adapter-redis)         | Production / Distributed    | `ioredis`       |
+| [**Memcached**](./adapter-memcached) | Production / Distributed    | `memjs`         |
 
 ## Which one should I choose?
 

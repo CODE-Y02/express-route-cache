@@ -16,7 +16,7 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,css}\"",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
     "docs:dev": "pnpm --filter docs dev",

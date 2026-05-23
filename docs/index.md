@@ -68,9 +68,9 @@ import { createCache } from '@express-route-cache/core';
 import { createRedisAdapter } from '@express-route-cache/redis';
 
 const cache = createCache({
-  adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
-  staleTime: 60, // Serve fresh for 60s
-  swr: true,     // Serve stale instantly, refresh in bg
+adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
+staleTime: 60, // Serve fresh for 60s
+swr: true, // Serve stale instantly, refresh in bg
 });
 
 // Cache this slow endpoint
@@ -86,3 +86,4 @@ app.post('/api/reports', cache.route({ autoInvalidate: true }), addReport);
 </div>
   </div>
 </div>
+```

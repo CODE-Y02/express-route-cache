@@ -15,15 +15,15 @@
 
 This package contains the main caching logic and the built-in **Memory Adapter**. It is designed to be highly performant, type-safe, and compatible with both small and large-scale Express applications.
 
-| Feature                    | Description                                           |
-| -------------------------- | ----------------------------------------------------- |
-| **Invalidation**           | ✅ **O(1) Epoch `INCR`** (Instant, zero blocking)      |
-| **Stale-While-Revalidate** | ✅ **Instant Stale Delivery** + Background Refresh     |
-| **Stampede Protection**    | ✅ **Request Coalescing** (1,000 reqs = 1 DB call)     |
-| **Standalone Fetch**       | ✅ **`cache.fetch()`** (Manual data caching)           |
-| **Retries**                | ✅ **Exponential Backoff** (Built-in)                  |
-| **Binary Support**         | ✅ **Automatic** (Images, PDFs, Buffers)               |
-| **Header Preservation**    | ✅ **Automatic** (CORS, Custom Headers)                |
+| Feature                    | Description                                        |
+| -------------------------- | -------------------------------------------------- |
+| **Invalidation**           | ✅ **O(1) Epoch `INCR`** (Instant, zero blocking)  |
+| **Stale-While-Revalidate** | ✅ **Instant Stale Delivery** + Background Refresh |
+| **Stampede Protection**    | ✅ **Request Coalescing** (1,000 reqs = 1 DB call) |
+| **Standalone Fetch**       | ✅ **`cache.fetch()`** (Manual data caching)       |
+| **Retries**                | ✅ **Exponential Backoff** (Built-in)              |
+| **Binary Support**         | ✅ **Automatic** (Images, PDFs, Buffers)           |
+| **Header Preservation**    | ✅ **Automatic** (CORS, Custom Headers)            |
 
 ---
 
@@ -48,39 +48,45 @@ const cache = createCache({
 app.get("/api/data", cache.route(), handler);
 
 // Standalone Fetch
-const data = await cache.fetch('custom-key', () => fetchData(), { retry: 3 });
+const data = await cache.fetch("custom-key", () => fetchData(), { retry: 3 });
 ```
 
 ## 📖 API Reference
 
 ### `createCache(config)`
 
-| Option      | Type          | Default | Description                                                        |
-| ----------- | ------------- | ------- | ------------------------------------------------------------------ |
-| `adapter`   | `CacheClient` | —       | **Required**. Memory, Redis, or Memcached adapter.                 |
-| `staleTime` | `number`      | `60`    | Seconds data stays fresh.                                          |
-| `gcTime`    | `number`      | `300`   | Seconds stale data stays in cache.                                 |
-| `swr`       | `boolean`     | `false` | Enable background revalidation.                                    |
-| `stampede`  | `boolean`     | `true`  | Prevent "thundering herd" by coalescing requests.                  |
-| `retry`     | `number`      | `0`     | Number of retries for failed fetches.                              |
-| `keyPrefix` | `string`      | `"erc:"`| Prefix for all cache keys.                                         |
-| `vary`      | `string[]`    | `[]`    | Headers to namespace caches.                                       |
-| `autoInvalidate`| `boolean` | `false` | Auto-invalidate on POST/PUT/DELETE.                                |
-| `metrics`   | `boolean`     | `false` | Enable real-time telemetry metrics collection.                     |
-| `studio`    | `boolean \| Object`| `false`| Enable the Cache Studio visual dashboard.                          |
+| Option           | Type                | Default  | Description                                        |
+| ---------------- | ------------------- | -------- | -------------------------------------------------- |
+| `adapter`        | `CacheClient`       | —        | **Required**. Memory, Redis, or Memcached adapter. |
+| `staleTime`      | `number`            | `60`     | Seconds data stays fresh.                          |
+| `gcTime`         | `number`            | `300`    | Seconds stale data stays in cache.                 |
+| `swr`            | `boolean`           | `false`  | Enable background revalidation.                    |
+| `stampede`       | `boolean`           | `true`   | Prevent "thundering herd" by coalescing requests.  |
+| `retry`          | `number`            | `0`      | Number of retries for failed fetches.              |
+| `keyPrefix`      | `string`            | `"erc:"` | Prefix for all cache keys.                         |
+| `vary`           | `string[]`          | `[]`     | Headers to namespace caches.                       |
+| `autoInvalidate` | `boolean`           | `false`  | Auto-invalidate on POST/PUT/DELETE.                |
+| `metrics`        | `boolean`           | `false`  | Enable real-time telemetry metrics collection.     |
+| `studio`         | `boolean \| Object` | `false`  | Enable the Cache Studio visual dashboard.          |
 
 ### `cache.fetch(key, fetcher, opts)`
 
 Standalone method for manual data caching. Includes full SWR, Stampede Protection, and Retries.
 
 ```ts
-const data = await cache.fetch('my-key', async () => {
-  return await db.users.findMany();
-}, { staleTime: 60, swr: true, retry: 3 });
+const data = await cache.fetch(
+  "my-key",
+  async () => {
+    return await db.users.findMany();
+  },
+  { staleTime: 60, swr: true, retry: 3 },
+);
 ```
 
 ## 🔍 In-Depth
+
 For a full comparison with TanStack Query and deep dives into the architecture, visit our [Main Documentation](https://code-y02.github.io/express-route-cache).
 
 ## License
+
 MIT

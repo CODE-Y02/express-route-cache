@@ -17,7 +17,7 @@ When a user updates their profile, the system must invalidate `/api/users/123`, 
 ### Our Solution: Epoch Versioning
 
 We assign an integer "epoch" counter to every route pattern (e.g., `/users` -> Epoch `1`).
-This epoch is embedded directly into the generated cache key when storing data. 
+This epoch is embedded directly into the generated cache key when storing data.
 
 > [!NOTE]
 > Manual `cache.fetch()` keys bypass the automatic route epoch versioning by default for simplicity, but you can manually include version segments in your custom keys if needed.
@@ -39,11 +39,12 @@ All future `/users/*` requests will now query for `v:/users=6`, causing an insta
 ### Sequential Integrity (Smart Invalidation)
 
 To prevent race conditions during database updates, all invalidations (manual or automatic) are hooked into the Express `res.on('finish')` event. This guarantees that:
+
 1. The database update completes.
 2. The response is sent to the client.
 3. Only then is the cache invalidated.
 
-Without this "post-handler" sequence, a concurrent `GET` request could hit the server *after* the epoch is incremented but *before* the DB update is finished, causing the server to re-cache stale data under the new epoch (creating a "Cache Zombie").
+Without this "post-handler" sequence, a concurrent `GET` request could hit the server _after_ the epoch is incremented but _before_ the DB update is finished, causing the server to re-cache stale data under the new epoch (creating a "Cache Zombie").
 
 ### Trade-offs
 
@@ -61,7 +62,7 @@ When a highly trafficked endpoint's cache expires, 1,000 concurrent requests mig
 
 ### Our Solution: In-Memory Promise LRU Cache
 
-When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's (or manual `fetcher`'s) execution. It stores this Promise in an in-memory `LRUCache`. 
+When a cache MISS occurs, the middleware generates the cache key and creates a pending Promise representing the Express handler's (or manual `fetcher`'s) execution. It stores this Promise in an in-memory `LRUCache`.
 
 The `inflightRequests` map stores `Promise<any>`, allowing it to seamlessly coalesce both Express response objects and generic data fetched via `cache.fetch()`.
 
@@ -112,12 +113,12 @@ Inspired by Next.js's Incremental Static Regeneration (ISR) and server actions, 
 If a request arrives when the age is between `staleTime` and `gcTime`:
 
 1. The server instantly responds using the real Express `res` object with the stale `CacheEntry`. The user's TCP connection is closed.
-2. The middleware clones the `res` object using `Object.create()`, strips out the native network `write` and `end` bindings, and forces the HTTP `next()` chain to run in the background. 
+2. The middleware clones the `res` object using `Object.create()`, strips out the native network `write` and `end` bindings, and forces the HTTP `next()` chain to run in the background.
 3. Your standard database handler executes, calls `mockRes.json(data)`, and our caching layer silently intercepts that fresh data stream into Redis without throwing `ERR_HTTP_HEADERS_SENT` Socket errors.
 
 ### Trade-offs
 
-- **Pros:** Near 100% perceived uptime and instant latency for end users, with *Zero API Changes*. Developers do not have to write special background callback functions; they just write standard Express handlers. (This is exactly how Next.js works under the hood).
+- **Pros:** Near 100% perceived uptime and instant latency for end users, with _Zero API Changes_. Developers do not have to write special background callback functions; they just write standard Express handlers. (This is exactly how Next.js works under the hood).
 - **Cons:** Background processing occupies the single-threaded Node.js event loop momentarily. Revalidating a massive payload (e.g., executing `JSON.stringify` on a 5MB array) will temporarily block synchronous operations on the main thread for a few milliseconds.
 
 ---
@@ -142,12 +143,15 @@ If `sortQuery: true` is enabled via configuration, we extract the keys via `Obje
 ## 6. Binary Serialization & Header Preservation
 
 ### The Problem
+
 Traditional JSON caching middlewares fail in two ways:
+
 1. They convert all response bodies to UTF-8 strings, which corrupts binary data like PNGs or PDFs.
 2. They strip custom headers (like CORS or App-Version) during replay.
 
 ### Our Solution
-We use a **Base64 Serialization Layer**. All response bodies (Buffers or strings) are converted to Base64 strings before storage. When serving a `HIT`, we check an `isBase64` flag in the metadata and decode back to a Buffer before calling `res.end()`. 
+
+We use a **Base64 Serialization Layer**. All response bodies (Buffers or strings) are converted to Base64 strings before storage. When serving a `HIT`, we check an `isBase64` flag in the metadata and decode back to a Buffer before calling `res.end()`.
 
 Furthermore, we use `res.getHeaders()` to capture the full response state, filtering only for ephemeral headers (like `Set-Cookie` or `X-Express-*`), ensuring a perfect high-fidelity replay of the original response.
 

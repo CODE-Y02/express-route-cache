@@ -48,11 +48,11 @@ const cache = createCache({ adapter, keyPrefix: "my-app:" });
 
 ## Adapter Options (`createRedisAdapter`)
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `url` | `string` | Redis connection URL (e.g. `redis://localhost:6379`). |
-| `options` | `RedisOptions` | Raw `ioredis` options object (alternative to `url`). |
-| `client` | `Redis` | An existing `ioredis` instance to reuse. |
+| Option    | Type           | Description                                           |
+| :-------- | :------------- | :---------------------------------------------------- |
+| `url`     | `string`       | Redis connection URL (e.g. `redis://localhost:6379`). |
+| `options` | `RedisOptions` | Raw `ioredis` options object (alternative to `url`).  |
+| `client`  | `Redis`        | An existing `ioredis` instance to reuse.              |
 
 > [!NOTE]
 > The cache key prefix (default `"erc:"`) is configured on `createCache({ keyPrefix })`, not on the adapter.

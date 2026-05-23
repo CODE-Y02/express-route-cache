@@ -63,7 +63,7 @@ reported to the community leaders responsible for enforcement via direct message
 
 - **LinkedIn**: [Yatharth Lakhate](https://www.linkedin.com/in/yatharth-lakhate/)
 - **X (Twitter)**: [@Yatharth_L](https://x.com/Yatharth_L)
-All complaints will be reviewed and investigated promptly and fairly.
+  All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the
 reporter of any incident.

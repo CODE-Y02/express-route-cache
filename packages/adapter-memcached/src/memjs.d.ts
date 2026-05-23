@@ -23,13 +23,21 @@ declare module "memjs" {
   export class Client {
     static create(servers?: string, options?: ClientOptions): Client;
     get(key: string): Promise<GetResult>;
-    set(key: string, value: string, options?: { expires?: number }): Promise<boolean>;
-    add(key: string, value: string, options?: { expires?: number }): Promise<boolean>;
+    set(
+      key: string,
+      value: string,
+      options?: { expires?: number },
+    ): Promise<boolean>;
+    add(
+      key: string,
+      value: string,
+      options?: { expires?: number },
+    ): Promise<boolean>;
     delete(key: string): Promise<boolean>;
     increment(
       key: string,
       amount: number,
-      options?: { initial?: number; expires?: number }
+      options?: { initial?: number; expires?: number },
     ): Promise<IncrResult>;
     close(): void;
   }

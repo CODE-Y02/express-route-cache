@@ -43,23 +43,23 @@ flowchart TD
         ExpressApp["Express API Server"]
         Cache["Cache Instance (Telemetry Metrics Tracker)"]
         Adapter["Cache Adapter (Memory/Redis/Memcached)"]
-        
+
         ExpressApp -->|Middleware Interceptor| Cache
         Cache -->|Store / Retrieve / Invalidate| Adapter
-        
+
         subgraph Standalone ["Option 1: Standalone Studio Server"]
             DashboardServer["Dedicated Express Server (e.g. port 3001)"]
         end
-        
+
         subgraph Mounted ["Option 2: Mounted Router Middleware"]
             Router["createStudio Router Middleware"]
         end
-        
+
         ExpressApp -->|Mounted on route /studio| Router
         Cache -.->|Provides Metrics & Keys| DashboardServer
         Cache -.->|Provides Metrics & Keys| Router
     end
-    
+
     Browser(["Web Browser (Cache Studio UI)"])
     Browser -->|Fetches HTML & APIs| DashboardServer
     Browser -->|Fetches HTML & APIs| Router
@@ -72,6 +72,7 @@ flowchart TD
 You can enable Cache Studio by specifying it inside the `createCache` configuration in `@express-route-cache/core`.
 
 ### Enabling Metrics Telemetry
+
 To display charts and graphs (hits, misses, SWR execution counters), set `metrics: true`:
 
 ```ts
@@ -79,12 +80,13 @@ import { createCache, createMemoryAdapter } from "@express-route-cache/core";
 
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  metrics: true,  // Required: Enables real-time hit/miss counting telemetry
-  studio: true,   // Activates Cache Studio config reference
+  metrics: true, // Required: Enables real-time hit/miss counting telemetry
+  studio: true, // Activates Cache Studio config reference
 });
 ```
 
 ### Config Options (`StudioOptions`)
+
 You can pass custom options to `studio` instead of a simple boolean:
 
 ```ts
@@ -93,19 +95,19 @@ const cache = createCache({
   metrics: true,
   studio: {
     enabled: true,
-    port: 3001,           // Automatically spawns a standalone server on port 3001
+    port: 3001, // Automatically spawns a standalone server on port 3001
     path: "/admin/cache", // Base mount path (default: '/studio')
-    hostname: "0.0.0.0",  // Used in the console log URL message only (see note below)
-  }
+    hostname: "0.0.0.0", // Used in the console log URL message only (see note below)
+  },
 });
 ```
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `enabled` | `boolean` | `true` | Enable or disable the Studio. |
-| `port` | `number` | — | If set, auto-starts a standalone Express server on this port. |
-| `path` | `string` | `"/studio"` | Mount path for the dashboard. |
-| `hostname` | `string` | `"localhost"` | Used **only in the console log message** to format the printed URL. It does not change the network interface the server binds to. |
+| Option     | Type      | Default       | Description                                                                                                                       |
+| :--------- | :-------- | :------------ | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `enabled`  | `boolean` | `true`        | Enable or disable the Studio.                                                                                                     |
+| `port`     | `number`  | —             | If set, auto-starts a standalone Express server on this port.                                                                     |
+| `path`     | `string`  | `"/studio"`   | Mount path for the dashboard.                                                                                                     |
+| `hostname` | `string`  | `"localhost"` | Used **only in the console log message** to format the printed URL. It does not change the network interface the server binds to. |
 
 When you define a `port` under `studio` options, the core cache factory **automatically spins up a standalone Express server** on that port on startup, logging the dashboard URL directly to your console:
 `Cache Studio visible at --> http://localhost:3001/admin/cache`
@@ -115,9 +117,11 @@ When you define a `port` under `studio` options, the core cache factory **automa
 ## 🔌 Integration Methods
 
 ### 1. Standalone Auto-Start (Recommended)
+
 By simply passing a `port` in the configuration, you separate the dashboard lifecycle from your main API traffic. This is perfect for production environments where you don't want to expose administration endpoints on the public API gateway.
 
 ### 2. Mounted Middleware
+
 Mount the `createStudio` router directly inside your existing Express application:
 
 ```ts
@@ -151,6 +155,7 @@ app.listen(3000, () => {
 ---
 
 ### 3. CLI Runner (`express-route-cache-studio`)
+
 If you want to view a production cache (like Redis or Memcached) without adding any code to your application server, you can launch it using the CLI runner:
 
 ```bash
@@ -162,10 +167,12 @@ npx express-route-cache-studio
 > The binary name is `express-route-cache-studio` (as registered in `package.json`). The CLI also respects a `PORT` environment variable to override the default port `5555`.
 
 The CLI runner auto-detects database connections from your environment variables:
+
 - **Redis**: Reads `REDIS_URL` or `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
 - **Memcached**: Reads `MEMCACHED_SERVERS`
 
 #### Detailed CLI Config File (`erc.config.js`)
+
 For custom adapters or advanced credentials, place an `erc.config.js` in your workspace root:
 
 ```javascript
@@ -174,10 +181,13 @@ const { createRedisAdapter } = require("@express-route-cache/redis");
 const Redis = require("ioredis");
 
 // Securely instantiate connection pool
-const redisClient = new Redis("redis://:my_secure_password@my-redis-host:6379/0", {
-  maxRetriesPerRequest: 3,
-  connectTimeout: 5000,
-});
+const redisClient = new Redis(
+  "redis://:my_secure_password@my-redis-host:6379/0",
+  {
+    maxRetriesPerRequest: 3,
+    connectTimeout: 5000,
+  },
+);
 
 module.exports = {
   adapter: createRedisAdapter({ client: redisClient }),
@@ -196,15 +206,16 @@ The Studio router exposes a small HTTP API that you can integrate with directly 
 
 All endpoints are mounted relative to the Studio path (e.g. if mounted at `/studio`, the keys endpoint is at `/studio/api/keys`).
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/status` | Returns connection status, adapter type, and current metrics snapshot. |
-| `GET` | `/api/keys` | Lists all keys in the cache store. |
-| `GET` | `/api/keys/detail?key=<key>` | Returns the raw and parsed value for a specific key. |
-| `POST` | `/api/purge` | Deletes a single key. Body: `{ "key": "erc:hash:..." }` |
-| `POST` | `/api/purge-all` | Deletes all keys in the cache store. |
+| Method | Endpoint                     | Description                                                            |
+| :----- | :--------------------------- | :--------------------------------------------------------------------- |
+| `GET`  | `/api/status`                | Returns connection status, adapter type, and current metrics snapshot. |
+| `GET`  | `/api/keys`                  | Lists all keys in the cache store.                                     |
+| `GET`  | `/api/keys/detail?key=<key>` | Returns the raw and parsed value for a specific key.                   |
+| `POST` | `/api/purge`                 | Deletes a single key. Body: `{ "key": "erc:hash:..." }`                |
+| `POST` | `/api/purge-all`             | Deletes all keys in the cache store.                                   |
 
 **Example: purge a key from a CI pipeline**
+
 ```bash
 curl -X POST http://localhost:3001/studio/api/purge \
   -H "Content-Type: application/json" \
@@ -212,6 +223,7 @@ curl -X POST http://localhost:3001/studio/api/purge \
 ```
 
 **Example: read metrics from a health endpoint**
+
 ```bash
 curl http://localhost:3001/studio/api/status
 # → { "connected": true, "adapter": "redis", "metricsEnabled": true, "metrics": { "hits": 42, ... } }
@@ -230,14 +242,15 @@ flowchart LR
         Shim["Custom Adapter Shim (erc.config.js)"]
         CLI --> Shim
     end
-    
+
     Database[("Target Database (e.g. Redis / Memcached)")]
     Shim -->|SCAN keys / GET value / DEL purge| Database
-    
+
     Browser(["Web Browser (UI)"]) -->|HTTP APIs| CLI
 ```
 
 ### Writing a Custom Adapter Shim
+
 To monitor a custom store, write an `erc.config.js` and implement the three required methods (`keys`, `get`, `del`) to map to your database driver:
 
 ```javascript
@@ -260,14 +273,14 @@ module.exports = {
       // In this example, we scan session keys only
       return redisClient.keys("session:*");
     },
-    
+
     // 2. Retrieve a key's raw value (or JSON representation)
     get: async (key) => {
       const val = await redisClient.get(key);
       if (!val) return null;
       return val;
     },
-    
+
     // 3. Delete key if purged on the dashboard
     del: async (key) => {
       await redisClient.del(key);

@@ -29,11 +29,11 @@ Cache different responses per user by including the `Authorization` header in th
 ```ts
 const cache = createCache({
   adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
-  vary: ['authorization'],  // Cache key includes the Authorization header value
+  vary: ["authorization"], // Cache key includes the Authorization header value
   staleTime: 120,
 });
 
-app.get('/api/profile', cache.route(), async (req, res) => {
+app.get("/api/profile", cache.route(), async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
   res.json(user);
 });
@@ -51,12 +51,12 @@ Isolate cache entries per tenant using a custom tenant header:
 ```ts
 const cache = createCache({
   adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
-  vary: ['x-tenant-id'],
+  vary: ["x-tenant-id"],
   staleTime: 60,
 });
 
-app.get('/api/dashboard', cache.route(), async (req, res) => {
-  const tenantId = req.headers['x-tenant-id'];
+app.get("/api/dashboard", cache.route(), async (req, res) => {
+  const tenantId = req.headers["x-tenant-id"];
   const data = await getDashboardData(tenantId);
   res.json(data);
 });
@@ -70,7 +70,7 @@ Prevent cache fragmentation when clients send the same parameters in different o
 
 ```ts
 // ?sort=name&page=1 and ?page=1&sort=name both hit the same cache entry
-app.get('/api/products', cache.route({ sortQuery: true }), handler);
+app.get("/api/products", cache.route({ sortQuery: true }), handler);
 ```
 
 ---
@@ -80,13 +80,14 @@ app.get('/api/products', cache.route({ sortQuery: true }), handler);
 Use a dynamic key function when your cache key needs to incorporate data beyond headers or query params:
 
 ```ts
-app.get('/api/users/:id/dashboard', 
+app.get(
+  "/api/users/:id/dashboard",
   cache.route({
     key: (req) => `user-dashboard:${req.params.id}`,
     staleTime: 300,
     swr: true,
   }),
-  handler
+  handler,
 );
 ```
 
@@ -102,16 +103,20 @@ Pre-create the cache middleware, then decide per-request whether to apply it:
 ```ts
 const cachedRoute = cache.route({ staleTime: 60 });
 
-app.get('/api/feed', (req, res, next) => {
-  // Bypass cache for admin users who always need fresh data
-  if (req.headers['x-admin-bypass'] === 'true') {
-    return next(); // Goes straight to the handler below
-  }
-  return cachedRoute(req, res, next);
-}, async (req, res) => {
-  const feed = await getFeed();
-  res.json(feed);
-});
+app.get(
+  "/api/feed",
+  (req, res, next) => {
+    // Bypass cache for admin users who always need fresh data
+    if (req.headers["x-admin-bypass"] === "true") {
+      return next(); // Goes straight to the handler below
+    }
+    return cachedRoute(req, res, next);
+  },
+  async (req, res) => {
+    const feed = await getFeed();
+    res.json(feed);
+  },
+);
 ```
 
 ---
@@ -121,23 +126,23 @@ app.get('/api/feed', (req, res, next) => {
 Pre-populate the cache with frequently-accessed data before your server starts accepting traffic. This prevents cold-start latency spikes on the first requests.
 
 ```ts
-import { cache } from './cache';
-import { getTopProducts, getConfig } from './services';
+import { cache } from "./cache";
+import { getTopProducts, getConfig } from "./services";
 
 async function warmCache() {
-  console.log('Warming cache...');
+  console.log("Warming cache...");
 
   await Promise.all([
-    cache.fetch('top-products', () => getTopProducts(), { staleTime: 300 }),
-    cache.fetch('app-config',   () => getConfig(),      { staleTime: 3600 }),
+    cache.fetch("top-products", () => getTopProducts(), { staleTime: 300 }),
+    cache.fetch("app-config", () => getConfig(), { staleTime: 3600 }),
   ]);
 
-  console.log('Cache warm ✅');
+  console.log("Cache warm ✅");
 }
 
 async function start() {
   await warmCache();
-  app.listen(3000, () => console.log('Server ready'));
+  app.listen(3000, () => console.log("Server ready"));
 }
 
 start();
@@ -150,10 +155,10 @@ start();
 Invalidate the cache from a webhook (e.g., a CMS publish event, a Stripe webhook) without needing an active HTTP request:
 
 ```ts
-import { cache } from './cache';
+import { cache } from "./cache";
 
 // Contentful / Sanity webhook: content published
-app.post('/webhooks/content', express.json(), async (req, res) => {
+app.post("/webhooks/content", express.json(), async (req, res) => {
   const { contentType, slug } = req.body;
 
   // Invalidate the affected routes
@@ -174,22 +179,23 @@ Wrap your database calls with `cache.fetch()` in the service layer — keeping y
 
 ```ts
 // posts.service.ts
-import { cache } from './cache';
-import { db } from './db';
+import { cache } from "./cache";
+import { db } from "./db";
 
 export async function getPost(id: string) {
-  return cache.fetch(
-    `post:${id}`,
-    () => db.posts.findById(id),
-    { staleTime: 120, gcTime: 3600, swr: true, retry: 2 }
-  );
+  return cache.fetch(`post:${id}`, () => db.posts.findById(id), {
+    staleTime: 120,
+    gcTime: 3600,
+    swr: true,
+    retry: 2,
+  });
 }
 
 export async function updatePost(id: string, data: Partial<Post>) {
   const result = await db.posts.update(id, data);
 
   // Invalidate the post and the list
-  await cache.invalidateRoute(`/api/posts/${id}`, '/api/posts');
+  await cache.invalidateRoute(`/api/posts/${id}`, "/api/posts");
 
   return result;
 }
@@ -203,9 +209,10 @@ export async function updatePost(id: string, data: Partial<Post>) {
 
 ```ts
 // When a comment is posted, invalidate: the comment list AND the post (which shows comment count)
-app.post('/api/posts/:postId/comments', 
+app.post(
+  "/api/posts/:postId/comments",
   cache.invalidate(`/api/posts/:postId/comments`, `/api/posts/:postId`),
-  createComment
+  createComment,
 );
 ```
 
@@ -216,11 +223,12 @@ app.post('/api/posts/:postId/comments',
 For endpoints that aggregate across many tables (expensive to recompute), use a long `staleTime` with SWR so users never wait:
 
 ```ts
-app.get('/api/analytics/summary', 
+app.get(
+  "/api/analytics/summary",
   cache.route({
-    staleTime: 300,   // Fresh for 5 minutes
-    gcTime: 86400,    // Keep stale for 24 hours
-    swr: true,        // Serve stale instantly while recomputing in background
+    staleTime: 300, // Fresh for 5 minutes
+    gcTime: 86400, // Keep stale for 24 hours
+    swr: true, // Serve stale instantly while recomputing in background
   }),
   async (_req, res) => {
     const summary = await db.query(`
@@ -228,7 +236,7 @@ app.get('/api/analytics/summary',
       FROM ...
     `);
     res.json(summary);
-  }
+  },
 );
 ```
 
@@ -239,12 +247,13 @@ app.get('/api/analytics/summary',
 Skip caching for responses that exceed a size limit to protect your Node.js heap:
 
 ```ts
-app.get('/api/exports/:id',
+app.get(
+  "/api/exports/:id",
   cache.route({
-    maxBodySize: 512 * 1024,  // Only cache responses up to 512KB
+    maxBodySize: 512 * 1024, // Only cache responses up to 512KB
     staleTime: 3600,
   }),
-  generateExport
+  generateExport,
 );
 ```
 
@@ -257,17 +266,17 @@ Responses larger than `maxBodySize` are served normally — the cache is silentl
 Push `cache.metrics` to your metrics system (Prometheus, Datadog, etc.) on an interval:
 
 ```ts
-import { cache } from './cache';
+import { cache } from "./cache";
 
 // Push to your metrics collector every 30 seconds
 setInterval(() => {
   const m = cache.metrics;
   if (!m) return;
 
-  metrics.gauge('cache.hits', m.hits);
-  metrics.gauge('cache.misses', m.misses);
-  metrics.gauge('cache.swr_hits', m.swrHits);
-  metrics.gauge('cache.swr_failures', m.swrFailures);
-  metrics.gauge('cache.stampede_coalesces', m.stampedeCoalesces);
+  metrics.gauge("cache.hits", m.hits);
+  metrics.gauge("cache.misses", m.misses);
+  metrics.gauge("cache.swr_hits", m.swrHits);
+  metrics.gauge("cache.swr_failures", m.swrFailures);
+  metrics.gauge("cache.stampede_coalesces", m.stampedeCoalesces);
 }, 30_000);
 ```

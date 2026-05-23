@@ -25,7 +25,7 @@ Use it anywhere in your codebase: service layers, resolvers, cron jobs, or tRPC 
 ## Basic Usage
 
 ```ts
-import { createCache, createMemoryAdapter } from '@express-route-cache/core';
+import { createCache, createMemoryAdapter } from "@express-route-cache/core";
 
 const cache = createCache({
   adapter: createMemoryAdapter(),
@@ -34,7 +34,7 @@ const cache = createCache({
 });
 
 // In a service / route handler
-const users = await cache.fetch('all-users', () => db.users.findMany());
+const users = await cache.fetch("all-users", () => db.users.findMany());
 ```
 
 On the first call, the fetcher runs and the result is cached. Subsequent calls within `staleTime` return the cached value instantly without calling the fetcher.
@@ -42,11 +42,11 @@ On the first call, the fetcher runs and the result is cached. Subsequent calls w
 ## With SWR (Background Refresh)
 
 ```ts
-const users = await cache.fetch(
-  'all-users',
-  () => db.users.findMany(),
-  { staleTime: 60, gcTime: 3600, swr: true }
-);
+const users = await cache.fetch("all-users", () => db.users.findMany(), {
+  staleTime: 60,
+  gcTime: 3600,
+  swr: true,
+});
 ```
 
 When the entry is stale (older than `staleTime` but younger than `staleTime + gcTime`), the cached value is returned immediately and the fetcher re-runs in the background to refresh the cache for the next caller.
@@ -55,9 +55,9 @@ When the entry is stale (older than `staleTime` but younger than `staleTime + gc
 
 ```ts
 const data = await cache.fetch(
-  'external-api',
-  () => fetch('https://api.example.com/data').then(r => r.json()),
-  { retry: 3 } // 3 retries; waits 200ms, 400ms, 800ms before each retry attempt
+  "external-api",
+  () => fetch("https://api.example.com/data").then((r) => r.json()),
+  { retry: 3 }, // 3 retries; waits 200ms, 400ms, 800ms before each retry attempt
 );
 ```
 
@@ -65,14 +65,14 @@ If the fetcher throws, it is automatically retried up to `retry` times with expo
 
 ## Options
 
-| Option | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `staleTime` | `number` | global `staleTime` | Seconds data stays fresh. |
-| `gcTime` | `number` | global `gcTime` | Seconds stale data is kept in cache. |
-| `swr` | `boolean` | global `swr` | Enable background revalidation on stale hit. |
-| `enabled` | `boolean` | global `enabled` | Set to `false` to bypass caching for this call. |
-| `maxBodySize` | `number` | global `maxBodySize` | Max serialized payload size in bytes. |
-| `retry` | `number` | global `retry` | Number of retry attempts on fetcher failure. |
+| Option        | Type      | Default              | Description                                     |
+| :------------ | :-------- | :------------------- | :---------------------------------------------- |
+| `staleTime`   | `number`  | global `staleTime`   | Seconds data stays fresh.                       |
+| `gcTime`      | `number`  | global `gcTime`      | Seconds stale data is kept in cache.            |
+| `swr`         | `boolean` | global `swr`         | Enable background revalidation on stale hit.    |
+| `enabled`     | `boolean` | global `enabled`     | Set to `false` to bypass caching for this call. |
+| `maxBodySize` | `number`  | global `maxBodySize` | Max serialized payload size in bytes.           |
+| `retry`       | `number`  | global `retry`       | Number of retry attempts on fetcher failure.    |
 
 > [!NOTE]
 > Options `key`, `autoInvalidate`, `vary`, and `sortQuery` are not available on `cache.fetch()` — they are specific to route-based middleware.
@@ -83,8 +83,8 @@ The `key` you pass is automatically prefixed with `keyPrefix` (default `"erc:"`)
 
 ```ts
 // These are equivalent:
-await cache.fetch('users', fetcher);
-await cache.fetch('erc:users', fetcher);
+await cache.fetch("users", fetcher);
+await cache.fetch("erc:users", fetcher);
 ```
 
 ## Stampede Protection
@@ -94,9 +94,9 @@ await cache.fetch('erc:users', fetcher);
 ```ts
 // Within a single process, only 1 DB query fires despite concurrent callers
 const [a, b, c] = await Promise.all([
-  cache.fetch('top-products', fetchFromDB),
-  cache.fetch('top-products', fetchFromDB),
-  cache.fetch('top-products', fetchFromDB),
+  cache.fetch("top-products", fetchFromDB),
+  cache.fetch("top-products", fetchFromDB),
+  cache.fetch("top-products", fetchFromDB),
 ]);
 ```
 
@@ -109,9 +109,9 @@ const [a, b, c] = await Promise.all([
 
 ```ts
 const imageBuffer = await cache.fetch(
-  'logo-png',
-  () => fs.promises.readFile('./logo.png'),
-  { staleTime: 3600 }
+  "logo-png",
+  () => fs.promises.readFile("./logo.png"),
+  { staleTime: 3600 },
 );
 // imageBuffer is a Buffer
 ```
@@ -120,7 +120,7 @@ const imageBuffer = await cache.fetch(
 
 ```ts
 // user.service.ts
-import { cache } from './cache'; // your shared cache instance
+import { cache } from "./cache"; // your shared cache instance
 
 export async function getUser(id: string) {
   return cache.fetch(`user:${id}`, () => db.users.findById(id), {

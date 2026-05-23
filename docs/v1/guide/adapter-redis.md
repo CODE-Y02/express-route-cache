@@ -45,10 +45,10 @@ const cache = createCache({ adapter });
 
 The `createRedisAdapter` function accepts either a `url` string or an options object:
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `url` | `string` | Redis connection URL. |
-| `client` | `Redis` | An existing `ioredis` instance. |
+| Option      | Type     | Description                                  |
+| :---------- | :------- | :------------------------------------------- |
+| `url`       | `string` | Redis connection URL.                        |
+| `client`    | `Redis`  | An existing `ioredis` instance.              |
 | `keyPrefix` | `string` | Prefix for all cache keys (default: `erc:`). |
 
 ## Performance

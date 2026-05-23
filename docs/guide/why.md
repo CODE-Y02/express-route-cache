@@ -44,7 +44,7 @@ Instead of scanning keys, we use **Epoch Versioning**. Every route pattern has a
 
 ```ts
 // This is one Redis INCR, no matter how many /api/users/* entries exist
-await cache.invalidateRoute('/api/users');
+await cache.invalidateRoute("/api/users");
 ```
 
 ### 2. Stampede Protection Built In
@@ -72,17 +72,17 @@ Images, PDFs, and ZIPs are stored as Base64 and decoded perfectly on retrieval. 
 
 ## Feature Comparison
 
-| Feature | `@express-route-cache` | `apicache` | `route-cache` |
-| :--- | :---: | :---: | :---: |
-| O(1) invalidation | ✅ | ❌ (SCAN) | ❌ |
-| Stale-While-Revalidate | ✅ | ❌ | ❌ |
-| Stampede / thundering herd protection | ✅ | ❌ | ❌ |
-| Distributed (Redis / Memcached) | ✅ | ✅ | ❌ |
-| Binary support (images, PDFs) | ✅ | ✅ | ❌ |
-| Visual dashboard (Cache Studio) | ✅ | ❌ | ❌ |
-| TypeScript-first | ✅ | ❌ | ❌ |
-| Custom adapter interface | ✅ | ❌ | ❌ |
-| `cache.fetch()` (non-route caching) | ✅ | ❌ | ❌ |
+| Feature                               | `@express-route-cache` | `apicache` | `route-cache` |
+| :------------------------------------ | :--------------------: | :--------: | :-----------: |
+| O(1) invalidation                     |           ✅           | ❌ (SCAN)  |      ❌       |
+| Stale-While-Revalidate                |           ✅           |     ❌     |      ❌       |
+| Stampede / thundering herd protection |           ✅           |     ❌     |      ❌       |
+| Distributed (Redis / Memcached)       |           ✅           |     ✅     |      ❌       |
+| Binary support (images, PDFs)         |           ✅           |     ✅     |      ❌       |
+| Visual dashboard (Cache Studio)       |           ✅           |     ❌     |      ❌       |
+| TypeScript-first                      |           ✅           |     ❌     |      ❌       |
+| Custom adapter interface              |           ✅           |     ❌     |      ❌       |
+| `cache.fetch()` (non-route caching)   |           ✅           |     ❌     |      ❌       |
 
 > [!NOTE]
 > This comparison reflects publicly documented features. Other libraries are actively maintained and may be the right choice for simpler use cases.
@@ -92,6 +92,7 @@ Images, PDFs, and ZIPs are stored as Base64 and decoded perfectly on retrieval. 
 ## When Should You Use This Library?
 
 **Great fit if you:**
+
 - Have multiple server instances behind a load balancer
 - Need to invalidate cache on mutations (POST/PUT/PATCH/DELETE)
 - Want sub-millisecond responses even for stale data
@@ -100,6 +101,7 @@ Images, PDFs, and ZIPs are stored as Base64 and decoded perfectly on retrieval. 
 - Want a visual dashboard for your cache
 
 **May be overkill if you:**
+
 - Have a single-instance app with simple TTL-based caching needs
 - Don't need invalidation at all (pure time-based expiry is fine)
 - Are already deeply invested in a specific caching solution

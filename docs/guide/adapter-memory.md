@@ -42,9 +42,9 @@ const cache = createCache({
 createMemoryAdapter(defaultTTLSeconds?: number): CacheClient
 ```
 
-| Argument | Type | Default | Description |
-| :--- | :--- | :--- | :--- |
-| `defaultTTLSeconds` | `number` | `600` | Maximum TTL (seconds) for entries stored without an explicit TTL. Prevents unbounded memory growth. |
+| Argument            | Type     | Default | Description                                                                                         |
+| :------------------ | :------- | :------ | :-------------------------------------------------------------------------------------------------- |
+| `defaultTTLSeconds` | `number` | `600`   | Maximum TTL (seconds) for entries stored without an explicit TTL. Prevents unbounded memory growth. |
 
 ## Limitations
 

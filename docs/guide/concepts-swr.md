@@ -62,11 +62,11 @@ t=120s  Next expiry → same pattern, zero latency for users
                       refreshes in bg)       request)
 ```
 
-| Window | Behaviour |
-| :--- | :--- |
-| `0 → staleTime` | `X-Cache: HIT` — fresh, served instantly |
+| Window                         | Behaviour                                                                     |
+| :----------------------------- | :---------------------------------------------------------------------------- |
+| `0 → staleTime`                | `X-Cache: HIT` — fresh, served instantly                                      |
 | `staleTime → staleTime+gcTime` | `X-Cache: STALE` — served instantly + background refresh (SWR must be `true`) |
-| `> staleTime+gcTime` | `X-Cache: MISS` — expired, handler executes, user waits |
+| `> staleTime+gcTime`           | `X-Cache: MISS` — expired, handler executes, user waits                       |
 
 ## Two-Tier SWR Lock
 
@@ -86,15 +86,15 @@ SWR is disabled by default. Enable it globally or per-route:
 // Global — all cached routes use SWR
 const cache = createCache({
   swr: true,
-  staleTime: 60,   // Fresh for 60s
-  gcTime: 3600,    // Kept stale for 1 hour (SWR window = 60s–3600s)
+  staleTime: 60, // Fresh for 60s
+  gcTime: 3600, // Kept stale for 1 hour (SWR window = 60s–3600s)
 });
 
 // Per-route override
-app.get('/slow-report', cache.route({ swr: true, staleTime: 300 }), handler);
+app.get("/slow-report", cache.route({ swr: true, staleTime: 300 }), handler);
 
 // Disable per-route even if enabled globally
-app.get('/real-time-feed', cache.route({ swr: false }), handler);
+app.get("/real-time-feed", cache.route({ swr: false }), handler);
 ```
 
 ## Benefits
@@ -112,6 +112,7 @@ If a background revalidation fails (e.g. your route handler throws), the library
 ```
 
 Common causes:
+
 - An unhandled `async` rejection inside the route handler.
 - A missing database connection or service dependency.
 - Middleware that inspects `req.socket` and throws when it detects the mock background request object.

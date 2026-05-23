@@ -54,7 +54,9 @@
         "enabled": "boolean — default true",
         "key": "string | ((req) => string) — manual key override (route only)"
       }
-    },
+    }
+  },
+  "guides": [
     {
       "title": "Epoch Invalidation Concept",
       "url": "https://code-y02.github.io/express-route-cache/guide/concepts-invalidation",

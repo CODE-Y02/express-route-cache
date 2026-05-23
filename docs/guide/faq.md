@@ -91,15 +91,15 @@ It supports **Redis** (ioredis), **Memcached** (memjs), and **in-memory** storag
 
 ### How is it different from `apicache` or `express-cache-controller`?
 
-| Feature | `@express-route-cache` | `apicache` | `express-cache-controller` |
-| :--- | :---: | :---: | :---: |
-| O(1) Invalidation | ✅ | ❌ (SCAN) | ❌ |
-| SWR Background Refresh | ✅ | ❌ | ❌ |
-| Stampede Protection | ✅ | ❌ | ❌ |
-| Redis Support | ✅ | ✅ | ❌ |
-| Memcached Support | ✅ | ❌ | ❌ |
-| Binary Data (images) | ✅ | ❌ | ❌ |
-| TypeScript-first | ✅ | ❌ | ❌ |
+| Feature                | `@express-route-cache` | `apicache` | `express-cache-controller` |
+| :--------------------- | :--------------------: | :--------: | :------------------------: |
+| O(1) Invalidation      |           ✅           | ❌ (SCAN)  |             ❌             |
+| SWR Background Refresh |           ✅           |     ❌     |             ❌             |
+| Stampede Protection    |           ✅           |     ❌     |             ❌             |
+| Redis Support          |           ✅           |     ✅     |             ❌             |
+| Memcached Support      |           ✅           |     ❌     |             ❌             |
+| Binary Data (images)   |           ✅           |     ❌     |             ❌             |
+| TypeScript-first       |           ✅           |     ❌     |             ❌             |
 
 See the [full comparison →](./comparison)
 
@@ -133,9 +133,9 @@ This mirrors TanStack Query's naming convention:
 
 ```ts
 createCache({
-  staleTime: 60,  // Fresh for 60s — zero DB calls
-  gcTime: 3600,   // Stays cached for 1 hour (stale)
-  swr: true,      // Serve stale, refresh in background
+  staleTime: 60, // Fresh for 60s — zero DB calls
+  gcTime: 3600, // Stays cached for 1 hour (stale)
+  swr: true, // Serve stale, refresh in background
 });
 ```
 
@@ -146,13 +146,13 @@ createCache({
 Yes, use `enabled: false` per-route:
 
 ```ts
-app.get('/health', cache.route({ enabled: false }), handler);
+app.get("/health", cache.route({ enabled: false }), handler);
 ```
 
 Or toggle globally:
 
 ```ts
-const cache = createCache({ enabled: process.env.NODE_ENV !== 'test' });
+const cache = createCache({ enabled: process.env.NODE_ENV !== "test" });
 ```
 
 ---
@@ -163,7 +163,7 @@ Use the `vary` option to namespace the cache per user, or a custom `key` functio
 
 ```ts
 // Vary by Authorization header (one cache entry per token)
-cache.route({ vary: ['Authorization'] });
+cache.route({ vary: ["Authorization"] });
 
 // Or use a fully custom key
 cache.route({ key: (req) => `user:${req.user.id}:profile` });

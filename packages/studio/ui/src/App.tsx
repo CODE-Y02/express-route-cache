@@ -87,7 +87,9 @@ export default function App() {
     queryKey: ["key-detail", selectedKey],
     queryFn: () =>
       fetch(
-        getApiUrl(`api/keys/detail?key=${encodeURIComponent(selectedKey || "")}`),
+        getApiUrl(
+          `api/keys/detail?key=${encodeURIComponent(selectedKey || "")}`,
+        ),
       ).then((r) => r.json()),
     enabled: !!selectedKey,
   });

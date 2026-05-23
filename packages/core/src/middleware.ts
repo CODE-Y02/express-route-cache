@@ -232,7 +232,11 @@ export function createCache(config: CacheConfig): CacheInstance {
               if (client.setNX) {
                 // Distributed lock — adapter handles cross-server coordination
                 const lockTime = Math.max(10, staleTime);
-                acquired = await client.setNX(`swr-lock:${cacheKey}`, "1", lockTime);
+                acquired = await client.setNX(
+                  `swr-lock:${cacheKey}`,
+                  "1",
+                  lockTime,
+                );
               } else {
                 // Local fallback — per-process lock only
                 acquired = !localSwrLocks.has(cacheKey);
@@ -273,7 +277,11 @@ export function createCache(config: CacheConfig): CacheInstance {
         // populates it, preventing N simultaneous DB queries.
         if (client.setNX && !inflightRequests.has(cacheKey)) {
           const stampedeLockKey = `stampede:${cacheKey}`;
-          const isLeader = await client.setNX(stampedeLockKey, "1", totalTTL + 30);
+          const isLeader = await client.setNX(
+            stampedeLockKey,
+            "1",
+            totalTTL + 30,
+          );
 
           if (!isLeader) {
             // Another server holds the lock — poll the cache and serve when ready
@@ -317,7 +325,9 @@ export function createCache(config: CacheConfig): CacheInstance {
         // Coalesce same-process concurrent requests into a single in-flight
         // Promise. Works per-server only.
         if (globalOpts.stampede && inflightRequests.has(cacheKey)) {
-          const entry = await inflightRequests.get(cacheKey) as CacheEntry | null;
+          const entry = (await inflightRequests.get(
+            cacheKey,
+          )) as CacheEntry | null;
           if (entry) {
             const age = getAgeSeconds(entry);
             if (metrics) metrics.stampedeCoalesces++;
@@ -388,14 +398,14 @@ export function createCache(config: CacheConfig): CacheInstance {
     /**
      * Standalone data fetching with built-in SWR and Stampede Protection.
      * Use this for manual data caching (e.g., Database calls, External APIs).
-     * 
+     *
      * @example
-     * const users = await cache.fetch('all-users', () => db.users.findMany(), { 
-     *   staleTime: 60, 
+     * const users = await cache.fetch('all-users', () => db.users.findMany(), {
+     *   staleTime: 60,
      *   swr: true,
-     *   retry: 3 
+     *   retry: 3
      * });
-     * 
+     *
      * @template T - The type of data being fetched.
      * @param key - Unique cache identifier.
      * @param fetcher - Async function to retrieve data on MISS or SWR revalidation.
@@ -444,11 +454,7 @@ export function createCache(config: CacheConfig): CacheInstance {
                     isBuffer,
                     createdAt: Date.now(),
                   };
-                  await client.set(
-                    cacheKey,
-                    JSON.stringify(payload),
-                    totalTTL,
-                  );
+                  await client.set(cacheKey, JSON.stringify(payload), totalTTL);
                 })
                 .catch(() => {
                   if (metrics) metrics.swrFailures++;
@@ -477,11 +483,7 @@ export function createCache(config: CacheConfig): CacheInstance {
             isBuffer,
             createdAt: Date.now(),
           };
-          await client.set(
-            cacheKey,
-            JSON.stringify(payload),
-            totalTTL,
-          );
+          await client.set(cacheKey, JSON.stringify(payload), totalTTL);
           return data;
         },
       );
@@ -500,7 +502,11 @@ export function createCache(config: CacheConfig): CacheInstance {
 
   // ── Auto-start Cache Studio Standalone Server if port is specified ──
   const studioOpts = config.studio === true ? {} : config.studio;
-  if (studioOpts && studioOpts.enabled !== false && typeof studioOpts.port === "number") {
+  if (
+    studioOpts &&
+    studioOpts.enabled !== false &&
+    typeof studioOpts.port === "number"
+  ) {
     const port = studioOpts.port;
     const pathStr = studioOpts.path || "/studio";
     const hostname = studioOpts.hostname || "localhost";
@@ -511,15 +517,20 @@ export function createCache(config: CacheConfig): CacheInstance {
         const express = require("express");
         const app = express();
         app.use(express.json());
-        
+
         const cleanPath = pathStr.startsWith("/") ? pathStr : `/${pathStr}`;
         app.use(cleanPath, createStudio({ cache: instance }));
-        
+
         app.listen(port, () => {
-          console.log(`Cache Studio visible at --> http://${hostname}:${port}${cleanPath}`);
+          console.log(
+            `Cache Studio visible at --> http://${hostname}:${port}${cleanPath}`,
+          );
         });
       } catch (err) {
-        console.error("Failed to auto-start standalone Cache Studio server:", err);
+        console.error(
+          "Failed to auto-start standalone Cache Studio server:",
+          err,
+        );
       }
     });
   }
@@ -596,9 +607,14 @@ function interceptResponse(
 
     // Capture writes with encoding support
     res.write = function (chunk: any, encodingOrCb?: any, cb?: any): boolean {
-      const encoding = typeof encodingOrCb === "string" ? encodingOrCb as BufferEncoding : undefined;
+      const encoding =
+        typeof encodingOrCb === "string"
+          ? (encodingOrCb as BufferEncoding)
+          : undefined;
       if (chunk && !sizeExceeded) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+        const buffer = Buffer.isBuffer(chunk)
+          ? chunk
+          : Buffer.from(chunk, encoding);
         currentSize += buffer.length;
         if (currentSize > maxBodySize) {
           sizeExceeded = true;
@@ -612,14 +628,19 @@ function interceptResponse(
 
     // Capture end with encoding support
     res.end = function (chunk?: any, encodingOrCb?: any, cb?: any): Response {
-      const encoding = typeof encodingOrCb === "string" ? encodingOrCb as BufferEncoding : undefined;
+      const encoding =
+        typeof encodingOrCb === "string"
+          ? (encodingOrCb as BufferEncoding)
+          : undefined;
       if (intercepted) {
         return originalEnd(chunk, encodingOrCb, cb);
       }
       intercepted = true;
 
       if (chunk && !sizeExceeded) {
-        const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding);
+        const buffer = Buffer.isBuffer(chunk)
+          ? chunk
+          : Buffer.from(chunk, encoding);
         currentSize += buffer.length;
         if (currentSize > maxBodySize) {
           sizeExceeded = true;
@@ -698,7 +719,11 @@ async function revalidateInBackground(
       handle?: ((req: Request, res: Response, next: NextFunction) => void) & {
         isCacheMiddleware?: boolean;
       };
-      handle_request?: (req: Request, res: Response, next: NextFunction) => void;
+      handle_request?: (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+      ) => void;
     }[];
 
     let currentIndex = -1;
@@ -725,7 +750,10 @@ async function revalidateInBackground(
         value: false,
         writable: true,
       });
-      Object.defineProperty(mockRes, "finished", { value: false, writable: true });
+      Object.defineProperty(mockRes, "finished", {
+        value: false,
+        writable: true,
+      });
 
       // Isolate headers by copying existing ones safely
       const localHeaders = new Map<string, string | string[]>();
@@ -742,7 +770,8 @@ async function revalidateInBackground(
         localHeaders.set(name.toLowerCase(), value);
         return mockRes;
       };
-      mockRes.getHeader = (name: string) => localHeaders.get(name.toLowerCase());
+      mockRes.getHeader = (name: string) =>
+        localHeaders.get(name.toLowerCase());
       mockRes.removeHeader = (name: string) =>
         localHeaders.delete(name.toLowerCase());
       mockRes.getHeaders = () => Object.fromEntries(localHeaders);
@@ -771,7 +800,9 @@ async function revalidateInBackground(
       let index = currentIndex + 1;
       const runNext = (err?: unknown) => {
         if (err) {
-          console.error("[@express-route-cache] SWR background revalidation failed. Check your route handler for errors.");
+          console.error(
+            "[@express-route-cache] SWR background revalidation failed. Check your route handler for errors.",
+          );
           if (metrics) metrics.swrFailures++;
           return;
         }
@@ -823,7 +854,13 @@ async function waitForCachePopulation(
         const entry = deserializeEntry(cached);
         if (entry) {
           if (metrics) metrics.stampedePolls++;
-          sendCachedResponse(res, entry, getAgeSeconds(entry), staleTime, "HIT");
+          sendCachedResponse(
+            res,
+            entry,
+            getAgeSeconds(entry),
+            staleTime,
+            "HIT",
+          );
           return;
         }
       }
@@ -857,7 +894,7 @@ function extractCacheableHeaders(res: Response): Record<string, string> {
 
 /**
  * Helper to execute a fetcher with exponential backoff retry logic.
- * 
+ *
  * @param fetcher - The async function to execute.
  * @param retries - Total number of retries to attempt.
  * @returns The successful result of the fetcher.

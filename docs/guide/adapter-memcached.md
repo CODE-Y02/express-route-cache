@@ -36,7 +36,9 @@ import { createMemcachedAdapter } from "@express-route-cache/memcached";
 const adapter = createMemcachedAdapter({ servers: "localhost:11211" });
 
 // Multiple servers (comma-separated)
-const adapter = createMemcachedAdapter({ servers: "server1:11211,server2:11211" });
+const adapter = createMemcachedAdapter({
+  servers: "server1:11211,server2:11211",
+});
 
 // Reuse an existing memjs client
 const adapter = createMemcachedAdapter({ client: myExistingClient });
@@ -46,11 +48,11 @@ const cache = createCache({ adapter, keyPrefix: "my-app:" });
 
 ## Adapter Options (`createMemcachedAdapter`)
 
-| Option | Type | Description |
-| :--- | :--- | :--- |
-| `servers` | `string` | Comma-separated Memcached server(s). Defaults to `"localhost:11211"`. |
-| `client` | `memjs.Client` | An existing `memjs` client instance to reuse. |
-| `options` | `Record<string, unknown>` | Additional raw `memjs` client options. |
+| Option    | Type                      | Description                                                           |
+| :-------- | :------------------------ | :-------------------------------------------------------------------- |
+| `servers` | `string`                  | Comma-separated Memcached server(s). Defaults to `"localhost:11211"`. |
+| `client`  | `memjs.Client`            | An existing `memjs` client instance to reuse.                         |
+| `options` | `Record<string, unknown>` | Additional raw `memjs` client options.                                |
 
 > [!NOTE]
 > The cache key prefix (default `"erc:"`) is configured on `createCache({ keyPrefix })`, not on the adapter.

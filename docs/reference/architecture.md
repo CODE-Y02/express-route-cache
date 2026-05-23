@@ -27,6 +27,7 @@ Traditional cache middlewares map a URL directly to a cache key. To invalidate a
 **Our Solution:** We assign an integer "epoch" counter to every route pattern. This epoch is embedded into the cache key hash. To invalidate, we simply call `INCR` on the epoch. All future requests generate new keys, making old ones instantly obsolete — no scanning, no deleting.
 
 Key structure:
+
 ```
 {prefix}hash:{sha256 of: method:url?queryHash|v:/api=0|v:/api/users=3|vary:auth=...}
 ```

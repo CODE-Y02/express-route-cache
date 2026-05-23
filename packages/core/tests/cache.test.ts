@@ -16,7 +16,7 @@ function createTestApp(cacheOpts?: Parameters<typeof createCache>[0]) {
       gcTime: 10,
       swr: false,
       stampede: true,
-    }
+    },
   );
 
   let callCount = 0;
@@ -39,7 +39,7 @@ function createTestApp(cacheOpts?: Parameters<typeof createCache>[0]) {
     cache.invalidate("/users"),
     (req: Request, res: Response) => {
       res.json({ created: true });
-    }
+    },
   );
 
   // GET /slow — 200ms delay to test stampede
@@ -63,7 +63,14 @@ function createTestApp(cacheOpts?: Parameters<typeof createCache>[0]) {
     res.send(largePayload);
   });
 
-  return { app, cache, getCallCount: () => callCount, resetCallCount: () => { callCount = 0; } };
+  return {
+    app,
+    cache,
+    getCallCount: () => callCount,
+    resetCallCount: () => {
+      callCount = 0;
+    },
+  };
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -248,7 +255,7 @@ describe("@express-route-cache/core", () => {
 
       // Fire 10 requests simultaneously to /slow (200ms handler)
       const responses = await Promise.all(
-        Array.from({ length: 10 }, () => request(app).get("/slow"))
+        Array.from({ length: 10 }, () => request(app).get("/slow")),
       );
 
       // All should succeed

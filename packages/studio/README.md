@@ -21,23 +21,23 @@ flowchart TD
         ExpressApp["Express API Server"]
         Cache["Cache Instance (Telemetry Metrics Tracker)"]
         Adapter["Cache Adapter (Memory/Redis/Memcached)"]
-        
+
         ExpressApp -->|Middleware Interceptor| Cache
         Cache -->|Store / Retrieve / Invalidate| Adapter
-        
+
         subgraph Standalone ["Option 1: Standalone Studio Server"]
             DashboardServer["Dedicated Express Server (e.g. port 3001)"]
         end
-        
+
         subgraph Mounted ["Option 2: Mounted Router Middleware"]
             Router["createStudio Router Middleware"]
         end
-        
+
         ExpressApp -->|Mounted on route /studio| Router
         Cache -.->|Provides Metrics & Keys| DashboardServer
         Cache -.->|Provides Metrics & Keys| Router
     end
-    
+
     Browser(["Web Browser (Cache Studio UI)"])
     Browser -->|Fetches HTML & APIs| DashboardServer
     Browser -->|Fetches HTML & APIs| Router
@@ -48,6 +48,7 @@ flowchart TD
 ## 🛠️ Usage & Integration Options
 
 ### 1. Standalone Auto-Start (Zero Code)
+
 Add a `port` inside the `studio` configuration of `@express-route-cache/core`. It will automatically spin up a dedicated dashboard server on that port during startup:
 
 ```ts
@@ -57,10 +58,10 @@ const cache = createCache({
   adapter: createMemoryAdapter(),
   metrics: true, // Required: Enables real-time charts/telemetry
   studio: {
-    port: 3001,  // Auto-starts standalone dashboard server
+    port: 3001, // Auto-starts standalone dashboard server
     path: "/studio", // Mount path
-    hostname: "localhost"
-  }
+    hostname: "localhost",
+  },
 });
 ```
 
@@ -70,6 +71,7 @@ Console output on startup:
 ---
 
 ### 2. Express Middleware Mount
+
 Mount the `createStudio` router directly inside your existing main Express application:
 
 ```ts
@@ -97,19 +99,23 @@ Visiting `http://localhost:3000/studio` will dynamically resolve backend APIs re
 ---
 
 ### 3. CLI Runner (`express-route-cache-studio`)
+
 Monitor a production cache instance without modifying your server application code.
 
 Run the global CLI command:
+
 ```bash
 # Starts dashboard on http://localhost:5555
 npx express-route-cache-studio
 ```
 
 The CLI runner auto-detects database connections from your environment variables:
+
 - **Redis**: Reads `REDIS_URL` or `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
 - **Memcached**: Reads `MEMCACHED_SERVERS`
 
 #### CLI Configuration (`erc.config.js`)
+
 Create a file named `erc.config.js` or `erc.config.json` in your workspace root to define custom adapters or credentials:
 
 ```javascript
@@ -136,10 +142,10 @@ flowchart LR
         Shim["Custom Adapter Shim (erc.config.js)"]
         CLI --> Shim
     end
-    
+
     Database[("Target Database (e.g. Redis / Memcached)")]
     Shim -->|SCAN keys / GET value / DEL purge| Database
-    
+
     Browser(["Web Browser (UI)"]) -->|HTTP APIs| CLI
 ```
 
@@ -153,10 +159,10 @@ module.exports = {
   adapter: {
     // 1. Tell the UI how to get the list of keys
     keys: async () => redisClient.keys("sessions:*"),
-    
+
     // 2. Retrieve a key's raw value (or JSON representation)
     get: async (key) => redisClient.get(key),
-    
+
     // 3. Delete key if purged on the dashboard
     del: async (key) => redisClient.del(key),
   },

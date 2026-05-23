@@ -34,13 +34,13 @@ Invalidating cached data is notoriously difficult. Most libraries struggle with 
 
 ```ts
 // Increment epoch for /users
-await cache.invalidateRoute('/users');
+await cache.invalidateRoute("/users");
 ```
 
 ### Middleware Invalidation
 
 ```ts
-app.post('/users', cache.invalidate('/users'), createUser);
+app.post("/users", cache.invalidate("/users"), createUser);
 ```
 
 ### Auto Invalidation

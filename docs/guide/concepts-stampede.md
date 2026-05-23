@@ -38,6 +38,7 @@ When your adapter implements the optional `setNX` method (both the Redis and Mem
 The stampede lock TTL is set to `staleTime + gcTime + 30` seconds. For example, with `staleTime: 60, gcTime: 300`, the lock lives for **390 seconds** in Redis.
 
 This means:
+
 - If the **leader completes normally**, it explicitly deletes the lock key so followers can proceed immediately.
 - If the **leader crashes** before populating the cache, followers poll for up to ~1.5s then fall through and run the handler themselves — guaranteeing eventual response at the cost of one extra handler execution per follower.
 - The long TTL is a safety net to prevent the lock from lingering indefinitely after an unexpected process exit.

@@ -9,12 +9,12 @@ app.use(express.json());
 // ── Create cache with TanStack-inspired options ──
 const cache = createCache({
   adapter: createMemoryAdapter(),
-  staleTime: 120,  // data fresh for 2 minutes
-  gcTime: 300,     // stale data lives 5 more minutes
-  swr: true,       // serve stale, revalidate in background
-  stampede: true,   // coalesce concurrent cold-cache requests
-  metrics: true,    // enable telemetry & stats
-  studio: true,     // enable Studio configuration reference
+  staleTime: 120, // data fresh for 2 minutes
+  gcTime: 300, // stale data lives 5 more minutes
+  swr: true, // serve stale, revalidate in background
+  stampede: true, // coalesce concurrent cold-cache requests
+  metrics: true, // enable telemetry & stats
+  studio: true, // enable Studio configuration reference
 });
 
 // ── Mount Cache Studio ──
@@ -28,7 +28,7 @@ app.get(
   async (req: Request, res: Response) => {
     await simulateDelay(2000);
     res.json({ username: req.params.username, data: "Some user data" });
-  }
+  },
 );
 
 // ── Automatic route-tree invalidation ──
@@ -38,8 +38,10 @@ app.post(
   "/v1/users",
   cache.invalidate("/v1/users"),
   (req: Request, res: Response) => {
-    res.json({ message: "User created (cache invalidated for /v1/users tree)" });
-  }
+    res.json({
+      message: "User created (cache invalidated for /v1/users tree)",
+    });
+  },
 );
 
 app.post(
@@ -47,7 +49,7 @@ app.post(
   cache.invalidate("/v1/users"),
   (req: Request, res: Response) => {
     res.json({ message: "User updated: " + req.params.username });
-  }
+  },
 );
 
 // ── Non-cached route ──
@@ -64,12 +66,20 @@ portfinder.getPort((err, port) => {
   } else {
     app.listen(port, () => {
       console.log(`Server listening on http://localhost:${port}`);
-      console.log(`Cache Studio visible at --> http://localhost:${port}/studio`);
+      console.log(
+        `Cache Studio visible at --> http://localhost:${port}/studio`,
+      );
       console.log("");
       console.log("Try these:");
-      console.log(`  GET  http://localhost:${port}/v1/users/john  (1st: MISS + 2s delay, 2nd: HIT instant)`);
-      console.log(`  POST http://localhost:${port}/v1/users       (invalidates all /v1/users/* cache)`);
-      console.log(`  GET  http://localhost:${port}/v1/users/john  (MISS again — cache was invalidated)`);
+      console.log(
+        `  GET  http://localhost:${port}/v1/users/john  (1st: MISS + 2s delay, 2nd: HIT instant)`,
+      );
+      console.log(
+        `  POST http://localhost:${port}/v1/users       (invalidates all /v1/users/* cache)`,
+      );
+      console.log(
+        `  GET  http://localhost:${port}/v1/users/john  (MISS again — cache was invalidated)`,
+      );
     });
   }
 });

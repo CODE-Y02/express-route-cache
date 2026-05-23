@@ -50,6 +50,7 @@ curl -I http://localhost:3000/api/data
 ```
 
 Look for:
+
 - `X-Cache: HIT` (Serving from cache)
 - `X-Cache: MISS` (Fetched from source)
 - `X-Cache: STALE` (Serving stale, refreshing in background)

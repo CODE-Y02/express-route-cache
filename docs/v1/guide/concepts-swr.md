@@ -37,11 +37,11 @@ SWR is disabled by default. You can enable it globally or per-route:
 const cache = createCache({
   swr: true,
   staleTime: 60, // Fresh for 60s
-  gcTime: 3600,   // Kept for 1 hour
+  gcTime: 3600, // Kept for 1 hour
 });
 
 // Per-route override
-app.get('/slow-api', cache.route({ swr: true }), handler);
+app.get("/slow-api", cache.route({ swr: true }), handler);
 ```
 
 ## Benefits

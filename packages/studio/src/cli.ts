@@ -5,7 +5,11 @@ import fs from "fs";
 import express from "express";
 import dotenv from "dotenv";
 import open from "open";
-import { createCache, createMemoryAdapter, type CacheConfig } from "@express-route-cache/core";
+import {
+  createCache,
+  createMemoryAdapter,
+  type CacheConfig,
+} from "@express-route-cache/core";
 import { createRedisAdapter } from "@express-route-cache/redis";
 import { createMemcachedAdapter } from "@express-route-cache/memcached";
 import { createStudio } from "./index";
@@ -47,7 +51,9 @@ async function run() {
         url: process.env.REDIS_URL,
         options: {
           host: process.env.REDIS_HOST,
-          port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT) : undefined,
+          port: process.env.REDIS_PORT
+            ? parseInt(process.env.REDIS_PORT)
+            : undefined,
           password: process.env.REDIS_PASSWORD,
         },
       });
@@ -58,7 +64,9 @@ async function run() {
       });
     } else {
       console.warn("⚠️  No redis or memcached environment variables found.");
-      console.log("Defaulting to Memory adapter. Note: This will be isolated to the CLI process!");
+      console.log(
+        "Defaulting to Memory adapter. Note: This will be isolated to the CLI process!",
+      );
       adapter = createMemoryAdapter();
     }
     config = {

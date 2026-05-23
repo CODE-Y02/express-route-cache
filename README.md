@@ -210,16 +210,19 @@ npm install @express-route-cache/studio
 ```
 
 ### 1. Auto-Start (Standalone Server)
+
 Just specify a `port` in your cache options. It will automatically spin up a dedicated dashboard server on startup:
+
 ```ts
 const cache = createCache({
   adapter: createMemoryAdapter(),
   metrics: true, // Enables telemetry charts
-  studio: { port: 3001 } // Launches visual dashboard on http://localhost:3001/studio
+  studio: { port: 3001 }, // Launches visual dashboard on http://localhost:3001/studio
 });
 ```
 
 ### 2. Mount on your existing Express app
+
 ```ts
 import { createStudio } from "@express-route-cache/studio";
 

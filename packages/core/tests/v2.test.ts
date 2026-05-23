@@ -19,8 +19,10 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
   describe("Binary Data Support", () => {
     it("should not corrupt binary data (Buffer)", async () => {
-      const binaryData = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46]);
-      
+      const binaryData = Buffer.from([
+        0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46,
+      ]);
+
       app.get("/binary", cache.route(), (req, res) => {
         res.setHeader("Content-Type", "image/jpeg");
         res.send(binaryData);
@@ -49,7 +51,7 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
       await request(app).get("/headers"); // Warm up
       const res = await request(app).get("/headers");
-      
+
       expect(res.headers["x-cache"]).toBe("HIT");
       expect(res.headers["x-custom-header"]).toBe("hello-world");
     });
@@ -63,7 +65,7 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
       await request(app).get("/leak");
       const res = await request(app).get("/leak");
-      
+
       expect(res.headers["x-cache"]).toBe("HIT");
       expect(res.headers["set-cookie"]).toBeUndefined();
       expect(res.headers["x-express-internal"]).toBeUndefined();
@@ -79,7 +81,7 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
       await request(app).get("/private");
       const res = await request(app).get("/private");
-      
+
       expect(res.headers["x-cache"]).toBe("HIT");
       expect(res.headers["cache-control"]).toBe("private, no-cache");
     });
@@ -91,7 +93,7 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
       await request(app).get("/public");
       const res = await request(app).get("/public");
-      
+
       expect(res.headers["x-cache"]).toBe("HIT");
       expect(res.headers["cache-control"]).toContain("public, max-age=");
     });
@@ -126,7 +128,7 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
       expect(p1.status).toBe(200);
 
       // Tiny delay for the 'finish' event to process the async epoch increment
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 50));
 
       // 3. Next GET should be a MISS
       const g3 = await request(app).get("/data");
@@ -137,27 +139,41 @@ describe("Route Cache V2 Features & Bug Fixes", () => {
 
   describe("New V2 Fixes (SWR Lock, Hashing, Fetch Buffer, CORS SWR)", () => {
     it("should hash the cache key to prevent length overflow", async () => {
-      app.get("/very-long-url-path-with-query-parameters", cache.route({ vary: ["X-Vary-Header"] }), (req, res) => {
-        res.json({ ok: true });
-      });
+      app.get(
+        "/very-long-url-path-with-query-parameters",
+        cache.route({ vary: ["X-Vary-Header"] }),
+        (req, res) => {
+          res.json({ ok: true });
+        },
+      );
 
-      const res = await request(app).get("/very-long-url-path-with-query-parameters").set("X-Vary-Header", "token-value");
+      const res = await request(app)
+        .get("/very-long-url-path-with-query-parameters")
+        .set("X-Vary-Header", "token-value");
       expect(res.headers["x-cache"]).toBe("MISS");
     });
 
     it("should support Buffer in standalone cache.fetch", async () => {
       const bufferData = Buffer.from("hello-world-binary");
-      const result = await cache.fetch("binary-fetch-key", async () => {
-        return bufferData;
-      }, { staleTime: 60 });
+      const result = await cache.fetch(
+        "binary-fetch-key",
+        async () => {
+          return bufferData;
+        },
+        { staleTime: 60 },
+      );
 
       expect(Buffer.isBuffer(result)).toBe(true);
       expect(result.toString()).toBe("hello-world-binary");
 
       // Verify it retrieves from cache as a Buffer
-      const resultCached = await cache.fetch("binary-fetch-key", async () => {
-        return Buffer.from("should-not-hit");
-      }, { staleTime: 60 });
+      const resultCached = await cache.fetch(
+        "binary-fetch-key",
+        async () => {
+          return Buffer.from("should-not-hit");
+        },
+        { staleTime: 60 },
+      );
       expect(Buffer.isBuffer(resultCached)).toBe(true);
       expect(resultCached.toString()).toBe("hello-world-binary");
     });

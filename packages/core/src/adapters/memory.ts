@@ -48,13 +48,18 @@ export function createMemoryAdapter(defaultTTLSeconds = 600): CacheClient {
 
     async incr(key: string): Promise<number> {
       const current = cache.get<string>(key);
-      const newVal = current !== undefined ? (parseInt(current, 10) || 0) + 1 : 1;
+      const newVal =
+        current !== undefined ? (parseInt(current, 10) || 0) + 1 : 1;
       // Epoch keys should not expire (they're counters)
       cache.set(key, String(newVal), 0);
       return newVal;
     },
 
-    async setNX(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+    async setNX(
+      key: string,
+      value: string,
+      ttlSeconds: number,
+    ): Promise<boolean> {
       if (cache.has(key)) return false;
       cache.set(key, value, ttlSeconds);
       return true;

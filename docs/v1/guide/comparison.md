@@ -22,20 +22,20 @@ Choosing the right caching middleware for your Express.js API is critical for pr
 
 ## Feature Matrix
 
-| Feature | `@express-route-cache` | `apicache` | `express-cache-controller` | `node-cache-manager` | `http-cache-middleware` |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **O(1) Invalidation** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **SWR Background Refresh** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Stampede Protection** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Redis Adapter** | ✅ | ✅ | ❌ | ✅ | ✅ |
-| **Memcached Adapter** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **In-Memory Adapter** | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **Binary Data Support** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Header Preservation** | ✅ Full | ⚠️ Partial | ⚠️ Partial | ❌ | ⚠️ Partial |
-| **TypeScript-first** | ✅ | ❌ | ❌ | ⚠️ | ❌ |
-| **Per-route Overrides** | ✅ | ✅ | ❌ | ❌ | ❌ |
-| **Standalone Fetch API** | ✅ | ❌ | ❌ | ✅ | ❌ |
-| **Active Maintenance** | ✅ | ⚠️ Low | ❌ Archived | ✅ | ⚠️ Low |
+| Feature                    | `@express-route-cache` | `apicache` | `express-cache-controller` | `node-cache-manager` | `http-cache-middleware` |
+| :------------------------- | :--------------------: | :--------: | :------------------------: | :------------------: | :---------------------: |
+| **O(1) Invalidation**      |           ✅           |     ❌     |             ❌             |          ❌          |           ❌            |
+| **SWR Background Refresh** |           ✅           |     ❌     |             ❌             |          ❌          |           ❌            |
+| **Stampede Protection**    |           ✅           |     ❌     |             ❌             |          ❌          |           ❌            |
+| **Redis Adapter**          |           ✅           |     ✅     |             ❌             |          ✅          |           ✅            |
+| **Memcached Adapter**      |           ✅           |     ❌     |             ❌             |          ✅          |           ❌            |
+| **In-Memory Adapter**      |           ✅           |     ✅     |             ✅             |          ✅          |           ✅            |
+| **Binary Data Support**    |           ✅           |     ❌     |             ❌             |          ❌          |           ❌            |
+| **Header Preservation**    |        ✅ Full         | ⚠️ Partial |         ⚠️ Partial         |          ❌          |       ⚠️ Partial        |
+| **TypeScript-first**       |           ✅           |     ❌     |             ❌             |          ⚠️          |           ❌            |
+| **Per-route Overrides**    |           ✅           |     ✅     |             ❌             |          ❌          |           ❌            |
+| **Standalone Fetch API**   |           ✅           |     ❌     |             ❌             |          ✅          |           ❌            |
+| **Active Maintenance**     |           ✅           |   ⚠️ Low   |        ❌ Archived         |          ✅          |         ⚠️ Low          |
 
 ---
 
@@ -108,22 +108,22 @@ The core insight is that **the hard problems in production caching are invalidat
 3. **Stampede Protection** — A single cache expiry no longer spikes your database.
 
 ```ts
-import { createCache } from '@express-route-cache/core';
-import { createRedisAdapter } from '@express-route-cache/redis';
+import { createCache } from "@express-route-cache/core";
+import { createRedisAdapter } from "@express-route-cache/redis";
 
 const cache = createCache({
   adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
-  staleTime: 60,   // Fresh for 60s
-  gcTime: 3600,    // Kept for 1 hour
-  swr: true,       // No latency spikes
-  stampede: true,  // No thundering herds (default)
+  staleTime: 60, // Fresh for 60s
+  gcTime: 3600, // Kept for 1 hour
+  swr: true, // No latency spikes
+  stampede: true, // No thundering herds (default)
 });
 
 // One line to cache any GET route
 app.use(cache.middleware());
 
 // One line to invalidate on mutation
-app.post('/api/posts', cache.invalidate('/api/posts'), createPost);
+app.post("/api/posts", cache.invalidate("/api/posts"), createPost);
 ```
 
 [Get Started →](./getting-started)
