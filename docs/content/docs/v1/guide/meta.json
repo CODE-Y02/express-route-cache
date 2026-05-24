@@ -1,0 +1,22 @@
+{
+  "title": "Guides (v1)",
+  "pages": [
+    "getting-started",
+    "example-todo",
+    "---Concepts---",
+    "concepts-swr",
+    "concepts-invalidation",
+    "concepts-stampede",
+    "---Adapters---",
+    "adapters",
+    "adapter-memory",
+    "adapter-redis",
+    "adapter-memcached",
+    "---Advanced---",
+    "comparison",
+    "binary-support",
+    "headers",
+    "faq",
+    "troubleshooting"
+  ]
+}

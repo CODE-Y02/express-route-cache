@@ -1,0 +1,27 @@
+{
+  "title": "Guides",
+  "pages": [
+    "getting-started",
+    "studio",
+    "example-todo",
+    "---Concepts---",
+    "concepts-swr",
+    "concepts-invalidation",
+    "concepts-stampede",
+    "cache-fetch",
+    "---Adapters---",
+    "adapters",
+    "adapter-memory",
+    "adapter-redis",
+    "adapter-memcached",
+    "---Advanced---",
+    "recipes",
+    "testing",
+    "deployment",
+    "binary-support",
+    "headers",
+    "ai-support",
+    "faq",
+    "troubleshooting"
+  ]
+}

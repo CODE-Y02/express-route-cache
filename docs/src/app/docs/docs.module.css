@@ -1,0 +1,70 @@
+/* Theme-Aware Docs Customizations scoped to Docs Layout */
+.docsContainer {
+  --fd-primary: var(--primary);
+  --fd-accent: color-mix(in oklch, var(--primary) 10%, transparent);
+  --fd-accent-foreground: var(--primary);
+  --fd-border: color-mix(in oklch, var(--primary) 15%, transparent);
+}
+
+/* Headings theme-aware color */
+.docsContainer :global(h1),
+.docsContainer :global(h2),
+.docsContainer :global(h3),
+.docsContainer :global(h4) {
+  color: var(--primary) !important;
+}
+
+/* App Name / Brand Logo on Navbar and Sidebar Header */
+.docsContainer :global(a[href*="/docs"] span),
+.docsContainer :global(a[href="/"] span),
+.docsContainer :global([class*="sidebar"] [class*="title"]),
+.docsContainer :global([class*="nav"] [class*="title"]),
+.docsContainer :global([class*="header"] [class*="title"]),
+.docsContainer :global([class*="brand"]) {
+  color: var(--primary) !important;
+}
+
+/* Sidebar Item Hover State */
+.docsContainer :global(.fd-sidebar-item:hover),
+.docsContainer :global([class*="sidebar-item"]:hover),
+.docsContainer :global([class*="SidebarItem"]:hover) {
+  background-color: color-mix(in oklch, var(--primary) 10%, transparent) !important;
+  color: var(--primary) !important;
+}
+
+/* Sidebar Active/Selected State text and background */
+.docsContainer :global(.fd-sidebar-item-active),
+.docsContainer :global([class*="sidebar-item-active"]),
+.docsContainer :global([data-active="true"]) {
+  background-color: color-mix(in oklch, var(--primary) 12%, transparent) !important;
+  color: var(--primary) !important;
+}
+
+/* Heading hover anchor icon */
+.docsContainer :global(.prose h1:hover .subheading-anchor),
+.docsContainer :global(.prose h2:hover .subheading-anchor),
+.docsContainer :global(.prose h3:hover .subheading-anchor),
+.docsContainer :global(.prose h4:hover .subheading-anchor) {
+  color: var(--primary) !important;
+}
+
+/* Cards Hover border & glow */
+.docsContainer :global(.fd-card:hover),
+.docsContainer :global([class*="card"]:hover) {
+  border-color: var(--primary) !important;
+  box-shadow: 0 10px 25px -5px color-mix(in oklch, var(--primary) 15%, transparent) !important;
+}
+
+/* Mark Tag Highlight */
+.docsContainer :global(mark) {
+  background-color: color-mix(in oklch, var(--primary) 20%, transparent) !important;
+  color: var(--primary) !important;
+  border-radius: 4px;
+  padding: 0.1em 0.25em;
+  font-weight: 500;
+}
+
+/* Text Selection */
+.docsContainer :global(::selection) {
+  background-color: color-mix(in oklch, var(--primary) 25%, transparent) !important;
+}

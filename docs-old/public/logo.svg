@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Outer Glow Hexagon (Background) -->
+  <path fill="url(#logo-gradient)" opacity="0.15" d="M256 40 L452 150 L452 362 L256 472 L60 362 L60 150 Z" />
+  
+  <!-- Central Hexagonal Node -->
+  <path fill="url(#logo-gradient)" d="M256 160 L330 200 L330 280 L256 320 L182 280 L182 200 Z" />
+  
+  <!-- Modern Lightning Bolt -->
+  <path fill="#ffffff" d="M280 40 L160 280 L240 280 L200 472 L352 200 L272 200 L320 40 Z" filter="url(#glow)" style="mix-blend-mode: overlay; opacity: 0.9;" />
+  <path fill="#ffffff" d="M280 40 L160 280 L240 280 L200 472 L352 200 L272 200 L320 40 Z" />
+
+  <!-- Data Flow Lines -->
+  <path stroke="url(#logo-gradient)" stroke-width="8" stroke-linecap="round" fill="none" d="M60 150 L182 200 M452 150 L330 200 M60 362 L182 280 M452 362 L330 280" opacity="0.6" />
+</svg>
