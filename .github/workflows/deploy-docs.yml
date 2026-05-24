@@ -38,23 +38,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      - name: Build with VitePress
+      - name: Build with Next.js (Fumadocs)
         run: pnpm run docs:build
-        env:
-          VITEPRESS_BASE: /express-route-cache/
       
       - name: Create .nojekyll
-        run: touch docs/.vitepress/dist/.nojekyll
+        run: touch docs/out/.nojekyll
 
       - name: Debug Output
         run: |
           echo "Listing build output directory:"
-          ls -R docs/.vitepress/dist
+          ls -R docs/out
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/.vitepress/dist
+          path: docs/out
 
   deploy:
     environment:
