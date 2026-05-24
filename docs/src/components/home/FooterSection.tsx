@@ -37,7 +37,9 @@ export default function FooterSection() {
                 className="size-4 text-primary shrink-0"
                 aria-hidden="true"
               />
-              <span className="min-w-0 overflow-x-auto scrollbar-none whitespace-nowrap">npm i @express-route-cache/core</span>
+              <span className="min-w-0 overflow-x-auto scrollbar-none whitespace-nowrap">
+                npm i @express-route-cache/core
+              </span>
               {copied ? (
                 <Check
                   className="size-4 text-emerald-500 animate-scale-up shrink-0"

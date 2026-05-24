@@ -89,7 +89,8 @@ export default function DocsLayoutWrapper({
             ? {
                 title: (
                   <span className="font-sans font-bold text-sm tracking-tight text-foreground select-none group">
-                    <span className="text-primary mr-0.5">@</span>express-route-cache
+                    <span className="text-primary mr-0.5">@</span>
+                    express-route-cache
                   </span>
                 ),
                 url: "/",

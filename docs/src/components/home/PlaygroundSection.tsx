@@ -334,7 +334,10 @@ export default function PlaygroundSection() {
                           >
                             {req.method}
                           </span>
-                          <span className="text-xs font-mono font-semibold text-foreground truncate max-w-[120px] sm:max-w-[180px]" title={req.path}>
+                          <span
+                            className="text-xs font-mono font-semibold text-foreground truncate max-w-[120px] sm:max-w-[180px]"
+                            title={req.path}
+                          >
                             {req.path}
                           </span>
                         </div>
