@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'docs-old/**'
       - '.github/workflows/deploy-docs.yml'
 
 permissions:
@@ -42,10 +43,7 @@ jobs:
         run: pnpm run docs:build
 
       - name: Build old docs (Vitepress)
-        run: |
-          cd docs-old
-          npm install
-          npm run build
+        run: pnpm --filter docs-old build
 
       - name: Copy old docs to static export
         run: |

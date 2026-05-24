@@ -8,6 +8,7 @@ on:
       - next # Matches beta/rc branches
     paths-ignore:
       - 'docs/**'
+      - 'docs-old/**'
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 

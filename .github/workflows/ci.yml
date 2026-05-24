@@ -9,6 +9,7 @@ on:
       - "**" # This tells CI to run on all other feature branches
     paths-ignore:
       - 'docs/**'
+      - 'docs-old/**'
   pull_request:
     branches:
       - main
@@ -16,6 +17,7 @@ on:
       - next
     paths-ignore:
       - 'docs/**'
+      - 'docs-old/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
