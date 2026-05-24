@@ -1,10 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Shield,
-  Lock,
-} from "lucide-react";
+import { Shield, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
@@ -70,7 +67,10 @@ export default function StampedeSection() {
   };
 
   return (
-    <section aria-label="Cache Stampede Simulation" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-border">
+    <section
+      aria-label="Cache Stampede Simulation"
+      className="py-20 px-4 sm:px-6 lg:px-8 border-t border-border"
+    >
       <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
         {/* Left side: Explainer */}
         <div className="lg:col-span-5">
@@ -82,15 +82,14 @@ export default function StampedeSection() {
             Deflect Cache Stampedes
           </h2>
           <p className="text-muted-foreground mb-6 leading-relaxed">
-            When a high-traffic cache key expires, the "thundering herd"
-            hits your database simultaneously, causing load spikes or server
-            crashes.
+            When a high-traffic cache key expires, the "thundering herd" hits
+            your database simultaneously, causing load spikes or server crashes.
           </p>
           <p className="text-muted-foreground mb-8 leading-relaxed">
             Our two-tier lock coordinates requests process-wide (via memory
-            coalescing) and cluster-wide (via Redis/Memcached SETNX).
-            Follower requests poll the cache silently while one leader
-            generates the data.
+            coalescing) and cluster-wide (via Redis/Memcached SETNX). Follower
+            requests poll the cache silently while one leader generates the
+            data.
           </p>
 
           <div className="flex gap-4">
@@ -127,8 +126,8 @@ export default function StampedeSection() {
                 </span>
                 <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-3">
                   <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />{" "}
-                    DB Query (1)
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> DB
+                    Query (1)
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />{" "}
@@ -142,14 +141,26 @@ export default function StampedeSection() {
               </div>
 
               <div className="sr-only" aria-live="polite">
-                {stampedeStatus === "idle" && "Simulator is idle. No requests currently executing."}
-                {stampedeStatus === "running" && stampedeProgress < 30 && "Request 1 started. Acquiring locks."}
-                {stampedeStatus === "running" && stampedeProgress >= 30 && stampedeProgress < 90 && "Request 1 executing database query. Requests 2 to 100 are waiting in the coalescer."}
-                {stampedeStatus === "running" && stampedeProgress >= 90 && "Database query finished. Serving all 100 requests."}
-                {stampedeStatus === "complete" && "All 100 requests successfully served. 1 database query executed, 99 queries saved."}
+                {stampedeStatus === "idle" &&
+                  "Simulator is idle. No requests currently executing."}
+                {stampedeStatus === "running" &&
+                  stampedeProgress < 30 &&
+                  "Request 1 started. Acquiring locks."}
+                {stampedeStatus === "running" &&
+                  stampedeProgress >= 30 &&
+                  stampedeProgress < 90 &&
+                  "Request 1 executing database query. Requests 2 to 100 are waiting in the coalescer."}
+                {stampedeStatus === "running" &&
+                  stampedeProgress >= 90 &&
+                  "Database query finished. Serving all 100 requests."}
+                {stampedeStatus === "complete" &&
+                  "All 100 requests successfully served. 1 database query executed, 99 queries saved."}
               </div>
 
-              <div className="grid grid-cols-10 gap-1.5 max-h-[160px] overflow-hidden" aria-hidden="true">
+              <div
+                className="grid grid-cols-10 gap-1.5 max-h-[160px] overflow-hidden"
+                aria-hidden="true"
+              >
                 {Array.from({ length: 100 }).map((_, idx) => {
                   let color =
                     "bg-muted-foreground/15 border border-transparent";

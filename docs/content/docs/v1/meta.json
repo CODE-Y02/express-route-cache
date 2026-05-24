@@ -1,8 +1,4 @@
 {
   "title": "Legacy (v1)",
-  "pages": [
-    "index",
-    "guide",
-    "reference"
-  ]
+  "pages": ["index", "guide", "reference"]
 }

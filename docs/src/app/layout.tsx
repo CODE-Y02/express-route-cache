@@ -1,61 +1,81 @@
-import { RootProvider } from 'fumadocs-ui/provider/next';
-import './global.css';
-import { Inter, Geist } from 'next/font/google';
+import { RootProvider } from "fumadocs-ui/provider/next";
+import "./global.css";
+import { Inter, Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import type { Metadata } from 'next';
-import CustomSearchDialog from '@/components/SearchDialog';
+import type { Metadata } from "next";
+import CustomSearchDialog from "@/components/SearchDialog";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | @express-route-cache',
-    default: '@express-route-cache | O(1) Route Caching for Express.js',
+    template: "%s | @express-route-cache",
+    default: "@express-route-cache | O(1) Route Caching for Express.js",
   },
-  description: 'Production-grade Express.js route caching with O(1) invalidation, Stale-While-Revalidate (SWR), and Stampede Protection. Supports Redis, Memcached, and in-memory adapters.',
-  metadataBase: new URL('https://express-route-cache.js.org'),
+  description:
+    "Production-grade Express.js route caching with O(1) invalidation, Stale-While-Revalidate (SWR), and Stampede Protection. Supports Redis, Memcached, and in-memory adapters.",
+  metadataBase: new URL("https://express-route-cache.js.org"),
   keywords: [
-    'express cache middleware', 'express route cache', 'nodejs caching', 'redis cache express', 
-    'stale-while-revalidate express', 'swr nodejs', 'express performance', 'cache invalidation', 
-    'stampede protection', 'thundering herd', 'express redis middleware', 'memcached express', 
-    'nodejs api caching', 'express middleware typescript', 'o1 cache invalidation', 
-    'express cache library', 'api response caching nodejs'
+    "express cache middleware",
+    "express route cache",
+    "nodejs caching",
+    "redis cache express",
+    "stale-while-revalidate express",
+    "swr nodejs",
+    "express performance",
+    "cache invalidation",
+    "stampede protection",
+    "thundering herd",
+    "express redis middleware",
+    "memcached express",
+    "nodejs api caching",
+    "express middleware typescript",
+    "o1 cache invalidation",
+    "express cache library",
+    "api response caching nodejs",
   ],
-  authors: [{ name: 'Yatharth Lakhate', url: 'https://github.com/CODE-Y02' }],
-  robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+  authors: [{ name: "Yatharth Lakhate", url: "https://github.com/CODE-Y02" }],
+  robots:
+    "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://express-route-cache.js.org',
-    siteName: 'express-route-cache',
-    title: '@express-route-cache | O(1) Route Caching for Express.js',
-    description: 'Production-grade Express.js route caching with O(1) invalidation, SWR, and Stampede Protection. Supports Redis, Memcached & Memory adapters.',
+    type: "website",
+    locale: "en_US",
+    url: "https://express-route-cache.js.org",
+    siteName: "express-route-cache",
+    title: "@express-route-cache | O(1) Route Caching for Express.js",
+    description:
+      "Production-grade Express.js route caching with O(1) invalidation, SWR, and Stampede Protection. Supports Redis, Memcached & Memory adapters.",
     images: [
       {
-        url: '/og-image.png',
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: 'express-route-cache — O(1) Route Caching for Express.js',
+        alt: "express-route-cache — O(1) Route Caching for Express.js",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: '@express-route-cache | O(1) Route Caching for Express.js',
-    description: 'Production-grade Express.js caching: O(1) invalidation, SWR, Stampede Protection. Redis, Memcached & Memory adapters.',
-    images: ['/og-image.png'],
-    site: '@Yatharth_L',
-    creator: '@Yatharth_L',
+    card: "summary_large_image",
+    title: "@express-route-cache | O(1) Route Caching for Express.js",
+    description:
+      "Production-grade Express.js caching: O(1) invalidation, SWR, Stampede Protection. Redis, Memcached & Memory adapters.",
+    images: ["/og-image.png"],
+    site: "@Yatharth_L",
+    creator: "@Yatharth_L",
   },
 };
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ["latin"],
 });
 
-export default function Layout({ children }: LayoutProps<'/'>) {
+export default function Layout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn(inter.className, "font-sans", geist.variable)} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={cn(inter.className, "font-sans", geist.variable)}
+      suppressHydrationWarning
+    >
       <body className="flex flex-col min-h-screen">
         <a
           href="#main-content"
@@ -63,7 +83,9 @@ export default function Layout({ children }: LayoutProps<'/'>) {
         >
           Skip to main content
         </a>
-        <RootProvider search={{ SearchDialog: CustomSearchDialog }}>{children}</RootProvider>
+        <RootProvider search={{ SearchDialog: CustomSearchDialog }}>
+          {children}
+        </RootProvider>
       </body>
     </html>
   );

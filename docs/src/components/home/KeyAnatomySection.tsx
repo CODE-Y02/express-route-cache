@@ -9,14 +9,17 @@ export default function KeyAnatomySection() {
   >("epoch");
 
   return (
-    <section aria-label="Cache Key Structure Explorer" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section
+      aria-label="Cache Key Structure Explorer"
+      className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+    >
       <div className="text-center mb-12">
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-4 text-foreground">
           Anatomy of a Versioned Key
         </h2>
         <p className="text-muted-foreground max-w-xl mx-auto">
-          How we compose deterministic, instant-invalidating Redis keys.
-          Click the segments to inspect how our versioning engine works.
+          How we compose deterministic, instant-invalidating Redis keys. Click
+          the segments to inspect how our versioning engine works.
         </p>
       </div>
 

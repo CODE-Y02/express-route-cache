@@ -28,7 +28,11 @@
 .docsContainer :global(.fd-sidebar-item:hover),
 .docsContainer :global([class*="sidebar-item"]:hover),
 .docsContainer :global([class*="SidebarItem"]:hover) {
-  background-color: color-mix(in oklch, var(--primary) 10%, transparent) !important;
+  background-color: color-mix(
+    in oklch,
+    var(--primary) 10%,
+    transparent
+  ) !important;
   color: var(--primary) !important;
 }
 
@@ -36,7 +40,11 @@
 .docsContainer :global(.fd-sidebar-item-active),
 .docsContainer :global([class*="sidebar-item-active"]),
 .docsContainer :global([data-active="true"]) {
-  background-color: color-mix(in oklch, var(--primary) 12%, transparent) !important;
+  background-color: color-mix(
+    in oklch,
+    var(--primary) 12%,
+    transparent
+  ) !important;
   color: var(--primary) !important;
 }
 
@@ -52,12 +60,17 @@
 .docsContainer :global(.fd-card:hover),
 .docsContainer :global([class*="card"]:hover) {
   border-color: var(--primary) !important;
-  box-shadow: 0 10px 25px -5px color-mix(in oklch, var(--primary) 15%, transparent) !important;
+  box-shadow: 0 10px 25px -5px
+    color-mix(in oklch, var(--primary) 15%, transparent) !important;
 }
 
 /* Mark Tag Highlight */
 .docsContainer :global(mark) {
-  background-color: color-mix(in oklch, var(--primary) 20%, transparent) !important;
+  background-color: color-mix(
+    in oklch,
+    var(--primary) 20%,
+    transparent
+  ) !important;
   color: var(--primary) !important;
   border-radius: 4px;
   padding: 0.1em 0.25em;
@@ -66,5 +79,9 @@
 
 /* Text Selection */
 .docsContainer :global(::selection) {
-  background-color: color-mix(in oklch, var(--primary) 25%, transparent) !important;
+  background-color: color-mix(
+    in oklch,
+    var(--primary) 25%,
+    transparent
+  ) !important;
 }

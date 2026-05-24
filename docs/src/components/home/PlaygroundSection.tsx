@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Zap,
-  RefreshCw,
-  Activity,
-} from "lucide-react";
+import { Zap, RefreshCw, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -213,14 +209,17 @@ export default function PlaygroundSection() {
   };
 
   return (
-    <section aria-label="Interactive Caching Playground" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section
+      aria-label="Interactive Caching Playground"
+      className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+    >
       <div className="text-center mb-16">
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-4">
           Explore Caching Mechanics
         </h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          Click the tabs to toggle code patterns, and run the simulator to
-          see the background orchestration logs in action.
+          Click the tabs to toggle code patterns, and run the simulator to see
+          the background orchestration logs in action.
         </p>
       </div>
 
@@ -274,7 +273,10 @@ export default function PlaygroundSection() {
           <Card className="border border-border bg-card flex flex-col h-full rounded-3xl overflow-hidden shadow-lg">
             <div className="px-6 py-4 border-b border-border bg-muted/40 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="size-4.5 text-primary animate-pulse" aria-hidden="true" />
+                <Activity
+                  className="size-4.5 text-primary animate-pulse"
+                  aria-hidden="true"
+                />
                 <span className="font-bold text-sm text-foreground">
                   Simulation Monitor
                 </span>
@@ -304,7 +306,10 @@ export default function PlaygroundSection() {
                 </div>
                 {requestList.length === 0 ? (
                   <div className="flex flex-col items-center justify-center p-6 rounded-2xl border border-dashed border-border bg-muted/10 text-center text-muted-foreground text-xs gap-2 min-h-[96px]">
-                    <Activity className="size-5 text-muted-foreground/45 animate-pulse" aria-hidden="true" />
+                    <Activity
+                      className="size-5 text-muted-foreground/45 animate-pulse"
+                      aria-hidden="true"
+                    />
                     <span>
                       No requests simulated yet. Click below to run a test.
                     </span>
@@ -403,7 +408,10 @@ export default function PlaygroundSection() {
               >
                 {playgroundStatus === "running" ? (
                   <>
-                    <RefreshCw className="size-4 animate-spin" aria-hidden="true" />
+                    <RefreshCw
+                      className="size-4 animate-spin"
+                      aria-hidden="true"
+                    />
                     Processing...
                   </>
                 ) : (

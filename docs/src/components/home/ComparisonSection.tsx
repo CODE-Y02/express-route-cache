@@ -5,7 +5,10 @@ import Link from "next/link";
 
 export default function ComparisonSection() {
   return (
-    <section aria-label="Feature Comparison Matrix" className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <section
+      aria-label="Feature Comparison Matrix"
+      className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
+    >
       <div className="text-center mb-16">
         <h2 className="text-3xl sm:text-5xl font-bold tracking-tight mb-4 text-foreground">
           How We Compare
@@ -20,9 +23,7 @@ export default function ComparisonSection() {
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="p-5 font-bold text-foreground text-sm">
-                Feature
-              </th>
+              <th className="p-5 font-bold text-foreground text-sm">Feature</th>
               <th className="p-5 font-bold text-primary text-sm">
                 @express-route-cache
               </th>
@@ -51,9 +52,7 @@ export default function ComparisonSection() {
               <td className="p-5 text-muted-foreground">
                 Browser only, no server cache
               </td>
-              <td className="p-5 text-muted-foreground">
-                Manual key deletion
-              </td>
+              <td className="p-5 text-muted-foreground">Manual key deletion</td>
             </tr>
             <tr>
               <td className="p-5 font-semibold text-foreground">
@@ -83,9 +82,7 @@ export default function ComparisonSection() {
               <td className="p-5 font-semibold text-foreground">
                 Non-Route Caching
               </td>
-              <td className="p-5 text-primary font-bold">
-                cache.fetch() API
-              </td>
+              <td className="p-5 text-primary font-bold">cache.fetch() API</td>
               <td className="p-5 text-muted-foreground">
                 No (middleware only)
               </td>
@@ -98,9 +95,7 @@ export default function ComparisonSection() {
               <td className="p-5 font-semibold text-foreground">
                 TypeScript-first
               </td>
-              <td className="p-5 text-primary font-bold">
-                Yes &mdash; 100%
-              </td>
+              <td className="p-5 text-primary font-bold">Yes &mdash; 100%</td>
               <td className="p-5 text-muted-foreground">No</td>
               <td className="p-5 text-muted-foreground">No</td>
               <td className="p-5 text-muted-foreground">Partial</td>
@@ -172,25 +167,19 @@ export default function ComparisonSection() {
                 <span className="block text-[9px] font-bold text-primary uppercase tracking-wider mb-0.5">
                   @express-route-cache
                 </span>
-                <span className="text-foreground font-semibold">
-                  {row.erc}
-                </span>
+                <span className="text-foreground font-semibold">{row.erc}</span>
               </div>
               <div>
                 <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
                   {row.col2.label}
                 </span>
-                <span className="text-muted-foreground">
-                  {row.col2.val}
-                </span>
+                <span className="text-muted-foreground">{row.col2.val}</span>
               </div>
               <div>
                 <span className="block text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">
                   {row.col3.label}
                 </span>
-                <span className="text-muted-foreground">
-                  {row.col3.val}
-                </span>
+                <span className="text-muted-foreground">{row.col3.val}</span>
               </div>
             </div>
           </div>

@@ -99,7 +99,7 @@ It supports **Redis** (ioredis), **Memcached** (memjs), and **in-memory** storag
 | Redis Support          |           ✅           |     ✅     |             ❌             |          ✅          |           ✅            |
 | Memcached Support      |           ✅           |     ❌     |             ❌             |          ✅          |           ❌            |
 | Binary Data (images)   |           ✅           |     ❌     |             ❌             |          ❌          |           ❌            |
-| TypeScript-first       |           ✅           |     ❌     |             ❌             |         ⚠️          |           ❌            |
+| TypeScript-first       |           ✅           |     ❌     |             ❌             |          ⚠️          |           ❌            |
 
 See the [full comparison →](./comparison)
 

@@ -5,7 +5,7 @@ description: Caching middleware for Express.js - Version 1.x
 
 # Legacy Documentation (v1.x)
 
-Welcome to the documentation for **Version 1.x** of `@express-route-cache`. 
+Welcome to the documentation for **Version 1.x** of `@express-route-cache`.
 
 > [!WARNING]
 > This documentation is for the legacy version of `@express-route-cache`. For the latest features (including the standalone `cache.fetch` API, Cache Studio, and improved performance), please check out the [Latest Version (v2.x)](/docs/guide/why).

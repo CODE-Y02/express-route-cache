@@ -1,6 +1,6 @@
-@import 'tailwindcss';
-@import 'fumadocs-ui/css/neutral.css';
-@import 'fumadocs-ui/css/preset.css';
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -154,7 +154,8 @@ html > body[data-scroll-locked] {
   --primary-foreground: oklch(0.985 0 0);
   --ring: oklch(0.5 0.22 25);
 }
-.dark[data-theme="ember"], [data-theme="ember"] .dark {
+.dark[data-theme="ember"],
+[data-theme="ember"] .dark {
   --primary: oklch(0.6 0.22 15);
   --primary-hover: oklch(0.55 0.22 15);
   --primary-foreground: oklch(0.985 0 0);
@@ -168,7 +169,8 @@ html > body[data-scroll-locked] {
   --primary-foreground: oklch(0.1 0 0);
   --ring: oklch(0.78 0.16 80);
 }
-.dark[data-theme="thunder"], [data-theme="thunder"] .dark {
+.dark[data-theme="thunder"],
+[data-theme="thunder"] .dark {
   --primary: oklch(0.85 0.16 80);
   --primary-hover: oklch(0.79 0.16 80);
   --primary-foreground: oklch(0.1 0 0);
@@ -182,7 +184,8 @@ html > body[data-scroll-locked] {
   --primary-foreground: oklch(0.985 0 0);
   --ring: oklch(0.5 0.22 260);
 }
-.dark[data-theme="sea"], [data-theme="sea"] .dark {
+.dark[data-theme="sea"],
+[data-theme="sea"] .dark {
   --primary: oklch(0.6 0.22 250);
   --primary-hover: oklch(0.55 0.22 250);
   --primary-foreground: oklch(0.985 0 0);
@@ -196,7 +199,8 @@ html > body[data-scroll-locked] {
   --primary-foreground: oklch(0.985 0 0);
   --ring: oklch(0.35 0.05 250);
 }
-.dark[data-theme="night"], [data-theme="night"] .dark {
+.dark[data-theme="night"],
+[data-theme="night"] .dark {
   --primary: oklch(0.82 0.03 250);
   --primary-hover: oklch(0.76 0.03 250);
   --primary-foreground: oklch(0.1 0 0);
@@ -216,7 +220,9 @@ html > body[data-scroll-locked] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+  *,
+  ::before,
+  ::after {
     animation-delay: -1ms !important;
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;

@@ -1,7 +1,4 @@
 {
   "title": "Reference (v1)",
-  "pages": [
-    "api",
-    "architecture"
-  ]
+  "pages": ["api", "architecture"]
 }

@@ -13,7 +13,11 @@ import FooterSection from "@/components/home/FooterSection";
 export default function HomePage() {
   return (
     <TooltipProvider>
-      <div id="main-content" tabIndex={-1} className="outline-none relative min-h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary selection:text-primary-foreground">
+      <div
+        id="main-content"
+        tabIndex={-1}
+        className="outline-none relative min-h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary selection:text-primary-foreground"
+      >
         {/* Decorative Grid and Ambient Glows */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(var(--primary-rgb,220,38,38),0.07),transparent_50%)] pointer-events-none" />
         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.005)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.005)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none opacity-30" />

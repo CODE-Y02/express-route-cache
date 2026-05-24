@@ -62,20 +62,14 @@ export default function HeroSection() {
 
       <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight max-w-5xl leading-none bg-clip-text text-transparent bg-gradient-to-b from-slate-950 via-slate-800 to-slate-600 dark:from-white dark:via-slate-100 dark:to-slate-400 mb-8 select-none">
         Production caching infrastructure for Express{" "}
-        <span className="text-primary">
-          — routes, services, and beyond.
-        </span>
+        <span className="text-primary">— routes, services, and beyond.</span>
       </h1>
 
       <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mb-12 leading-relaxed font-normal">
         Cache any Express route{" "}
-        <span className="text-foreground font-semibold">
-          or async function
-        </span>{" "}
+        <span className="text-foreground font-semibold">or async function</span>{" "}
         with <span className="text-foreground font-semibold">SWR</span>,{" "}
-        <span className="text-foreground font-semibold">
-          O(1) invalidation
-        </span>
+        <span className="text-foreground font-semibold">O(1) invalidation</span>
         , and{" "}
         <span className="text-foreground font-semibold">
           stampede protection
@@ -90,12 +84,21 @@ export default function HeroSection() {
           aria-label="Copy npm installation command to clipboard"
           className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900"
         >
-          <Terminal className="size-4 text-primary shrink-0" aria-hidden="true" />
+          <Terminal
+            className="size-4 text-primary shrink-0"
+            aria-hidden="true"
+          />
           <span className="shrink-0">npm i @express-route-cache/core</span>
           {copied ? (
-            <Check className="size-4 text-emerald-500 animate-scale-up shrink-0" aria-hidden="true" />
+            <Check
+              className="size-4 text-emerald-500 animate-scale-up shrink-0"
+              aria-hidden="true"
+            />
           ) : (
-            <Copy className="size-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
+            <Copy
+              className="size-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
+              aria-hidden="true"
+            />
           )}
         </button>
 
@@ -107,7 +110,10 @@ export default function HeroSection() {
           )}
         >
           View Documentation
-          <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+          <ArrowRight
+            className="size-4 group-hover:translate-x-1 transition-transform"
+            aria-hidden="true"
+          />
         </Link>
       </div>
 

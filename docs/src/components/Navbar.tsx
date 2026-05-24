@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Star, Zap, Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
-import { Button } from '@/components/ui/button';
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Star, Zap, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import { gitConfig } from '@/lib/shared';
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { gitConfig } from "@/lib/shared";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -43,14 +43,26 @@ export function DarkLightToggle() {
         <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         <span className="sr-only">Toggle theme</span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="rounded-xl p-1 bg-popover border border-border">
-        <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">
+      <DropdownMenuContent
+        align="end"
+        className="rounded-xl p-1 bg-popover border border-border"
+      >
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className="cursor-pointer"
+        >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className="cursor-pointer"
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className="cursor-pointer"
+        >
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -59,27 +71,34 @@ export function DarkLightToggle() {
 }
 
 export default function Navbar() {
-  const pathname = usePathname() || '';
-  const isDocs = pathname.startsWith('/docs');
+  const pathname = usePathname() || "";
+  const isDocs = pathname.startsWith("/docs");
   const [githubStars, setGithubStars] = React.useState<number | null>(null);
 
   React.useEffect(() => {
-    fetch('https://api.github.com/repos/CODE-Y02/express-route-cache')
-      .then(r => r.json())
-      .then(data => typeof data?.stargazers_count === 'number' && setGithubStars(data.stargazers_count))
+    fetch("https://api.github.com/repos/CODE-Y02/express-route-cache")
+      .then((r) => r.json())
+      .then(
+        (data) =>
+          typeof data?.stargazers_count === "number" &&
+          setGithubStars(data.stargazers_count),
+      )
       .catch(() => {});
   }, []);
 
   return (
-    <header className={cn(
-      "sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md",
-      isDocs && "hidden md:block"
-    )}>
-      <div className={cn(
-        "mx-auto flex h-14 w-full items-center justify-between px-4 sm:px-6 lg:px-8",
-        isDocs ? "max-w-none px-6" : "max-w-7xl"
-      )}>
-        
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md",
+        isDocs && "hidden md:block",
+      )}
+    >
+      <div
+        className={cn(
+          "mx-auto flex h-14 w-full items-center justify-between px-4 sm:px-6 lg:px-8",
+          isDocs ? "max-w-none px-6" : "max-w-7xl",
+        )}
+      >
         {/* Brand Logo */}
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2 select-none group">
@@ -91,7 +110,6 @@ export default function Navbar() {
 
         {/* Action Controls */}
         <div className="flex items-center gap-4">
-          
           {/* Docs Link (Only on Landing Page) */}
           {!isDocs && (
             <Link
@@ -113,7 +131,9 @@ export default function Navbar() {
             <span>Star</span>
             {githubStars !== null && (
               <span className="bg-muted/80 px-1.5 py-0.5 rounded text-[10px] font-bold">
-                {githubStars >= 1000 ? `${(githubStars / 1000).toFixed(1)}k` : githubStars}
+                {githubStars >= 1000
+                  ? `${(githubStars / 1000).toFixed(1)}k`
+                  : githubStars}
               </span>
             )}
           </a>
@@ -135,7 +155,6 @@ export default function Navbar() {
           <div>
             <ThemeSwitcher />
           </div>
-
         </div>
       </div>
     </header>

@@ -2,13 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  Terminal,
-  Check,
-  Copy,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
+import { Terminal, Check, Copy, ArrowRight, ExternalLink } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -31,20 +25,29 @@ export default function FooterSection() {
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto mb-10 leading-relaxed">
             Add production-grade caching to your service layer in under a
-            minute. O(1) invalidation, SWR, and stampede protection out of
-            the box.
+            minute. O(1) invalidation, SWR, and stampede protection out of the
+            box.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
               onClick={copyToClipboard}
               className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900"
             >
-              <Terminal className="size-4 text-primary shrink-0" aria-hidden="true" />
+              <Terminal
+                className="size-4 text-primary shrink-0"
+                aria-hidden="true"
+              />
               <span className="shrink-0">npm i @express-route-cache/core</span>
               {copied ? (
-                <Check className="size-4 text-emerald-500 animate-scale-up shrink-0" aria-hidden="true" />
+                <Check
+                  className="size-4 text-emerald-500 animate-scale-up shrink-0"
+                  aria-hidden="true"
+                />
               ) : (
-                <Copy className="size-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
+                <Copy
+                  className="size-4 text-muted-foreground group-hover:text-foreground transition-colors shrink-0"
+                  aria-hidden="true"
+                />
               )}
             </button>
             <Link
@@ -55,7 +58,10 @@ export default function FooterSection() {
               )}
             >
               Read the Docs
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+              <ArrowRight
+                className="size-4 group-hover:translate-x-1 transition-transform"
+                aria-hidden="true"
+              />
             </Link>
           </div>
         </div>
@@ -70,8 +76,7 @@ export default function FooterSection() {
               @express-route-cache
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-              TanStack Query&apos;s mental model, for your Express.js
-              backend.
+              TanStack Query&apos;s mental model, for your Express.js backend.
             </p>
             <div className="flex items-center gap-3">
               <a
@@ -101,11 +106,7 @@ export default function FooterSection() {
                 className="text-muted-foreground hover:text-foreground transition-colors"
                 aria-label="X / Twitter"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-4"
-                  fill="currentColor"
-                >
+                <svg viewBox="0 0 24 24" className="size-4" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
               </a>

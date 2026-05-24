@@ -9,7 +9,7 @@
     },
     "docs#build": {
       "inputs": ["**"],
-      "outputs": [".vitepress/dist/**"]
+      "outputs": ["out/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
