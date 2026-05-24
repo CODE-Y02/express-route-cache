@@ -40,6 +40,17 @@ jobs:
         
       - name: Build with Next.js (Fumadocs)
         run: pnpm run docs:build
+
+      - name: Build old docs (Vitepress)
+        run: |
+          cd docs-old
+          npm install
+          npm run build
+
+      - name: Copy old docs to static export
+        run: |
+          mkdir -p docs/out/old-docs
+          cp -r docs-old/.vitepress/dist/* docs/out/old-docs/
       
       - name: Create .nojekyll
         run: touch docs/out/.nojekyll

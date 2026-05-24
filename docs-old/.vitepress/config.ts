@@ -2,7 +2,7 @@ import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
 import type { OgPageInfo } from "./og-image.js";
 
-const base = "/";
+const base = "/old-docs/";
 const siteUrl = "https://express-route-cache.js.org";
 
 // Collected during transformHead, consumed in buildEnd
