@@ -13,7 +13,7 @@
     }
   },
   "bin": {
-    "express-route-cache-studio": "./dist/cli.js"
+    "@express-route-cache/studio": "./dist/cli.js"
   },
   "files": [
     "dist"

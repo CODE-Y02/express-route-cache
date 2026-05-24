@@ -98,7 +98,7 @@ Visiting `http://localhost:3000/studio` will dynamically resolve backend APIs re
 
 ---
 
-### 3. CLI Runner (`express-route-cache-studio`)
+### 3. CLI Runner (`@express-route-cache/studio`)
 
 Monitor a production cache instance without modifying your server application code.
 
@@ -106,7 +106,7 @@ Run the global CLI command:
 
 ```bash
 # Starts dashboard on http://localhost:5555
-npx express-route-cache-studio
+npx @express-route-cache/studio
 ```
 
 The CLI runner auto-detects database connections from your environment variables:
@@ -170,4 +170,4 @@ module.exports = {
 };
 ```
 
-Run `npx express-route-cache-studio` and visit the dashboard to manage your keys visually!
+Run `npx @express-route-cache/studio` and visit the dashboard to manage your keys visually!

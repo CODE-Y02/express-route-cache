@@ -154,17 +154,17 @@ app.listen(3000, () => {
 
 ---
 
-### 3. CLI Runner (`express-route-cache-studio`)
+### 3. CLI Runner (`@express-route-cache/studio`)
 
 If you want to view a production cache (like Redis or Memcached) without adding any code to your application server, you can launch it using the CLI runner:
 
 ```bash
 # Runs the studio dashboard on http://localhost:5555
-npx express-route-cache-studio
+npx @express-route-cache/studio
 ```
 
 > [!IMPORTANT]
-> The binary name is `express-route-cache-studio` (as registered in `package.json`). The CLI also respects a `PORT` environment variable to override the default port `5555`.
+> The binary name is `@express-route-cache/studio` (as registered in `package.json`). The CLI also respects a `PORT` environment variable to override the default port `5555`.
 
 The CLI runner auto-detects database connections from your environment variables:
 
@@ -237,7 +237,7 @@ Because the Cache Studio UI and API routes are decoupled from the core middlewar
 
 ```mermaid
 flowchart LR
-    subgraph Process ["Studio CLI Process (npx express-route-cache-studio)"]
+    subgraph Process ["Studio CLI Process (npx @express-route-cache/studio)"]
         CLI["CLI Dashboard Server"]
         Shim["Custom Adapter Shim (erc.config.js)"]
         CLI --> Shim
@@ -290,4 +290,4 @@ module.exports = {
 };
 ```
 
-Run `npx express-route-cache-studio` in the folder containing this config file, and you get an instant visual admin console for your database sessions!
+Run `npx @express-route-cache/studio` in the folder containing this config file, and you get an instant visual admin console for your database sessions!
