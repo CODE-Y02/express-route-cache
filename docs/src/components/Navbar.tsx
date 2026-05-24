@@ -88,10 +88,7 @@ export default function Navbar() {
 
   return (
     <header
-      className={cn(
-        "sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md",
-        isDocs && "hidden md:block",
-      )}
+      className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md"
     >
       <div
         className={cn(
@@ -103,7 +100,9 @@ export default function Navbar() {
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2 select-none group">
             <span className="font-sans font-bold text-sm tracking-tight text-foreground transition-colors group-hover:text-primary">
-              <span className="text-primary mr-0.5">@</span>express-route-cache
+              <span className="text-primary mr-0.5">@</span>
+              <span className="hidden sm:inline">express-route-cache</span>
+              <span className="inline sm:hidden">erc</span>
             </span>
           </Link>
         </div>

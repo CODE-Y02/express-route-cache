@@ -4,6 +4,13 @@
   --fd-accent: color-mix(in oklch, var(--primary) 10%, transparent);
   --fd-accent-foreground: var(--primary);
   --fd-border: color-mix(in oklch, var(--primary) 15%, transparent);
+  --border: color-mix(in oklch, var(--primary) 15%, transparent) !important;
+}
+
+/* Sidebar and TOC Background Color Override (White in Light Mode) */
+.docsContainer :global(#nd-sidebar),
+.docsContainer :global(aside) {
+  background-color: var(--background) !important;
 }
 
 /* Headings theme-aware color */
@@ -84,4 +91,31 @@
     var(--primary) 25%,
     transparent
   ) !important;
+}
+
+/* Inline Code styling to remove forced borders and add theme-aware background tint and text color */
+.docsContainer :global(code:not(pre code)) {
+  border: none !important;
+  background-color: color-mix(
+    in oklch,
+    var(--primary) 8%,
+    transparent
+  ) !important;
+  color: var(--primary) !important;
+  padding: 0.15em 0.35em !important;
+  border-radius: 6px !important;
+  font-size: 0.85em !important;
+  font-weight: 500 !important;
+}
+
+/* Custom Navbar z-index adjustment inside Docs Layout to keep it below sidebars */
+.docsContainer :global(header) {
+  z-index: 30 !important;
+}
+
+/* Ensure search dialog and its portal overlay are always drawn above sidebars/navbar */
+:global([role="dialog"]),
+:global([data-search]),
+:global([class*="search"]) {
+  z-index: 1000 !important;
 }

@@ -19,6 +19,18 @@ export default function DocsLayoutWrapper({
 }: DocsLayoutWrapperProps) {
   const pathname = usePathname() || "";
   const isV1 = pathname.startsWith("/docs/v1") || pathname === "/docs/v1";
+  const [mounted, setMounted] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const filteredTree = useMemo(() => {
     if (!tree || !tree.children) return tree;
@@ -72,9 +84,20 @@ export default function DocsLayoutWrapper({
     <div className={styles.docsContainer}>
       <DocsLayout
         tree={filteredTree}
-        nav={{
-          component: <Navbar />,
-        }}
+        nav={
+          mounted && isMobile
+            ? {
+                title: (
+                  <span className="font-sans font-bold text-sm tracking-tight text-foreground select-none group">
+                    <span className="text-primary mr-0.5">@</span>express-route-cache
+                  </span>
+                ),
+                url: "/",
+              }
+            : {
+                component: <Navbar />,
+              }
+        }
         sidebar={{
           title: "@express-route-cache",
         }}
