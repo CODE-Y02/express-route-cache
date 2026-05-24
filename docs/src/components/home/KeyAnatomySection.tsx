@@ -27,12 +27,12 @@ export default function KeyAnatomySection() {
         <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-primary/50 via-primary to-primary/50" />
 
         {/* The Interactive Key row */}
-        <div className="flex flex-wrap items-center justify-center gap-1.5 font-mono text-xs sm:text-sm mb-8 bg-muted/30 p-3 sm:p-4 rounded-2xl border border-border/50">
+        <div className="flex flex-nowrap overflow-x-auto scrollbar-thin whitespace-nowrap items-center justify-start sm:justify-center gap-1.5 font-mono text-xs sm:text-sm mb-8 bg-muted/30 p-3 sm:p-4 rounded-2xl border border-border/50">
           <button
             onClick={() => setSelectedKeySegment("prefix")}
             aria-pressed={selectedKeySegment === "prefix"}
             className={cn(
-              "px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
+              "shrink-0 px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
               selectedKeySegment === "prefix"
                 ? "bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]"
                 : "bg-muted/80 hover:bg-muted text-muted-foreground border-border",
@@ -41,7 +41,7 @@ export default function KeyAnatomySection() {
             erc
           </button>
 
-          <span className="text-muted-foreground/60 font-bold px-0.5 select-none">
+          <span className="shrink-0 text-muted-foreground/60 font-bold px-0.5 select-none">
             :
           </span>
 
@@ -49,7 +49,7 @@ export default function KeyAnatomySection() {
             onClick={() => setSelectedKeySegment("route")}
             aria-pressed={selectedKeySegment === "route"}
             className={cn(
-              "px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
+              "shrink-0 px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
               selectedKeySegment === "route"
                 ? "bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]"
                 : "bg-muted/80 hover:bg-muted text-primary border-border",
@@ -58,7 +58,7 @@ export default function KeyAnatomySection() {
             GET:/api/users/:id
           </button>
 
-          <span className="text-muted-foreground/60 font-bold px-0.5 select-none">
+          <span className="shrink-0 text-muted-foreground/60 font-bold px-0.5 select-none">
             :
           </span>
 
@@ -66,7 +66,7 @@ export default function KeyAnatomySection() {
             onClick={() => setSelectedKeySegment("epoch")}
             aria-pressed={selectedKeySegment === "epoch"}
             className={cn(
-              "px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
+              "shrink-0 px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
               selectedKeySegment === "epoch"
                 ? "bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]"
                 : "bg-muted/80 hover:bg-muted text-amber-500 dark:text-amber-400 border-border",
@@ -75,7 +75,7 @@ export default function KeyAnatomySection() {
             v:api=0|v:api/users=3
           </button>
 
-          <span className="text-muted-foreground/60 font-bold px-0.5 select-none">
+          <span className="shrink-0 text-muted-foreground/60 font-bold px-0.5 select-none">
             :
           </span>
 
@@ -83,7 +83,7 @@ export default function KeyAnatomySection() {
             onClick={() => setSelectedKeySegment("vary")}
             aria-pressed={selectedKeySegment === "vary"}
             className={cn(
-              "px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
+              "shrink-0 px-2 py-1.5 sm:px-3 sm:py-2.5 rounded-lg sm:rounded-xl transition-all border font-semibold select-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 focus-visible:outline-none",
               selectedKeySegment === "vary"
                 ? "bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]"
                 : "bg-muted/80 hover:bg-muted text-muted-foreground border-border",
@@ -92,10 +92,10 @@ export default function KeyAnatomySection() {
             vary:auth=user_789
           </button>
 
-          <span className="text-muted-foreground/60 font-bold px-1 select-none">
+          <span className="shrink-0 text-muted-foreground/60 font-bold px-1 select-none">
             ➡
           </span>
-          <span className="px-2 py-1.5 sm:px-3.5 sm:py-2.5 rounded-lg sm:rounded-xl bg-primary/10 border border-primary/20 font-bold text-foreground text-[10px] sm:text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <span className="shrink-0 px-2 py-1.5 sm:px-3.5 sm:py-2.5 rounded-lg sm:rounded-xl bg-primary/10 border border-primary/20 font-bold text-foreground text-[10px] sm:text-xs shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
             SHA-256 HASH
           </span>
         </div>

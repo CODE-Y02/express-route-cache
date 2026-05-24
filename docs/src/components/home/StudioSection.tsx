@@ -23,9 +23,9 @@ export default function StudioSection() {
       aria-label="Cache Studio Diagnostics Suite"
       className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto"
     >
-      <Card className="border border-border bg-card rounded-3xl p-8 sm:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-lg">
+      <Card className="border border-border bg-card rounded-3xl p-6 sm:p-12 relative overflow-hidden flex flex-col md:flex-row items-center gap-8 shadow-lg">
         <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-primary/10 rounded-full blur-[80px]" />
-        <div className="flex-1">
+        <div className="w-full flex-1 min-w-0">
           <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-wider mb-4">
             <Eye className="size-4" aria-hidden="true" />
             <span>Diagnostics Suite</span>
@@ -43,13 +43,13 @@ export default function StudioSection() {
           <button
             onClick={copyToClipboard}
             aria-label="Copy npx command to clipboard"
-            className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900 mb-4 md:mb-0"
+            className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-xs sm:text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 max-w-full overflow-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900 mb-4 md:mb-0"
           >
             <Terminal
               className="size-4 text-primary shrink-0"
               aria-hidden="true"
             />
-            <span className="shrink-0">
+            <span className="min-w-0 overflow-x-auto scrollbar-none whitespace-nowrap">
               npx @express-route-cache/studio --host localhost
             </span>
             {copied ? (

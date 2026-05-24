@@ -31,13 +31,13 @@ export default function FooterSection() {
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
             <button
               onClick={copyToClipboard}
-              className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900"
+              className="flex items-center justify-between gap-3 px-5 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 hover:border-primary/50 cursor-pointer w-full sm:w-auto font-mono text-xs sm:text-sm text-foreground/80 transition-all select-none group shadow-[0_1px_2px_rgba(0,0,0,0.08)] !h-12 max-w-full overflow-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900"
             >
               <Terminal
                 className="size-4 text-primary shrink-0"
                 aria-hidden="true"
               />
-              <span className="shrink-0">npm i @express-route-cache/core</span>
+              <span className="min-w-0 overflow-x-auto scrollbar-none whitespace-nowrap">npm i @express-route-cache/core</span>
               {copied ? (
                 <Check
                   className="size-4 text-emerald-500 animate-scale-up shrink-0"

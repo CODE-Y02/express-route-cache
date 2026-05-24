@@ -120,11 +120,11 @@ export default function StampedeSection() {
 
             {/* Visual request grid */}
             <div className="mb-6 bg-muted/20 border border-border/40 rounded-2xl p-4">
-              <div className="flex justify-between items-center mb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                 <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   Concurrent Requests Visualizer
                 </span>
-                <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-3">
+                <span className="text-[10px] text-muted-foreground font-semibold flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" /> DB
                     Query (1)

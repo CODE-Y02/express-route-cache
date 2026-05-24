@@ -319,12 +319,12 @@ export default function PlaygroundSection() {
                     {requestList.map((req) => (
                       <div
                         key={req.id}
-                        className="flex items-center justify-between p-3 rounded-xl border border-border/80 bg-muted/20 animate-fade-in"
+                        className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-border/80 bg-muted/20 animate-fade-in"
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           <span
                             className={cn(
-                              "text-[9px] font-bold px-1.5 py-0.5 rounded",
+                              "text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0",
                               req.method === "GET"
                                 ? "bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30"
                                 : req.method === "POST"
@@ -334,14 +334,14 @@ export default function PlaygroundSection() {
                           >
                             {req.method}
                           </span>
-                          <span className="text-xs font-mono font-semibold text-foreground">
+                          <span className="text-xs font-mono font-semibold text-foreground truncate max-w-[120px] sm:max-w-[180px]" title={req.path}>
                             {req.path}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2.5 shrink-0">
                           <span
                             className={cn(
-                              "text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5",
+                              "text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 shrink-0",
                               req.status === "hit"
                                 ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30"
                                 : req.status === "miss"
@@ -365,7 +365,7 @@ export default function PlaygroundSection() {
                             />
                             {req.status.toUpperCase()}
                           </span>
-                          <span className="text-xs font-mono text-muted-foreground font-semibold">
+                          <span className="text-xs font-mono text-muted-foreground font-semibold shrink-0">
                             {req.duration}
                           </span>
                         </div>
