@@ -776,13 +776,9 @@ async function revalidateInBackground(
         localHeaders.delete(name.toLowerCase());
       mockRes.getHeaders = () => Object.fromEntries(localHeaders);
 
-      // Override output methods to prevent writing to real socket
-      mockRes.write = () => true;
-      mockRes.end = () => {
-        // Clean up SWR lock
-        client.del(`swr-lock:${cacheKey}`).catch(() => {});
-        return mockRes;
-      };
+      // Note: mockRes.write and mockRes.end are NOT set here — interceptResponse
+      // will monkey-patch them to capture the response body for caching.
+      // SWR lock cleanup is handled by the .finally() block in the caller.
 
       // Set up the response interceptor for this mock request/response first!
       interceptResponse(

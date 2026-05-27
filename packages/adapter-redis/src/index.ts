@@ -44,6 +44,17 @@ export function createRedisAdapter(
       : new Redis({ enableOfflineQueue: false, ...opts.options }));
 
   return {
+    name: "redis" as const,
+
+    async ping(): Promise<boolean> {
+      try {
+        await redis.ping();
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
     async get(key: string): Promise<string | null> {
       return redis.get(key);
     },
@@ -105,3 +116,7 @@ export function createRedisAdapter(
     },
   };
 }
+
+// ─── Cluster Adapter ────────────────────────────────────────────────────────
+export { createRedisClusterAdapter } from "./cluster";
+export type { RedisClusterAdapterOptions } from "./cluster";

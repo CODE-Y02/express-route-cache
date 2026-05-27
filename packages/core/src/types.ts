@@ -8,6 +8,18 @@ import type { Request, Response, NextFunction } from "express";
  * No Set operations (sadd/smembers) — keeps Memcached fully compatible.
  */
 export interface CacheClient {
+  /**
+   * Human-readable adapter name for diagnostics and Studio identification.
+   * @example "memory", "redis", "redis-cluster", "memcached"
+   */
+  readonly name?: string;
+
+  /**
+   * Health check — returns `true` if the adapter can reach its backing store.
+   * Used by Cache Studio to display real connection status.
+   */
+  ping?(): Promise<boolean>;
+
   /** Retrieve a cached value by key. Returns `null` on miss. */
   get(key: string): Promise<string | null>;
 
