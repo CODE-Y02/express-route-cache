@@ -137,7 +137,7 @@ export interface CacheConfig {
    * Whether caching is enabled globally.
    * @default true
    */
-  enabled?: boolean;
+  enabled?: boolean | ((req: Request, res: Response) => boolean);
 
   /**
    * Whether to sort query parameter keys before hashing.
@@ -196,7 +196,7 @@ export interface RouteOptions {
   staleTime?: number;
   gcTime?: number;
   swr?: boolean;
-  enabled?: boolean;
+  enabled?: boolean | ((req: Request, res: Response) => boolean);
   vary?: string[];
   sortQuery?: boolean;
   maxBodySize?: number;

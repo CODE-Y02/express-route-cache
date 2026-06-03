@@ -214,3 +214,27 @@ export function getFreshness(
 export function getAgeSeconds(entry: CacheEntry): number {
   return Math.floor((Date.now() - entry.createdAt) / 1000);
 }
+
+/**
+ * Generate a prefix-safe hashed cache key based on a namespace tag and custom uniqueness data.
+ * Useful for caching POST request bodies, user-specific data, or dynamic payloads.
+ */
+export function generateCacheKey<T>(
+  tag: string,
+  data: T,
+  prefix = "erc:"
+): string {
+  let dataStr = "";
+  if (typeof data === "string") {
+    dataStr = data;
+  } else if (Buffer.isBuffer(data)) {
+    dataStr = data.toString("base64");
+  } else if (typeof data === "object" && data !== null) {
+    dataStr = JSON.stringify(data);
+  } else if (data !== undefined && data !== null) {
+    dataStr = String(data);
+  }
+
+  const hash = crypto.createHash("sha256").update(dataStr).digest("hex");
+  return `${prefix}${tag}:${hash}`;
+}

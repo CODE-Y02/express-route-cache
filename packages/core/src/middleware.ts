@@ -145,7 +145,13 @@ export function createCache(config: CacheConfig): CacheInstance {
         return;
       }
 
-      // Handle auto-invalidation for non-GET mutation methods
+      const enabledCheck = routeOpts?.enabled ?? globalOpts.enabled;
+      const enabled =
+        typeof enabledCheck === "function"
+          ? enabledCheck(req, res)
+          : enabledCheck;
+
+      // Handle auto-invalidation and routing for non-GET mutation methods
       if (req.method !== "GET") {
         const autoInv = routeOpts?.autoInvalidate ?? globalOpts.autoInvalidate;
         if (autoInv) {
@@ -158,12 +164,16 @@ export function createCache(config: CacheConfig): CacheInstance {
             }
           });
         }
-        next();
-        return;
+
+        // Non-GET caching must be explicitly enabled per-route (not via global default enabled = true)
+        const isExplicitlyEnabled = routeOpts?.enabled !== undefined && enabled;
+        if (!isExplicitlyEnabled) {
+          next();
+          return;
+        }
       }
 
       // Check enabled
-      const enabled = routeOpts?.enabled ?? globalOpts.enabled;
       if (!enabled) {
         next();
         return;
