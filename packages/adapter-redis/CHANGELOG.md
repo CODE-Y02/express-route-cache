@@ -1,5 +1,16 @@
 # @express-route-cache/redis
 
+## 1.1.0
+
+### Minor Changes
+
+- 05861c8: feat: support dynamic enabled callback and caching of non-GET routes with type-safe generateCacheKey helper
+
+### Patch Changes
+
+- Updated dependencies [05861c8]
+  - @express-route-cache/core@2.1.0
+
 ## 1.1.0-next.0
 
 ### Minor Changes

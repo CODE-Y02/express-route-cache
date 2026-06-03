@@ -51,13 +51,14 @@ jobs:
 
       - name: Ensure all changesets are versioned (consumed)
         run: |
-          # Count markdown changeset files (excluding config.json / pre.json)
+          # Count markdown changeset files (excluding config.json)
           CHANGESETS=$(find .changeset -name "*.md" | wc -l)
           if [ "$CHANGESETS" -gt 0 ]; then
             echo "❌ Error: Unconsumed changesets found in .changeset/ directory!"
             echo "Please run 'pnpm changeset version' locally, commit the version bump, and push."
             exit 1
           fi
+          echo "✅ No unconsumed changesets found."
 
       - name: Publish to NPM
         run: npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
