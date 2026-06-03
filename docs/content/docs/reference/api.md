@@ -24,22 +24,22 @@ The main entry point for initializing the caching layer.
 
 ### `CacheConfig` Options
 
-| Option           | Type                       | Default   | Description                                                                            |
-| :--------------- | :------------------------- | :-------- | :------------------------------------------------------------------------------------- |
-| `adapter`        | `CacheClient`              | —         | **Required**. Storage adapter (Memory, Redis, Memcached).                              |
-| `staleTime`      | `number`                   | `60`      | Seconds data stays fresh. During this window, cached responses are returned instantly. |
-| `gcTime`         | `number`                   | `300`     | Seconds stale data is kept in cache before eviction. Total TTL = `staleTime + gcTime`. |
-| `swr`            | `boolean`                  | `false`   | Enable Stale-While-Revalidate background refresh.                                      |
-| `stampede`       | `boolean`                  | `true`    | Prevent thundering-herd via request coalescing.                                        |
-| `vary`           | `string[]`                 | `[]`      | Request headers to include in the cache key (e.g. `['authorization']`).                |
-| `sortQuery`      | `boolean`                  | `false`   | Sort query params alphabetically for higher hit rates (`?a=1&b=2` ≡ `?b=2&a=1`).       |
-| `maxBodySize`    | `number`                   | `2097152` | Max response size in bytes to cache (default: 2MB). Larger responses skip the cache.   |
-| `autoInvalidate` | `boolean`                  | `false`   | Auto-invalidate route pattern epochs on successful POST, PUT, PATCH, or DELETE.        |
-| `retry`          | `number`                   | `0`       | Retries with exponential backoff for `cache.fetch()` on failure.                       |
-| `keyPrefix`      | `string`                   | `"erc:"`  | Global prefix for all cache keys in Redis/Memcached.                                   |
+| Option           | Type                                                    | Default   | Description                                                                            |
+| :--------------- | :------------------------------------------------------ | :-------- | :------------------------------------------------------------------------------------- |
+| `adapter`        | `CacheClient`                                           | —         | **Required**. Storage adapter (Memory, Redis, Memcached).                              |
+| `staleTime`      | `number`                                                | `60`      | Seconds data stays fresh. During this window, cached responses are returned instantly. |
+| `gcTime`         | `number`                                                | `300`     | Seconds stale data is kept in cache before eviction. Total TTL = `staleTime + gcTime`. |
+| `swr`            | `boolean`                                               | `false`   | Enable Stale-While-Revalidate background refresh.                                      |
+| `stampede`       | `boolean`                                               | `true`    | Prevent thundering-herd via request coalescing.                                        |
+| `vary`           | `string[]`                                              | `[]`      | Request headers to include in the cache key (e.g. `['authorization']`).                |
+| `sortQuery`      | `boolean`                                               | `false`   | Sort query params alphabetically for higher hit rates (`?a=1&b=2` ≡ `?b=2&a=1`).       |
+| `maxBodySize`    | `number`                                                | `2097152` | Max response size in bytes to cache (default: 2MB). Larger responses skip the cache.   |
+| `autoInvalidate` | `boolean`                                               | `false`   | Auto-invalidate route pattern epochs on successful POST, PUT, PATCH, or DELETE.        |
+| `retry`          | `number`                                                | `0`       | Retries with exponential backoff for `cache.fetch()` on failure.                       |
+| `keyPrefix`      | `string`                                                | `"erc:"`  | Global prefix for all cache keys in Redis/Memcached.                                   |
 | `enabled`        | `boolean \| ((req: Request, res: Response) => boolean)` | `true`    | Toggle caching globally. Accepts boolean or callback function.                         |
-| `metrics`        | `boolean`                  | `false`   | Enable real-time telemetry metrics collection (required for Cache Studio charts).      |
-| `studio`         | `boolean \| StudioOptions` | `false`   | Enable the Cache Studio visual dashboard or configure a standalone server.             |
+| `metrics`        | `boolean`                                               | `false`   | Enable real-time telemetry metrics collection (required for Cache Studio charts).      |
+| `studio`         | `boolean \| StudioOptions`                              | `false`   | Enable the Cache Studio visual dashboard or configure a standalone server.             |
 
 ### Returns (`CacheInstance`)
 
@@ -62,18 +62,18 @@ Apply specific caching rules to an individual route. All `RouteOptions` override
 
 ### `RouteOptions`
 
-| Option           | Type                                 | Description                                                                                                                    |
-| :--------------- | :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
-| `staleTime`      | `number`                             | Override global `staleTime` for this route.                                                                                    |
-| `gcTime`         | `number`                             | Override global `gcTime` for this route.                                                                                       |
-| `swr`            | `boolean`                            | Override global `swr` for this route.                                                                                          |
+| Option           | Type                                                    | Description                                                                                                                                                                 |
+| :--------------- | :------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `staleTime`      | `number`                                                | Override global `staleTime` for this route.                                                                                                                                 |
+| `gcTime`         | `number`                                                | Override global `gcTime` for this route.                                                                                                                                    |
+| `swr`            | `boolean`                                               | Override global `swr` for this route.                                                                                                                                       |
 | `enabled`        | `boolean \| ((req: Request, res: Response) => boolean)` | Disable or enable caching for this route. Accepts boolean or callback function. Explicitly setting this to `true` or a callback allows caching `POST` / non-`GET` requests. |
-| `vary`           | `string[]`                           | Override global `vary` for this route.                                                                                         |
-| `sortQuery`      | `boolean`                            | Override global `sortQuery` for this route.                                                                                    |
-| `maxBodySize`    | `number`                             | Override global `maxBodySize` for this route.                                                                                  |
-| `autoInvalidate` | `boolean`                            | Override global `autoInvalidate` for this route. **No-op when `key` override is also set** — use `cache.invalidate()` instead. |
-| `retry`          | `number`                             | Override global `retry` for this route.                                                                                        |
-| `key`            | `string \| (req: Request) => string` | **Custom key override.** If provided, used instead of the auto-generated versioned key.                                        |
+| `vary`           | `string[]`                                              | Override global `vary` for this route.                                                                                                                                      |
+| `sortQuery`      | `boolean`                                               | Override global `sortQuery` for this route.                                                                                                                                 |
+| `maxBodySize`    | `number`                                                | Override global `maxBodySize` for this route.                                                                                                                               |
+| `autoInvalidate` | `boolean`                                               | Override global `autoInvalidate` for this route. **No-op when `key` override is also set** — use `cache.invalidate()` instead.                                              |
+| `retry`          | `number`                                                | Override global `retry` for this route.                                                                                                                                     |
+| `key`            | `string \| (req: Request) => string`                    | **Custom key override.** If provided, used instead of the auto-generated versioned key.                                                                                     |
 
 ```ts
 app.get(

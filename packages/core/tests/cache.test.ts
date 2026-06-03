@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import express, { type Request, type Response } from "express";
 import request from "supertest";
-import { createCache, createMemoryAdapter, generateCacheKey } from "../src/index";
+import {
+  createCache,
+  createMemoryAdapter,
+  generateCacheKey,
+} from "../src/index";
 
 // ─── Test Helpers ───────────────────────────────────────────────────────────
 

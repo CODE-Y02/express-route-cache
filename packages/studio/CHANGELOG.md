@@ -1,5 +1,18 @@
 # @express-route-cache/studio
 
+## 1.1.0-next.0
+
+### Minor Changes
+
+- feat: support dynamic enabled callback and caching of non-GET routes with type-safe generateCacheKey helper
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/memcached@1.1.0-next.0
+  - @express-route-cache/redis@1.1.0-next.0
+  - @express-route-cache/core@2.1.0-next.0
+
 ## 1.0.0
 
 ### Major Changes

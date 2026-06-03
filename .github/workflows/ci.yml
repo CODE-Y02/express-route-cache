@@ -52,3 +52,9 @@ jobs:
 
       - name: Run Tests
         run: pnpm test
+
+      - name: Verify changesets are present
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          npx changeset status --since=origin/${{ github.base_ref }}

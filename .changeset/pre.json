@@ -1,0 +1,19 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "docs": "0.0.0",
+    "docs-old": "0.0.0",
+    "cache-example": "0.1.4",
+    "@express-route-cache/memcached": "1.0.0",
+    "@express-route-cache/redis": "1.0.0",
+    "@express-route-cache/core": "2.0.0",
+    "@repo/eslint-config": "0.0.0",
+    "@express-route-cache/mcp": "1.1.0",
+    "@express-route-cache/studio": "1.0.0",
+    "@repo/typescript-config": "0.0.0"
+  },
+  "changesets": [
+    "cool-readers-nail"
+  ]
+}

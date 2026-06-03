@@ -113,7 +113,7 @@ app.post(
   async (req, res) => {
     const results = await performSearch(req.body);
     res.json(results);
-  }
+  },
 );
 ```
 

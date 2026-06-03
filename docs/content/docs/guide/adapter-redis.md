@@ -78,7 +78,7 @@ const adapter = createRedisClusterAdapter({
   ],
   options: {
     scaleReads: "slave", // scale reads to replicas
-  }
+  },
 });
 
 const cache = createCache({ adapter });
@@ -86,11 +86,11 @@ const cache = createCache({ adapter });
 
 ### Adapter Options (`createRedisClusterAdapter`)
 
-| Option    | Type            | Description                                                                    |
-| :-------- | :-------------- | :----------------------------------------------------------------------------- |
-| `nodes`   | `ClusterNode[]` | **Required**. List of seed cluster nodes.                                      |
-| `options` | `ClusterOptions`| Raw `ioredis` ClusterOptions configuration.                                    |
-| `client`  | `Cluster`       | An existing `ioredis.Cluster` instance to reuse (alternative to seeding nodes). |
+| Option    | Type             | Description                                                                     |
+| :-------- | :--------------- | :------------------------------------------------------------------------------ |
+| `nodes`   | `ClusterNode[]`  | **Required**. List of seed cluster nodes.                                       |
+| `options` | `ClusterOptions` | Raw `ioredis` ClusterOptions configuration.                                     |
+| `client`  | `Cluster`        | An existing `ioredis.Cluster` instance to reuse (alternative to seeding nodes). |
 
 ---
 

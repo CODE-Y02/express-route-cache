@@ -21,6 +21,7 @@ head:
 By default, `@express-route-cache` only caches `GET` requests. Standard mutation HTTP methods (`POST`, `PUT`, `PATCH`, `DELETE`) bypass the caching layer entirely and trigger auto-invalidation instead. This prevents accidental caching of destructive actions (e.g. creating a user or making a purchase).
 
 However, some endpoints use `POST` for read-only or idempotent operations, such as:
+
 1. **Search APIs** where the query parameters/filter payloads are too large to fit in a standard `GET` URL limit.
 2. **GraphQL APIs** which route all queries and mutations via `POST` requests.
 
@@ -44,7 +45,7 @@ app.post(
   cache.route({
     enabled: (req) => req.headers["x-skip-cache"] !== "true",
   }),
-  handler
+  handler,
 );
 ```
 
@@ -53,7 +54,7 @@ app.post(
 ## 2. Setting a Custom Cache Key
 
 > [!WARNING]
-> **CRITICAL**: The default key generator in `@express-route-cache` does **not** parse or incorporate the request body (`req.body`). 
+> **CRITICAL**: The default key generator in `@express-route-cache` does **not** parse or incorporate the request body (`req.body`).
 > If you enable `POST` caching without specifying a custom `key`, all `POST` requests to that URL will share the same cache entry, regardless of what query or body is sent.
 
 To differentiate between different `POST` bodies, you must provide a custom `key` generator that incorporates the body payload.
@@ -78,14 +79,14 @@ app.post(
   "/api/search",
   cache.route({
     enabled: true,
-    // data is req.body (generic T). We pass "" as the prefix 
+    // data is req.body (generic T). We pass "" as the prefix
     // so that cache.route can prepend the global prefix (e.g., "erc:")
     key: (req) => generateCacheKey("search", req.body, ""),
   }),
   async (req, res) => {
     const results = await performSearch(req.body);
     res.json(results);
-  }
+  },
 );
 ```
 
@@ -106,7 +107,7 @@ app.post(
       return generateCacheKey("graphql", uniquenessPayload, "");
     },
   }),
-  graphqlHandler
+  graphqlHandler,
 );
 ```
 
@@ -127,7 +128,7 @@ app.post(
     key: (req) => generateCacheKey("reports", req.body, ""),
     staleTime: 300,
   }),
-  reportsHandler
+  reportsHandler,
 );
 ```
 
