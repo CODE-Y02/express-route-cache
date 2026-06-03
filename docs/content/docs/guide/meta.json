@@ -15,6 +15,7 @@
     "adapter-redis",
     "adapter-memcached",
     "---Advanced---",
+    "caching-post-requests",
     "recipes",
     "testing",
     "deployment",

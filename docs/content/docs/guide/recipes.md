@@ -96,6 +96,32 @@ app.get(
 
 ---
 
+## Caching POST Requests (e.g. Search / GraphQL)
+
+By default, non-`GET` requests bypass the caching layer. However, you can explicitly cache safe/idempotent `POST` requests (such as complex searches or GraphQL queries) by enabling it and defining a custom cache key incorporating the request body:
+
+```ts
+import { generateCacheKey } from "@express-route-cache/core";
+
+app.post(
+  "/api/search",
+  cache.route({
+    enabled: true, // Explicitly allow caching for this POST route
+    // Generate a unique hashed key from the request body
+    key: (req) => generateCacheKey("search", req.body, ""),
+  }),
+  async (req, res) => {
+    const results = await performSearch(req.body);
+    res.json(results);
+  }
+);
+```
+
+> [!IMPORTANT]
+> When caching `POST` requests, you must provide a custom `key` generator (using `generateCacheKey` or custom serialization). If you do not specify a key, all `POST` requests to the same URL will share the same cache key regardless of the body payload.
+
+---
+
 ## Conditional Caching (Skip for Certain Requests)
 
 Pre-create the cache middleware, then decide per-request whether to apply it:

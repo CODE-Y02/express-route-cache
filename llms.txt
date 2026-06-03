@@ -16,15 +16,18 @@
 - **SWR (Stale-While-Revalidate)**: [Guide](https://code-y02.github.io/express-route-cache/guide/concepts-swr)
 - **Stampede Protection**: [Guide](https://code-y02.github.io/express-route-cache/guide/concepts-stampede)
 - **Binary Support**: [Guide](https://code-y02.github.io/express-route-cache/guide/binary-support)
+- **POST Request Caching**: [Guide](https://code-y02.github.io/express-route-cache/guide/caching-post-requests)
 
 **Full Technical Spec (TXT)**: https://code-y02.github.io/express-route-cache/llms-full.txt
 **Machine Context (JSON)**: https://code-y02.github.io/express-route-cache/ai.json
 
 ## 📝 Code Patterns
-- **Route Caching**: `app.get('/path', cache.route(), handler)`
+- **Route Caching (GET)**: `app.get('/path', cache.route(), handler)`
+- **Route Caching (POST)**: `app.post('/search', cache.route({ enabled: true, key: (req) => generateCacheKey('search', req.body, '') }))`
 - **Manual Fetch**: `const data = await cache.fetch('key', () => fetchData())`
 - **Invalidation**: `await cache.invalidate('/path')` (O(1) Epoch based)
 - **Custom Key**: `cache.route({ key: (req) => 'custom' })`
+- **Redis Cluster Adapter**: `createRedisClusterAdapter({ nodes: [{ host: '10.0.0.1', port: 6379 }] })`
 
 ## ⚙️ Configuration
 ```ts
