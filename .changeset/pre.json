@@ -13,7 +13,5 @@
     "@express-route-cache/studio": "1.0.0",
     "@repo/typescript-config": "0.0.0"
   },
-  "changesets": [
-    "cool-readers-nail"
-  ]
+  "changesets": ["cool-readers-nail"]
 }

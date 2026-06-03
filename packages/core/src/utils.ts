@@ -222,7 +222,7 @@ export function getAgeSeconds(entry: CacheEntry): number {
 export function generateCacheKey<T>(
   tag: string,
   data: T,
-  prefix = "erc:"
+  prefix = "erc:",
 ): string {
   let dataStr = "";
   if (typeof data === "string") {
