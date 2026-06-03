@@ -61,7 +61,9 @@ jobs:
           echo "✅ No unconsumed changesets found."
 
       - name: Publish to NPM
-        run: npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
