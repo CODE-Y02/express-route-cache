@@ -24,6 +24,12 @@ export function createMemoryAdapter(defaultTTLSeconds = 600): CacheClient {
   const cache = new NodeCache({ stdTTL: defaultTTLSeconds, useClones: false });
 
   return {
+    name: "memory" as const,
+
+    async ping(): Promise<boolean> {
+      return true; // In-memory — always reachable
+    },
+
     async get(key: string): Promise<string | null> {
       const value = cache.get<string>(key);
       return value ?? null;
@@ -60,6 +66,8 @@ export function createMemoryAdapter(defaultTTLSeconds = 600): CacheClient {
       value: string,
       ttlSeconds: number,
     ): Promise<boolean> {
+      // NodeCache has() and set() are synchronous — no async yield
+      // between check and set, so this is safe in single-threaded Node.js.
       if (cache.has(key)) return false;
       cache.set(key, value, ttlSeconds);
       return true;

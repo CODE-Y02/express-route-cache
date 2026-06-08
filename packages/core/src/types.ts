@@ -8,6 +8,18 @@ import type { Request, Response, NextFunction } from "express";
  * No Set operations (sadd/smembers) — keeps Memcached fully compatible.
  */
 export interface CacheClient {
+  /**
+   * Human-readable adapter name for diagnostics and Studio identification.
+   * @example "memory", "redis", "redis-cluster", "memcached"
+   */
+  readonly name?: string;
+
+  /**
+   * Health check — returns `true` if the adapter can reach its backing store.
+   * Used by Cache Studio to display real connection status.
+   */
+  ping?(): Promise<boolean>;
+
   /** Retrieve a cached value by key. Returns `null` on miss. */
   get(key: string): Promise<string | null>;
 
@@ -125,7 +137,7 @@ export interface CacheConfig {
    * Whether caching is enabled globally.
    * @default true
    */
-  enabled?: boolean;
+  enabled?: boolean | ((req: Request, res: Response) => boolean);
 
   /**
    * Whether to sort query parameter keys before hashing.
@@ -184,7 +196,7 @@ export interface RouteOptions {
   staleTime?: number;
   gcTime?: number;
   swr?: boolean;
-  enabled?: boolean;
+  enabled?: boolean | ((req: Request, res: Response) => boolean);
   vary?: string[];
   sortQuery?: boolean;
   maxBodySize?: number;

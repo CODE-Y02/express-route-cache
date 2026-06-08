@@ -57,6 +57,43 @@ const cache = createCache({ adapter, keyPrefix: "my-app:" });
 > [!NOTE]
 > The cache key prefix (default `"erc:"`) is configured on `createCache({ keyPrefix })`, not on the adapter.
 
+---
+
+## Redis Cluster Adapter
+
+If you are running in a distributed environment with a Redis Cluster topology (such as AWS ElastiCache Cluster or custom sharded setups), use `createRedisClusterAdapter`.
+
+It automatically manages keys across multiple nodes, pipelines `DEL` calls to handle cross-slot limitations safely, and queries master nodes individually during `keys()` lookups.
+
+### Setup
+
+```ts
+import { createCache } from "@express-route-cache/core";
+import { createRedisClusterAdapter } from "@express-route-cache/redis";
+
+const adapter = createRedisClusterAdapter({
+  nodes: [
+    { host: "10.0.0.1", port: 6379 },
+    { host: "10.0.0.2", port: 6379 },
+  ],
+  options: {
+    scaleReads: "slave", // scale reads to replicas
+  },
+});
+
+const cache = createCache({ adapter });
+```
+
+### Adapter Options (`createRedisClusterAdapter`)
+
+| Option    | Type             | Description                                                                     |
+| :-------- | :--------------- | :------------------------------------------------------------------------------ |
+| `nodes`   | `ClusterNode[]`  | **Required**. List of seed cluster nodes.                                       |
+| `options` | `ClusterOptions` | Raw `ioredis` ClusterOptions configuration.                                     |
+| `client`  | `Cluster`        | An existing `ioredis.Cluster` instance to reuse (alternative to seeding nodes). |
+
+---
+
 ## Performance
 
 This adapter uses native Redis `MGET` and `INCR` commands for O(1) performance, and `SCAN` (cursor-based) for safe key enumeration in Cache Studio. It is highly optimized for high-throughput Express applications.

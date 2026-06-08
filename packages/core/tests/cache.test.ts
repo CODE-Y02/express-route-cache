@@ -1,7 +1,11 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import express, { type Request, type Response } from "express";
 import request from "supertest";
-import { createCache, createMemoryAdapter } from "../src/index";
+import {
+  createCache,
+  createMemoryAdapter,
+  generateCacheKey,
+} from "../src/index";
 
 // ─── Test Helpers ───────────────────────────────────────────────────────────
 
@@ -371,6 +375,145 @@ describe("@express-route-cache/core", () => {
       expect(res2.status).toBe(200);
       expect(res2.headers["x-cache"]).toBeUndefined();
       expect(getCallCount()).toBe(2); // Handler re-executed
+    });
+  });
+
+  // ── 11. Dynamic Enabled Check and POST Caching ───────────────────────
+
+  describe("Dynamic Enabled Check and POST Caching", () => {
+    it("should support enabled as a function", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      app.get(
+        "/dynamic",
+        cache.route({
+          enabled: (req) => req.headers["x-cache-enable"] === "true",
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ calls });
+        },
+      );
+
+      // 1. First request with enabled:false (header missing) -> MISS
+      const res1 = await request(app).get("/dynamic");
+      expect(res1.headers["x-cache"]).toBeUndefined();
+      expect(res1.body.calls).toBe(1);
+
+      // 2. Second request with enabled:false (header missing) -> MISS (calls increments)
+      const res2 = await request(app).get("/dynamic");
+      expect(res2.headers["x-cache"]).toBeUndefined();
+      expect(res2.body.calls).toBe(2);
+
+      // 3. Third request with enabled:true (header present) -> MISS (but cached now)
+      const res3 = await request(app)
+        .get("/dynamic")
+        .set("x-cache-enable", "true");
+      expect(res3.headers["x-cache"]).toBe("MISS");
+      expect(res3.body.calls).toBe(3);
+
+      // 4. Fourth request with enabled:true (header present) -> HIT
+      const res4 = await request(app)
+        .get("/dynamic")
+        .set("x-cache-enable", "true");
+      expect(res4.headers["x-cache"]).toBe("HIT");
+      expect(res4.body.calls).toBe(3); // call count remains 3
+    });
+
+    it("should cache POST requests when explicitly enabled", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      app.post(
+        "/search",
+        cache.route({
+          enabled: true,
+          key: (req) => generateCacheKey("search", req.body, ""),
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ result: `data for ${req.body.query}`, calls });
+        },
+      );
+
+      // 1st request -> MISS
+      const res1 = await request(app).post("/search").send({ query: "apple" });
+      expect(res1.headers["x-cache"]).toBe("MISS");
+      expect(res1.body.calls).toBe(1);
+
+      // 2nd request with same body -> HIT
+      const res2 = await request(app).post("/search").send({ query: "apple" });
+      expect(res2.headers["x-cache"]).toBe("HIT");
+      expect(res2.body.calls).toBe(1);
+
+      // 3rd request with different body -> MISS (custom key separates the caches)
+      const res3 = await request(app).post("/search").send({ query: "banana" });
+      expect(res3.headers["x-cache"]).toBe("MISS");
+      expect(res3.body.calls).toBe(2);
+    });
+
+    it("should NOT cache POST requests by default", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      app.post(
+        "/default-post",
+        cache.route(), // enabled: true by default globally, but should not cache POST
+        (req, res) => {
+          calls++;
+          res.json({ calls });
+        },
+      );
+
+      const res1 = await request(app).post("/default-post").send({});
+      expect(res1.headers["x-cache"]).toBeUndefined();
+      expect(res1.body.calls).toBe(1);
+
+      const res2 = await request(app).post("/default-post").send({});
+      expect(res2.headers["x-cache"]).toBeUndefined();
+      expect(res2.body.calls).toBe(2);
+    });
+
+    it("should generate type-safe cache keys using generateCacheKey helper", () => {
+      // 1. Strings
+      const key1 = generateCacheKey("my-tag", "string-data");
+      expect(key1).toMatch(/^erc:my-tag:[a-f0-9]{64}$/);
+
+      // 2. Objects
+      const key2 = generateCacheKey("my-tag", { foo: "bar" });
+      expect(key2).toMatch(/^erc:my-tag:[a-f0-9]{64}$/);
+
+      // 3. Buffers
+      const key3 = generateCacheKey("my-tag", Buffer.from("buffer-data"));
+      expect(key3).toMatch(/^erc:my-tag:[a-f0-9]{64}$/);
+
+      // 4. Custom Prefix
+      const key4 = generateCacheKey("my-tag", "data", "custom:");
+      expect(key4).toMatch(/^custom:my-tag:[a-f0-9]{64}$/);
+
+      // 5. Uniqueness checks
+      const keyA = generateCacheKey("tag", { query: "a" });
+      const keyB = generateCacheKey("tag", { query: "b" });
+      expect(keyA).not.toBe(keyB);
     });
   });
 });

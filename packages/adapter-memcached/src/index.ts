@@ -47,6 +47,18 @@ export function createMemcachedAdapter(
     );
 
   return {
+    name: "memcached" as const,
+
+    async ping(): Promise<boolean> {
+      try {
+        // memjs doesn't have a dedicated ping — try a harmless GET
+        await client.get("__ping__");
+        return true;
+      } catch {
+        return false;
+      }
+    },
+
     async get(key: string): Promise<string | null> {
       const { value } = await client.get(key);
       return value ? value.toString("utf-8") : null;
@@ -101,6 +113,10 @@ export function createMemcachedAdapter(
     },
 
     async keys(): Promise<string[]> {
+      // Memcached protocol does not support key enumeration.
+      // `stats items` + `stats cachedump` exists but is unreliable,
+      // deprecated in newer Memcached versions, and not exposed by memjs.
+      // Cache Studio shows a warning when adapter is "memcached".
       return [];
     },
 

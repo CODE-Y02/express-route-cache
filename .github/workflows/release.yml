@@ -49,16 +49,24 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
-      - name: Create Release Pull Request or Publish to NPM
-        id: changesets
-        uses: changesets/action@v1
-        with:
-          # Use @next tag for the next branch, otherwise default to @latest
-          publish: npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
-          commit: "chore(release): version packages"
+      - name: Ensure all changesets are versioned (consumed)
+        run: |
+          # Count markdown changeset files (excluding config.json)
+          CHANGESETS=$(find .changeset -name "*.md" | wc -l)
+          if [ "$CHANGESETS" -gt 0 ]; then
+            echo "❌ Error: Unconsumed changesets found in .changeset/ directory!"
+            echo "Please run 'pnpm changeset version' locally, commit the version bump, and push."
+            exit 1
+          fi
+          echo "✅ No unconsumed changesets found."
+
+      - name: Publish to NPM
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+          npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync NPM Tags (Main Branch)
         if: github.ref_name == 'main'

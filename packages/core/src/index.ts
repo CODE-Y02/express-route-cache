@@ -21,6 +21,7 @@ export {
   getParentRoutePatterns,
   buildVersionedKey,
   buildCacheKey,
+  generateCacheKey,
   getFreshness,
   getAgeSeconds,
 } from "./utils";

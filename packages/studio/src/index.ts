@@ -40,24 +40,32 @@ export function createStudio(
   // 1. Status & Metrics Endpoint
   router.get("/api/status", async (_req, res) => {
     try {
-      let adapter = "memory";
-      const adapterName = cache.adapter.constructor?.name?.toLowerCase() || "";
-      const adapterObj = cache.adapter as unknown as Record<string, unknown>;
-      if (adapterName.includes("redis") || adapterObj.redis) {
-        adapter = "redis";
-      } else if (adapterName.includes("memcached") || adapterObj.client) {
-        adapter = "memcached";
+      // Adapter type — use the `name` field added to CacheClient interface
+      const adapter = cache.adapter.name ?? "memory";
+
+      // Real health check — probe the adapter connection
+      let connected = false;
+      try {
+        if (cache.adapter.ping) {
+          connected = await cache.adapter.ping();
+        } else {
+          // Fallback: try a harmless GET — if it doesn't throw, we're connected
+          await cache.adapter.get("__studio_health__");
+          connected = true;
+        }
+      } catch {
+        connected = false;
       }
 
       res.json({
-        connected: true,
+        connected,
         adapter,
         metricsEnabled: !!cache.metrics,
         metrics: cache.metrics,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      res.status(500).json({ error: message });
+      res.status(500).json({ connected: false, error: message });
     }
   });
 

@@ -1,5 +1,21 @@
 # cache-example
 
+## 0.1.5
+
+### Patch Changes
+
+- Updated dependencies [05861c8]
+  - @express-route-cache/studio@1.1.0
+  - @express-route-cache/core@2.1.0
+
+## 0.1.5-next.0
+
+### Patch Changes
+
+- Updated dependencies
+  - @express-route-cache/studio@1.1.0-next.0
+  - @express-route-cache/core@2.1.0-next.0
+
 ## 0.1.4
 
 ### Patch Changes
