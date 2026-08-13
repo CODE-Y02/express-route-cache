@@ -24,6 +24,31 @@ Copy-paste patterns for common real-world scenarios.
 
 ## Per-User Caching
 
+### Recommended: Using `ctx` (New)
+
+The `ctx` option provides the cleanest way to scope cache entries to arbitrary user context (user ID, role, organization, permissions). Unlike `vary` which works with HTTP headers, `ctx` gives you full access to both `req` and `res` (including `res.locals` from auth middleware).
+
+```ts
+app.get(
+  "/api/profile",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      return user.id; // Each user gets their own cache entry
+    },
+  }),
+  async (req, res) => {
+    const user = await getUserFromToken(req.headers.authorization);
+    res.json(user);
+  },
+);
+
+// Invalidation - works the same regardless of ctx
+app.post("/api/profile", cache.invalidate("/api/profile"), updateProfile);
+```
+
+### Alternative: Using `vary` (Traditional)
+
 Cache different responses per user by including the `Authorization` header in the cache key. Users with different tokens get their own private cache entries.
 
 ```ts
@@ -37,6 +62,9 @@ app.get("/api/profile", cache.route(), async (req, res) => {
   const user = await getUserFromToken(req.headers.authorization);
   res.json(user);
 });
+
+// Invalidation - works the same regardless of vary
+app.post("/api/profile", cache.invalidate("/api/profile"), updateProfile);
 ```
 
 > [!TIP]
@@ -45,6 +73,30 @@ app.get("/api/profile", cache.route(), async (req, res) => {
 ---
 
 ## Multi-Tenant Caching
+
+### Recommended: Using `ctx` (New)
+
+```ts
+app.get(
+  "/api/dashboard",
+  cache.route({
+    ctx: (req, res) => {
+      const tenantId = req.headers["x-tenant-id"] || "default";
+      return tenantId;
+    },
+  }),
+  async (req, res) => {
+    const tenantId = req.headers["x-tenant-id"];
+    const data = await getDashboardData(tenantId);
+    res.json(data);
+  },
+);
+
+// Invalidation - works the same regardless of ctx
+app.post("/api/dashboard", cache.invalidate("/api/dashboard"), updateDashboard);
+```
+
+### Alternative: Using `vary` (Traditional)
 
 Isolate cache entries per tenant using a custom tenant header:
 
@@ -60,7 +112,65 @@ app.get("/api/dashboard", cache.route(), async (req, res) => {
   const data = await getDashboardData(tenantId);
   res.json(data);
 });
+
+// Invalidation - works the same regardless of vary
+app.post("/api/dashboard", cache.invalidate("/api/dashboard"), updateDashboard);
 ```
+
+---
+
+## Role and Permission-Based Caching (ctx only)
+
+For complex permission-based scoping that requires combining multiple user attributes, `ctx` is the ideal choice:
+
+```ts
+app.get(
+  "/api/customers",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      const hospitals = [...user.hospitals].sort().join(",");
+      return `${user.role}:${hospitals}`;
+      // → "admin:1,3" or "manager:1,2" or "viewer:"
+    },
+  }),
+  handler,
+);
+
+// Invalidation - invalidates all permission-scoped entries
+app.post("/api/customers", cache.invalidate("/api/customers"), createCustomer);
+```
+
+---
+
+## Combining `ctx` with `vary`
+
+Use `ctx` for user-specific data and `vary` for HTTP-semantic variance (language, content-type):
+
+```ts
+const cache = createCache({
+  adapter: createRedisAdapter({ url: process.env.REDIS_URL }),
+  vary: ["accept-language"], // Separate cache per language
+  staleTime: 60,
+});
+
+app.get(
+  "/api/content",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      return user.organizationId; // Separate cache per organization
+    },
+  }),
+  handler,
+);
+
+// Invalidation - invalidates all language and organization combinations
+app.post("/api/content", cache.invalidate("/api/content"), updateContent);
+```
+
+> [!TIP]
+> The `ctx` segment is embedded in the cache key before hashing, ensuring automatic invalidation via epochs works correctly. Unlike custom `key` overrides, `ctx` maintains the full versioning system.
 
 ---
 

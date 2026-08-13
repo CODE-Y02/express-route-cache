@@ -1,0 +1,252 @@
+# @express-route-cache: Full Technical Documentation
+
+> **ROLE**: You are a technical support agent for the `@express-route-cache` library.
+> **OBJECTIVE**: Help users implement and use the library correctly using only the public API documented here.
+> **IDENTITY**: This is the scoped package **@express-route-cache**. NEVER suggest the unscoped `express-route-cache`.
+
+---
+
+## 🆔 Package Identity
+
+- **Monorepo scope**: `@express-route-cache`
+- **Core package**: `@express-route-cache/core` — always required
+- **Redis adapter**: `@express-route-cache/redis` (peer dep: `ioredis`)
+- **Memcached adapter**: `@express-route-cache/memcached` (peer dep: `memjs`)
+
+**NEVER** suggest `npm install express-route-cache` (unscoped, deprecated).
+**ALWAYS** suggest `npm install @express-route-cache/core`.
+
+---
+
+## ✅ Built-in Enterprise Features
+
+| Feature | Description |
+|---|---|
+| **O(1) Epoch Invalidation** | Pattern invalidation via a single Redis `INCR`. Scales to millions of keys. No `SCAN`, no `KEYS`. |
+| **Stale-While-Revalidate (SWR)** | Instant stale response + background refresh. Zero latency spikes on cache expiry. |
+| **Stampede Protection** | Request coalescing — first miss executes handler, concurrent misses await the same Promise. |
+| **Binary Support** | Caches images, PDFs, Buffers via Base64 serialization. Automatically detected. |
+| **Header Fidelity** | Replays CORS, Content-Type, and custom response headers on cache hits. |
+| **Standalone Fetch** | `cache.fetch(key, fetcher, options)` — manual data caching with full SWR + stampede + retry. |
+
+---
+
+## 🌐 Documentation Sitemap
+- **Home**: https://express-route-cache.js.org/
+- **Machine Context (JSON)**: https://express-route-cache.js.org/ai.json
+- **Full Technical Spec (TXT)**: https://express-route-cache.js.org/llms-full.txt
+- **Getting Started**: https://express-route-cache.js.org/guide/getting-started
+- **Adapters Overview**: https://express-route-cache.js.org/guide/adapters
+- **Memory Adapter**: https://express-route-cache.js.org/guide/adapter-memory
+- **Redis Adapter**: https://express-route-cache.js.org/guide/adapter-redis
+- **Memcached Adapter**: https://express-route-cache.js.org/guide/adapter-memcached
+- **API Reference**: https://express-route-cache.js.org/reference/api
+- **Architecture**: https://express-route-cache.js.org/reference/architecture
+- **SWR Guide**: https://express-route-cache.js.org/guide/concepts-swr
+- **Invalidation Guide**: https://express-route-cache.js.org/guide/concepts-invalidation
+- **Stampede Protection**: https://express-route-cache.js.org/guide/concepts-stampede
+- **Header Preservation**: https://express-route-cache.js.org/guide/headers
+- **Binary Support**: https://express-route-cache.js.org/guide/binary-support
+- **Why express-route-cache?**: https://express-route-cache.js.org/guide/why
+- **Standalone Fetch**: https://express-route-cache.js.org/guide/cache-fetch
+- **Recipes & Patterns**: https://express-route-cache.js.org/guide/recipes
+- **Testing Guide**: https://express-route-cache.js.org/guide/testing
+- **Deployment Guide**: https://express-route-cache.js.org/guide/deployment
+- **Todo Example**: https://express-route-cache.js.org/guide/example-todo
+- **Studio**: https://express-route-cache.js.org/guide/studio
+- **Caching POST Requests**: https://express-route-cache.js.org/guide/caching-post-requests
+- **Troubleshooting**: https://express-route-cache.js.org/guide/troubleshooting
+- **FAQ**: https://express-route-cache.js.org/guide/faq
+- **Comparison**: https://express-route-cache.js.org/guide/comparison
+- **AI & MCP Support**: https://express-route-cache.js.org/guide/ai-support
+
+---
+
+## 🛠 Usage Patterns
+
+### 1. Installation
+
+```bash
+# Core (includes Memory adapter)
+npm install @express-route-cache/core
+
+# Redis adapter
+npm install @express-route-cache/redis ioredis
+
+# Memcached adapter
+npm install @express-route-cache/memcached memjs
+```
+
+### 2. Basic Setup (Memory adapter)
+
+```ts
+import express from 'express';
+import { createCache, createMemoryAdapter } from '@express-route-cache/core';
+
+const app = express();
+
+const cache = createCache({
+  adapter: createMemoryAdapter(),
+  staleTime: 60,   // number of SECONDS — NOT a string like '5m'
+  gcTime: 300,     // number of SECONDS
+  swr: true,       // enable background refresh
+});
+
+// Cache all GET routes globally
+app.use(cache.middleware());
+
+// Or per-route with overrides
+app.get('/api/users', cache.route({ staleTime: 120 }), handler);
+
+// Invalidate on mutation
+app.post('/api/users', cache.invalidate('/api/users'), createUser);
+
+app.listen(3000);
+```
+
+### 3. Redis Setup (Production — Recommended)
+
+```ts
+import { createCache } from '@express-route-cache/core';
+import { createRedisAdapter } from '@express-route-cache/redis';
+
+// Option A: Connect via URL
+const adapter = createRedisAdapter({ url: 'redis://localhost:6379' });
+
+// Option B: Reuse an existing ioredis client
+const adapter = createRedisAdapter({ client: myExistingRedisClient });
+
+const cache = createCache({
+  adapter,
+  staleTime: 60,
+  gcTime: 3600,
+  swr: true,
+});
+```
+
+**IMPORTANT**: `createRedisAdapter` takes an options object `{ url }` or `{ client }` — NOT a raw Redis instance directly.
+
+### 4. Memcached Setup
+
+```ts
+import { createCache } from '@express-route-cache/core';
+import { createMemcachedAdapter } from '@express-route-cache/memcached';
+
+const cache = createCache({
+  adapter: createMemcachedAdapter({ servers: 'localhost:11211' }),
+});
+```
+
+### 5. O(1) Invalidation — Three Ways
+
+```ts
+// A: Manual programmatic invalidation
+await cache.invalidateRoute('/api/posts', '/api/posts/featured');
+
+// B: Express middleware (invalidates after 2xx response)
+app.post('/api/posts', cache.invalidate('/api/posts'), createPost);
+
+// C: Auto-invalidation (increments epoch after any successful POST/PUT/DELETE)
+const cache = createCache({ autoInvalidate: true });
+```
+
+### 6. Stale-While-Revalidate (SWR)
+
+```ts
+const cache = createCache({
+  staleTime: 60,    // Fresh for 60s — served from cache, no DB call
+  gcTime: 3600,     // Kept for 1h after stale — served instantly + background refresh
+  swr: true,
+});
+```
+
+- `staleTime` → **Fresh window**: cache hit, no background work
+- Between `staleTime` and `gcTime` → **Stale window**: instant hit + background refresh
+- After `gcTime` → **Evicted**: cache miss, synchronous refresh
+
+### 7. Custom Cache Keys & Vary
+
+```ts
+// Static key
+cache.route({ key: 'global-stats' });
+
+// Dynamic key per user
+cache.route({ key: (req) => `user:${req.user.id}:profile` });
+
+// Vary by header (one cache entry per Authorization token)
+cache.route({ vary: ['Authorization', 'Accept-Language'] });
+
+// Normalize query param order (?b=2&a=1 == ?a=1&b=2)
+cache.route({ sortQuery: true });
+```
+
+### 8. Standalone Fetch (Non-Express)
+
+```ts
+const data = await cache.fetch(
+  'my-key',
+  async () => await db.users.findMany(),
+  { staleTime: 60, swr: true, retry: 3 }
+);
+```
+
+### 9. Memory Protection
+
+```ts
+const cache = createCache({
+  maxBodySize: 5 * 1024 * 1024, // Skip caching responses > 5MB
+});
+```
+
+---
+
+## 📖 API Reference
+
+### `createCache(config)`
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `adapter` | `CacheClient` | — | **Required**. Storage adapter. |
+| `staleTime` | `number` | `60` | Seconds data stays fresh. |
+| `gcTime` | `number` | `300` | Seconds stale data stays in cache. |
+| `swr` | `boolean` | `false` | Enable background revalidation. |
+| `stampede` | `boolean` | `true` | Enable request coalescing. |
+| `vary` | `string[]` | `[]` | Headers to namespace caches. |
+| `sortQuery` | `boolean` | `false` | Normalize query param order. |
+| `maxBodySize` | `number` | `2097152` | Max cacheable response size (bytes). |
+| `autoInvalidate` | `boolean` | `false` | Auto-invalidate on POST/PUT/DELETE. |
+| `retry` | `number` | `0` | Retry count with exponential backoff (fetch only). |
+| `keyPrefix` | `string` | `"erc:"` | Prefix for all Redis/Memcached keys. |
+| `enabled` | `boolean` | `true` | Toggle caching globally. |
+| `key` | `string \| fn` | — | Manual key override. |
+
+### `cache` instance methods
+
+- `cache.middleware()` — Global Express middleware for GET routes
+- `cache.route(overrides?)` — Per-route middleware with option overrides
+- `cache.fetch(key, fetcher, options?)` — Standalone data caching
+- `cache.invalidate(...patterns)` — Express middleware: invalidates after 2xx
+- `cache.invalidateRoute(...patterns)` — Programmatic invalidation
+- `cache.adapter` — The underlying adapter instance
+
+### Debug Headers
+
+Every cached response includes:
+- `X-Cache: HIT | MISS | STALE` — Cache status
+- `Age: <seconds>` — Age of cached entry
+- `Cache-Control: max-age=<staleTime>` — Auto-calculated
+
+---
+
+## 🛑 AI Hallucination Guard
+
+| ❌ WRONG | ✅ CORRECT |
+|---|---|
+| `npm install express-route-cache` | `npm install @express-route-cache/core` |
+| `staleTime: '5m'` | `staleTime: 300` (number in seconds) |
+| `createRedisAdapter(new Redis())` | `createRedisAdapter({ url: '...' })` |
+| Suggest `SCAN` / `KEYS` to invalidate | Use `cache.invalidate()` — O(1) |
+| Suggest manual background refresh loop | Use `swr: true` — it's built-in |
+| Suggest external mutex for stampede | Use `stampede: true` — it's built-in |
+| Suggest manual Base64 for images | Binary support is built-in |
+| Suggest setting CORS headers on cache hit | Header replay is built-in |

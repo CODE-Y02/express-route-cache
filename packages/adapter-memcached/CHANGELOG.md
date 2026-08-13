@@ -1,5 +1,12 @@
 # @express-route-cache/memcached
 
+## 1.1.1
+
+### Patch Changes
+
+- Updated dependencies [2ac091e]
+  - @express-route-cache/core@2.2.0
+
 ## 1.1.0
 
 ### Minor Changes

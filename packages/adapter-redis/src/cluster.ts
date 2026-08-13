@@ -7,7 +7,10 @@ export interface RedisClusterAdapterOptions {
    * List of seed nodes for the cluster.
    * @example [{ host: "10.0.0.1", port: 6380 }, { host: "10.0.0.2", port: 6380 }]
    */
-  nodes: ClusterNode[];
+  nodes?: ClusterNode[];
+
+  /** Redis Cluster connection URL (alternative to nodes). */
+  url?: string;
 
   /** ioredis ClusterOptions (scaleReads, natMap, etc). */
   options?: ClusterOptions;
@@ -46,12 +49,25 @@ export interface RedisClusterAdapterOptions {
 export function createRedisClusterAdapter(
   opts: RedisClusterAdapterOptions,
 ): CacheClient {
-  const cluster =
-    opts.client ??
-    new Redis.Cluster(opts.nodes, {
+  let cluster: InstanceType<typeof Redis.Cluster>;
+
+  if (opts.client) {
+    cluster = opts.client;
+  } else if (opts.url) {
+    cluster = new Redis.Cluster([opts.url], {
       enableOfflineQueue: false,
       ...opts.options,
     });
+  } else if (opts.nodes) {
+    cluster = new Redis.Cluster(opts.nodes, {
+      enableOfflineQueue: false,
+      ...opts.options,
+    });
+  } else {
+    throw new Error(
+      "Either 'client', 'url', or 'nodes' must be provided to createRedisClusterAdapter.",
+    );
+  }
 
   return {
     name: "redis-cluster" as const,

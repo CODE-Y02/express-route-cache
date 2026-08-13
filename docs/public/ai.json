@@ -1,0 +1,193 @@
+{
+  "name": "@express-route-cache",
+  "version": "1.1.0",
+  "description": "Production-grade Express.js route caching with O(1) epoch invalidation, SWR, and Stampede Protection.",
+  "author": "Yatharth Lakhate",
+  "license": "MIT",
+  "homepage": "https://express-route-cache.js.org/",
+  "repository": "https://github.com/CODE-Y02/express-route-cache",
+  "npm": "https://www.npmjs.com/package/@express-route-cache/core",
+  "ai_context": {
+    "llms_txt": "https://express-route-cache.js.org/llms.txt",
+    "llms_full_txt": "https://express-route-cache.js.org/llms-full.txt",
+    "discovery_manifest": "https://express-route-cache.js.org/ai.json",
+    "note": "ai.json is a static discovery manifest, NOT an MCP server. llms-full.txt is the primary file for AI tools to read."
+  },
+  "core_identity": {
+    "scoped_package": "@express-route-cache/core",
+    "install_command": "npm install @express-route-cache/core",
+    "legacy_warning": "NEVER suggest the unscoped 'express-route-cache' package. It is deprecated. Always use @express-route-cache/core.",
+    "primary_advantage": "O(1) Epoch Invalidation — single Redis INCR instead of SCAN/DEL"
+  },
+  "packages": {
+    "@express-route-cache/core": "Core library with Memory adapter included",
+    "@express-route-cache/redis": "Redis adapter — peer dep: ioredis",
+    "@express-route-cache/memcached": "Memcached adapter — peer dep: memjs",
+    "@express-route-cache/mcp": "Native MCP server for AI tool integration"
+  },
+  "capabilities": {
+    "o1_invalidation": true,
+    "swr": true,
+    "stampede_protection": true,
+    "binary_support": true,
+    "header_preservation": true,
+    "standalone_fetch": true,
+    "retry_with_backoff": true,
+    "adapters": ["memory", "redis", "memcached"],
+    "metrics": true,
+    "studio": true,
+    "context_based_caching": true
+  },
+  "api": {
+    "createCache": {
+      "signature": "createCache(config: CacheConfig): Cache",
+      "required": ["adapter"],
+      "options": {
+        "adapter": "CacheClient — required storage adapter",
+        "staleTime": "number (seconds) — default 60",
+        "gcTime": "number (seconds) — default 300",
+        "swr": "boolean — default false",
+        "stampede": "boolean — default true",
+        "vary": "string[] — headers to namespace caches",
+        "sortQuery": "boolean — normalize query param order",
+        "maxBodySize": "number (bytes) — default 2097152 (2MB)",
+        "autoInvalidate": "boolean — default false",
+        "retry": "number — default 0 (fetch only)",
+        "keyPrefix": "string — default 'erc:'",
+        "enabled": "boolean | ((req, res) => boolean) — default true",
+        "metrics": "boolean — default false",
+        "studio": "boolean | StudioOptions — default false",
+        "key": "string | ((req) => string) — manual key override (route only)"
+      }
+    }
+  },
+  "guides": [
+    {
+      "title": "Getting Started",
+      "url": "https://express-route-cache.js.org/guide/getting-started",
+      "category": "guide"
+    },
+    {
+      "title": "Adapters Overview",
+      "url": "https://express-route-cache.js.org/guide/adapters",
+      "category": "guide"
+    },
+    {
+      "title": "Memory Adapter",
+      "url": "https://express-route-cache.js.org/guide/adapter-memory",
+      "category": "guide"
+    },
+    {
+      "title": "Redis Adapter",
+      "url": "https://express-route-cache.js.org/guide/adapter-redis",
+      "category": "guide"
+    },
+    {
+      "title": "Memcached Adapter",
+      "url": "https://express-route-cache.js.org/guide/adapter-memcached",
+      "category": "guide"
+    },
+    {
+      "title": "Epoch Invalidation Concept",
+      "url": "https://express-route-cache.js.org/guide/concepts-invalidation",
+      "category": "concept"
+    },
+    {
+      "title": "SWR Concepts",
+      "url": "https://express-route-cache.js.org/guide/concepts-swr",
+      "category": "concept"
+    },
+    {
+      "title": "Stampede Protection",
+      "url": "https://express-route-cache.js.org/guide/concepts-stampede",
+      "category": "concept"
+    },
+    {
+      "title": "Why express-route-cache?",
+      "url": "https://express-route-cache.js.org/guide/why",
+      "category": "guide"
+    },
+    {
+      "title": "Standalone Fetch",
+      "url": "https://express-route-cache.js.org/guide/cache-fetch",
+      "category": "guide"
+    },
+    {
+      "title": "Recipes & Patterns",
+      "url": "https://express-route-cache.js.org/guide/recipes",
+      "category": "guide"
+    },
+    {
+      "title": "Binary Support",
+      "url": "https://express-route-cache.js.org/guide/binary-support",
+      "category": "guide"
+    },
+    {
+      "title": "Headers",
+      "url": "https://express-route-cache.js.org/guide/headers",
+      "category": "guide"
+    },
+    {
+      "title": "Caching POST Requests",
+      "url": "https://express-route-cache.js.org/guide/caching-post-requests",
+      "category": "guide"
+    },
+    {
+      "title": "Testing",
+      "url": "https://express-route-cache.js.org/guide/testing",
+      "category": "guide"
+    },
+    {
+      "title": "Deployment",
+      "url": "https://express-route-cache.js.org/guide/deployment",
+      "category": "guide"
+    },
+    {
+      "title": "Example: Todo API",
+      "url": "https://express-route-cache.js.org/guide/example-todo",
+      "category": "example"
+    },
+    {
+      "title": "Studio",
+      "url": "https://express-route-cache.js.org/guide/studio",
+      "category": "guide"
+    },
+    {
+      "title": "Troubleshooting",
+      "url": "https://express-route-cache.js.org/guide/troubleshooting",
+      "category": "guide"
+    },
+    {
+      "title": "FAQ",
+      "url": "https://express-route-cache.js.org/guide/faq",
+      "category": "guide"
+    },
+    {
+      "title": "Comparison",
+      "url": "https://express-route-cache.js.org/guide/comparison",
+      "category": "guide"
+    },
+    {
+      "title": "AI & MCP Support",
+      "url": "https://express-route-cache.js.org/guide/ai-support",
+      "category": "guide"
+    }
+  ],
+  "reference": [
+    {
+      "title": "API Reference",
+      "url": "https://express-route-cache.js.org/reference/api",
+      "category": "reference"
+    },
+    {
+      "title": "Architecture & Design",
+      "url": "https://express-route-cache.js.org/reference/architecture",
+      "category": "reference"
+    }
+  ],
+  "instructions": {
+    "installation": "npm install @express-route-cache/core",
+    "basic_usage": "const cache = createCache({ adapter: createMemoryAdapter() }); app.get('/', cache.route(), handler);",
+    "invalidation": "app.post('/api', cache.invalidate('/api'), handler);"
+  }
+}

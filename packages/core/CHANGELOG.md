@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 2.2.0
+
+### Minor Changes
+
+- 2ac091e: included clean way to include user context
+
 ## 2.1.0
 
 ### Minor Changes
