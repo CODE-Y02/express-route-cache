@@ -31,6 +31,29 @@ app.get(
   },
 );
 
+// ── Context-based caching with ctx (user-scoped) ──
+// Simulate auth middleware
+app.use((req, res, next) => {
+  const userId = req.headers["x-user-id"] as string || "anonymous";
+  (res as any).locals.user = { id: userId, role: "user" };
+  next();
+});
+
+app.get(
+  "/v1/profile",
+  cache.route({
+    ctx: (req, res) => {
+      const user = (res as any).locals.user;
+      return user.id; // Each user gets their own cache entry
+    },
+  }),
+  async (req: Request, res: Response) => {
+    await simulateDelay(1500);
+    const user = (res as any).locals.user;
+    res.json({ userId: user.id, profile: `Profile data for ${user.id}` });
+  },
+);
+
 // ── Automatic route-tree invalidation ──
 // POST /v1/users invalidates ALL cached /v1/users/* routes (including /v1/users/:username)
 
@@ -79,6 +102,17 @@ portfinder.getPort((err, port) => {
       );
       console.log(
         `  GET  http://localhost:${port}/v1/users/john  (MISS again — cache was invalidated)`,
+      );
+      console.log("");
+      console.log("Context-based caching (ctx):");
+      console.log(
+        `  GET  http://localhost:${port}/v1/profile     (with header: x-user-id: alice)`,
+      );
+      console.log(
+        `  GET  http://localhost:${port}/v1/profile     (with header: x-user-id: bob)`,
+      );
+      console.log(
+        `  GET  http://localhost:${port}/v1/profile     (same user = HIT, different user = MISS)`,
       );
     });
   }
