@@ -201,7 +201,7 @@ export function createCache(config: CacheConfig): CacheInstance {
         } else {
           // Resolve context value if provided
           const ctxValue = routeOpts?.ctx ? routeOpts.ctx(req, res) : undefined;
-          
+
           // We need req.route to be populated — this happens AFTER route matching.
           // If called as global middleware before route matching, use req.path as fallback.
           const result = await buildCacheKey(

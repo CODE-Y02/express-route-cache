@@ -145,13 +145,17 @@ Per-route middleware. Accepts all configuration options (like `staleTime` and `r
 Scope cache entries to arbitrary user context (user ID, role, organization) with full access to `req` and `res`:
 
 ```ts
-app.get("/customers", cache.route({
-  ctx: (req, res) => {
-    const user = res.locals.user;
-    const hospitals = [...user.hospitals].sort().join(",");
-    return `${user.role}:${hospitals}`;
-  }
-}), handler);
+app.get(
+  "/customers",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      const hospitals = [...user.hospitals].sort().join(",");
+      return `${user.role}:${hospitals}`;
+    },
+  }),
+  handler,
+);
 ```
 
 **Custom Keys:**

@@ -34,7 +34,7 @@ app.get(
 // ── Context-based caching with ctx (user-scoped) ──
 // Simulate auth middleware
 app.use((req, res, next) => {
-  const userId = req.headers["x-user-id"] as string || "anonymous";
+  const userId = (req.headers["x-user-id"] as string) || "anonymous";
   (res as any).locals.user = { id: userId, role: "user" };
   next();
 });

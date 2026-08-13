@@ -29,15 +29,19 @@ Copy-paste patterns for common real-world scenarios.
 The `ctx` option provides the cleanest way to scope cache entries to arbitrary user context (user ID, role, organization, permissions). Unlike `vary` which works with HTTP headers, `ctx` gives you full access to both `req` and `res` (including `res.locals` from auth middleware).
 
 ```ts
-app.get("/api/profile", cache.route({
-  ctx: (req, res) => {
-    const user = res.locals.user;
-    return user.id; // Each user gets their own cache entry
-  }
-}), async (req, res) => {
-  const user = await getUserFromToken(req.headers.authorization);
-  res.json(user);
-});
+app.get(
+  "/api/profile",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      return user.id; // Each user gets their own cache entry
+    },
+  }),
+  async (req, res) => {
+    const user = await getUserFromToken(req.headers.authorization);
+    res.json(user);
+  },
+);
 
 // Invalidation - works the same regardless of ctx
 app.post("/api/profile", cache.invalidate("/api/profile"), updateProfile);
@@ -73,16 +77,20 @@ app.post("/api/profile", cache.invalidate("/api/profile"), updateProfile);
 ### Recommended: Using `ctx` (New)
 
 ```ts
-app.get("/api/dashboard", cache.route({
-  ctx: (req, res) => {
-    const tenantId = req.headers["x-tenant-id"] || "default";
-    return tenantId;
-  }
-}), async (req, res) => {
-  const tenantId = req.headers["x-tenant-id"];
-  const data = await getDashboardData(tenantId);
-  res.json(data);
-});
+app.get(
+  "/api/dashboard",
+  cache.route({
+    ctx: (req, res) => {
+      const tenantId = req.headers["x-tenant-id"] || "default";
+      return tenantId;
+    },
+  }),
+  async (req, res) => {
+    const tenantId = req.headers["x-tenant-id"];
+    const data = await getDashboardData(tenantId);
+    res.json(data);
+  },
+);
 
 // Invalidation - works the same regardless of ctx
 app.post("/api/dashboard", cache.invalidate("/api/dashboard"), updateDashboard);
@@ -116,14 +124,18 @@ app.post("/api/dashboard", cache.invalidate("/api/dashboard"), updateDashboard);
 For complex permission-based scoping that requires combining multiple user attributes, `ctx` is the ideal choice:
 
 ```ts
-app.get("/api/customers", cache.route({
-  ctx: (req, res) => {
-    const user = res.locals.user;
-    const hospitals = [...user.hospitals].sort().join(",");
-    return `${user.role}:${hospitals}`;
-    // → "admin:1,3" or "manager:1,2" or "viewer:"
-  }
-}), handler);
+app.get(
+  "/api/customers",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      const hospitals = [...user.hospitals].sort().join(",");
+      return `${user.role}:${hospitals}`;
+      // → "admin:1,3" or "manager:1,2" or "viewer:"
+    },
+  }),
+  handler,
+);
 
 // Invalidation - invalidates all permission-scoped entries
 app.post("/api/customers", cache.invalidate("/api/customers"), createCustomer);
@@ -142,12 +154,16 @@ const cache = createCache({
   staleTime: 60,
 });
 
-app.get("/api/content", cache.route({
-  ctx: (req, res) => {
-    const user = res.locals.user;
-    return user.organizationId; // Separate cache per organization
-  }
-}), handler);
+app.get(
+  "/api/content",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      return user.organizationId; // Separate cache per organization
+    },
+  }),
+  handler,
+);
 
 // Invalidation - invalidates all language and organization combinations
 app.post("/api/content", cache.invalidate("/api/content"), updateContent);

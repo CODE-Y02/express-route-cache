@@ -575,7 +575,7 @@ describe("@express-route-cache/core", () => {
       });
 
       let calls = 0;
-      
+
       // Middleware to set user in res.locals
       app.use((req, res, next) => {
         const userId = req.headers["x-user-id"] as string;
@@ -637,13 +637,9 @@ describe("@express-route-cache/core", () => {
         },
       );
 
-      app.post(
-        "/items",
-        cache.invalidate("/items"),
-        (req, res) => {
-          res.json({ created: true });
-        },
-      );
+      app.post("/items", cache.invalidate("/items"), (req, res) => {
+        res.json({ created: true });
+      });
 
       // Populate cache for org1
       await request(app).get("/items").set("x-org-id", "org1");

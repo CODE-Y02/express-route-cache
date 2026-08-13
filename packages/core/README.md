@@ -73,31 +73,36 @@ const data = await cache.fetch("custom-key", () => fetchData(), { retry: 3 });
 
 Per-route options passed to `cache.route()`:
 
-| Option      | Type                                    | Default  | Description                                          |
-| ----------- | --------------------------------------- | -------- | ---------------------------------------------------- |
-| `staleTime` | `number`                                | global   | Override global stale time.                          |
-| `gcTime`    | `number`                                | global   | Override global gc time.                             |
-| `swr`       | `boolean`                               | global   | Override global SWR setting.                         |
-| `vary`      | `string[]`                              | global   | Override global vary headers.                       |
-| `ctx`       | `(req, res) => string`                  | —        | Arbitrary context segment for user-scoped caching.  |
-| `key`       | `string \| (req) => string`             | —        | Custom cache key override.                           |
-| `enabled`   | `boolean \| (req, res) => boolean`      | global   | Enable/disable caching for this route.               |
+| Option      | Type                               | Default | Description                                        |
+| ----------- | ---------------------------------- | ------- | -------------------------------------------------- |
+| `staleTime` | `number`                           | global  | Override global stale time.                        |
+| `gcTime`    | `number`                           | global  | Override global gc time.                           |
+| `swr`       | `boolean`                          | global  | Override global SWR setting.                       |
+| `vary`      | `string[]`                         | global  | Override global vary headers.                      |
+| `ctx`       | `(req, res) => string`             | —       | Arbitrary context segment for user-scoped caching. |
+| `key`       | `string \| (req) => string`        | —       | Custom cache key override.                         |
+| `enabled`   | `boolean \| (req, res) => boolean` | global  | Enable/disable caching for this route.             |
 
 ### Context-Based Caching (`ctx`)
 
 The `ctx` option allows you to scope cache entries to arbitrary user context (e.g., user ID, role, organization). Unlike `vary` which works with HTTP headers, `ctx` gives you full access to both `req` and `res` (including `res.locals`).
 
 ```ts
-app.get("/customers", cache.route({
-  ctx: (req, res) => {
-    const user = res.locals.user;
-    const hospitals = [...user.hospitals].sort().join(",");
-    return `${user.role}:${hospitals}`;
-  }
-}), handler);
+app.get(
+  "/customers",
+  cache.route({
+    ctx: (req, res) => {
+      const user = res.locals.user;
+      const hospitals = [...user.hospitals].sort().join(",");
+      return `${user.role}:${hospitals}`;
+    },
+  }),
+  handler,
+);
 ```
 
 **Key benefits:**
+
 - Works with `res.locals` (auth middleware data)
 - Automatic invalidation via epochs (no manual key management)
 - Combines with `vary` for multi-dimensional scoping
