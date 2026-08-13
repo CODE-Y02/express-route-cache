@@ -89,6 +89,7 @@ export function buildVersionedKey(opts: {
   vary?: string[];
   varyValues?: Record<string, string>;
   sortQuery?: boolean;
+  ctx?: string;
 }): string {
   const {
     prefix,
@@ -100,6 +101,7 @@ export function buildVersionedKey(opts: {
     vary,
     varyValues,
     sortQuery,
+    ctx,
   } = opts;
 
   // Query hash (deterministic if sortQuery is enabled)
@@ -123,7 +125,10 @@ export function buildVersionedKey(opts: {
       "|" + vary.map((h) => `vary:${h}=${varyValues[h] || ""}`).join("|");
   }
 
-  const rawKey = `${prefix}${method}:${url}${queryHash ? `?${queryHash}` : ""}|${versionSegments}${varySegment}`;
+  // Context segment (for arbitrary user-scoped context)
+  const ctxSegment = ctx ? `|ctx:${ctx}` : "";
+
+  const rawKey = `${prefix}${method}:${url}${queryHash ? `?${queryHash}` : ""}|${versionSegments}${varySegment}${ctxSegment}`;
   const hash = crypto.createHash("sha256").update(rawKey).digest("hex");
   return `${prefix}hash:${hash}`;
 }
@@ -138,6 +143,7 @@ export async function buildCacheKey(
   prefix: string,
   vary?: string[],
   sortQuery?: boolean,
+  ctx?: string,
 ): Promise<{ key: string; routePattern: string; parentPatterns: string[] }> {
   const routePattern = getRoutePattern(req);
   const parentPatterns = getParentRoutePatterns(routePattern);
@@ -164,6 +170,7 @@ export async function buildCacheKey(
     vary,
     varyValues,
     sortQuery,
+    ctx,
   });
 
   return { key, routePattern, parentPatterns };

@@ -204,6 +204,8 @@ export interface RouteOptions {
   retry?: number;
   /** Custom cache key override. If provided, used instead of auto-generated key. */
   key?: string | ((req: Request) => string);
+  /** Arbitrary context segment for user-scoped caching. Resolved async in middleware. */
+  ctx?: (req: Request, res: Response) => string;
 }
 
 /** The object returned by `createCache()`. */

@@ -141,6 +141,19 @@ Returns `{ middleware(), route(), fetch(), invalidate(), invalidateRoute(), adap
 
 Per-route middleware. Accepts all configuration options (like `staleTime` and `retry`) as overrides for a specific endpoint.
 
+**Context-Based Caching (`ctx`):**
+Scope cache entries to arbitrary user context (user ID, role, organization) with full access to `req` and `res`:
+
+```ts
+app.get("/customers", cache.route({
+  ctx: (req, res) => {
+    const user = res.locals.user;
+    const hospitals = [...user.hospitals].sort().join(",");
+    return `${user.role}:${hospitals}`;
+  }
+}), handler);
+```
+
 **Custom Keys:**
 You can provide a custom string or a function to generate the cache key.
 

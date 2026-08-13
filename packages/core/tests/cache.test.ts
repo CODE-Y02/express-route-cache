@@ -516,4 +516,209 @@ describe("@express-route-cache/core", () => {
       expect(keyA).not.toBe(keyB);
     });
   });
+
+  // ── 6. Context-Based Caching (ctx) ─────────────────────────────────────
+
+  describe("Context-Based Caching (ctx)", () => {
+    it("should cache separately based on ctx value", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      app.get(
+        "/data",
+        cache.route({
+          ctx: (req, res) => {
+            const userId = req.headers["x-user-id"] as string;
+            return userId || "anonymous";
+          },
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ data: "value", calls });
+        },
+      );
+
+      // Request for user1 -> MISS
+      const res1 = await request(app).get("/data").set("x-user-id", "user1");
+      expect(res1.headers["x-cache"]).toBe("MISS");
+      expect(res1.body.calls).toBe(1);
+
+      // Request for user1 again -> HIT
+      const res2 = await request(app).get("/data").set("x-user-id", "user1");
+      expect(res2.headers["x-cache"]).toBe("HIT");
+      expect(res2.body.calls).toBe(1);
+
+      // Request for user2 -> MISS (different ctx)
+      const res3 = await request(app).get("/data").set("x-user-id", "user2");
+      expect(res3.headers["x-cache"]).toBe("MISS");
+      expect(res3.body.calls).toBe(2);
+
+      // Request for user2 again -> HIT
+      const res4 = await request(app).get("/data").set("x-user-id", "user2");
+      expect(res4.headers["x-cache"]).toBe("HIT");
+      expect(res4.body.calls).toBe(2);
+    });
+
+    it("should work with res.locals for user context", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      
+      // Middleware to set user in res.locals
+      app.use((req, res, next) => {
+        const userId = req.headers["x-user-id"] as string;
+        (res.locals as any).user = { id: userId || "guest", role: "user" };
+        next();
+      });
+
+      app.get(
+        "/profile",
+        cache.route({
+          ctx: (req, res) => {
+            const user = (res.locals as any).user;
+            return `${user.id}:${user.role}`;
+          },
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ profile: (res.locals as any).user, calls });
+        },
+      );
+
+      // Admin user -> MISS
+      const res1 = await request(app).get("/profile").set("x-user-id", "admin");
+      expect(res1.headers["x-cache"]).toBe("MISS");
+      expect(res1.body.calls).toBe(1);
+
+      // Admin user again -> HIT
+      const res2 = await request(app).get("/profile").set("x-user-id", "admin");
+      expect(res2.headers["x-cache"]).toBe("HIT");
+      expect(res2.body.calls).toBe(1);
+
+      // Regular user -> MISS (different ctx)
+      const res3 = await request(app).get("/profile").set("x-user-id", "user1");
+      expect(res3.headers["x-cache"]).toBe("MISS");
+      expect(res3.body.calls).toBe(2);
+    });
+
+    it("should invalidate correctly with ctx-based caching", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+      });
+
+      let calls = 0;
+      app.get(
+        "/items",
+        cache.route({
+          ctx: (req, res) => {
+            const orgId = req.headers["x-org-id"] as string;
+            return orgId || "default";
+          },
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ items: [`item-${calls}`], calls });
+        },
+      );
+
+      app.post(
+        "/items",
+        cache.invalidate("/items"),
+        (req, res) => {
+          res.json({ created: true });
+        },
+      );
+
+      // Populate cache for org1
+      await request(app).get("/items").set("x-org-id", "org1");
+      expect(calls).toBe(1);
+
+      // HIT for org1
+      const res1 = await request(app).get("/items").set("x-org-id", "org1");
+      expect(res1.headers["x-cache"]).toBe("HIT");
+      expect(calls).toBe(1);
+
+      // Invalidate
+      await request(app).post("/items").send({});
+
+      // MISS for org1 after invalidation
+      const res2 = await request(app).get("/items").set("x-org-id", "org1");
+      expect(res2.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(2);
+    });
+
+    it("should combine ctx with vary headers", async () => {
+      const app = express();
+      app.use(express.json());
+
+      const cache = createCache({
+        adapter: createMemoryAdapter(),
+        staleTime: 60,
+        vary: ["accept-language"],
+      });
+
+      let calls = 0;
+      app.get(
+        "/content",
+        cache.route({
+          ctx: (req, res) => {
+            const region = req.headers["x-region"] as string;
+            return region || "global";
+          },
+        }),
+        (req, res) => {
+          calls++;
+          res.json({ content: "data", calls });
+        },
+      );
+
+      // Region US, Lang EN -> MISS
+      const res1 = await request(app)
+        .get("/content")
+        .set("x-region", "us")
+        .set("accept-language", "en");
+      expect(res1.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(1);
+
+      // Region US, Lang EN -> HIT
+      const res2 = await request(app)
+        .get("/content")
+        .set("x-region", "us")
+        .set("accept-language", "en");
+      expect(res2.headers["x-cache"]).toBe("HIT");
+      expect(calls).toBe(1);
+
+      // Region US, Lang ES -> MISS (different vary)
+      const res3 = await request(app)
+        .get("/content")
+        .set("x-region", "us")
+        .set("accept-language", "es");
+      expect(res3.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(2);
+
+      // Region EU, Lang EN -> MISS (different ctx)
+      const res4 = await request(app)
+        .get("/content")
+        .set("x-region", "eu")
+        .set("accept-language", "en");
+      expect(res4.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(3);
+    });
+  });
 });
