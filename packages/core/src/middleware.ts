@@ -155,12 +155,10 @@ export function createCache(config: CacheConfig): CacheInstance {
       if (req.method !== "GET") {
         const autoInv = routeOpts?.autoInvalidate ?? globalOpts.autoInvalidate;
         if (autoInv) {
-          res.on("finish", async () => {
-            if (res.statusCode >= 200 && res.statusCode < 300) {
-              const pattern = routeOpts?.key ? null : getRoutePattern(req);
-              if (pattern) {
-                await invalidateRoutes([pattern]);
-              }
+          invalidateBeforeFlush(res, async () => {
+            const pattern = routeOpts?.key ? null : getRoutePattern(req);
+            if (pattern) {
+              await invalidateRoutes([pattern]);
             }
           });
         }
@@ -395,15 +393,7 @@ export function createCache(config: CacheConfig): CacheInstance {
     route: (opts?: RouteOptions) => createCacheHandler(opts),
     invalidate: (...routePatterns: string[]) => {
       return (req: Request, res: Response, next: NextFunction) => {
-        res.on("finish", async () => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            try {
-              await invalidateRoutes(routePatterns);
-            } catch {
-              // Don't block
-            }
-          }
-        });
+        invalidateBeforeFlush(res, () => invalidateRoutes(routePatterns));
         next();
       };
     },
@@ -553,6 +543,52 @@ export function createCache(config: CacheConfig): CacheInstance {
 }
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
+
+/**
+ * Increment epochs after the handler has chosen a 2xx status and called
+ * `res.end`, but before the body is flushed to the client.
+ *
+ * Waiting until `finish` lets React Query / SWR refetch the old epoch.
+ * Incrementing before the handler returns can recache pre-commit DB data.
+ */
+function invalidateBeforeFlush(res: Response, run: () => Promise<void>): void {
+  const originalEnd = res.end.bind(res);
+  let state: "idle" | "pending" | "flushed" = "idle";
+
+  res.end = function patchedEnd(
+    chunk?: unknown,
+    encodingOrCb?: unknown,
+    cb?: unknown,
+  ): Response {
+    if (state === "flushed") {
+      return originalEnd(chunk as never, encodingOrCb as never, cb as never);
+    }
+
+    // Ignore duplicate `end` while invalidation is in flight so a second
+    // call cannot flush the socket before the epoch increment completes.
+    if (state === "pending") {
+      return res;
+    }
+
+    state = "pending";
+
+    const flush = () => {
+      state = "flushed";
+      return originalEnd(chunk as never, encodingOrCb as never, cb as never);
+    };
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      return flush();
+    }
+
+    void Promise.resolve()
+      .then(run)
+      .catch(() => undefined)
+      .then(flush);
+
+    return res;
+  } as typeof res.end;
+}
 
 /**
  * Send a cached response with proper headers.
