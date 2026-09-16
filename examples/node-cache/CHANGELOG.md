@@ -1,5 +1,13 @@
 # cache-example
 
+## 0.1.7
+
+### Patch Changes
+
+- Updated dependencies [c60f36a]
+  - @express-route-cache/core@2.2.1
+  - @express-route-cache/studio@1.1.2
+
 ## 0.1.6
 
 ### Patch Changes

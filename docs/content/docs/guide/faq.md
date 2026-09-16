@@ -175,10 +175,10 @@ cache.route({ key: (req) => `user:${req.user.id}:profile` });
 
 ### How does O(1) cache invalidation work?
 
-Each route pattern (e.g., `/api/posts`) has an integer "epoch" counter stored alongside the cache. When you call `cache.invalidate('/api/posts')`:
+Each route pattern (e.g., `/api/posts`) has an integer "epoch" counter stored alongside the cache. When you call `cache.invalidate('/api/posts')` as middleware (or `await cache.invalidateRoute('/api/posts')`):
 
-1. The epoch for `/api/posts` is incremented (a single `INCR` command in Redis).
-2. All future requests look for cache keys containing the **new** epoch.
+1. After the handler chooses a **2xx** status, the epoch for `/api/posts` is incremented (a single `INCR` command) **before the response is flushed**.
+2. All subsequent requests look for cache keys containing the **new** epoch.
 3. Old entries still exist in Redis but are never queried — they expire naturally via TTL.
 
 No `SCAN`, no `KEYS`, no blocking operations. O(1) regardless of how many cached entries exist.
@@ -193,7 +193,7 @@ Yes, when using the **Redis** adapter. All instances share the same Redis epoch 
 
 ### What triggers `autoInvalidate`?
 
-When `autoInvalidate: true` is set, the library automatically increments the epoch for the matching route pattern after any successful **`POST`**, **`PUT`**, **`PATCH`**, or **`DELETE`** request (i.e., `2xx` response).
+When `autoInvalidate: true` is set, the library automatically increments the epoch for the matching route pattern on any successful **`POST`**, **`PUT`**, **`PATCH`**, or **`DELETE`** (2xx) **before the response is flushed**.
 
 ---
 

@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 2.2.1
+
+### Patch Changes
+
+- c60f36a: Await epoch invalidation on 2xx `res.end` before flushing the mutation response so clients cannot refetch stale cache.
+
 ## 2.2.0
 
 ### Minor Changes

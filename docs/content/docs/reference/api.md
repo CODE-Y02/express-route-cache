@@ -47,7 +47,7 @@ The main entry point for initializing the caching layer.
 | :----------------------------- | :--------------------------------------------- | :----------------------------------------------------------------- |
 | `middleware()`                 | `() => ExpressMiddleware`                      | Global middleware — caches all GET requests. Use with `app.use()`. |
 | `route(opts?)`                 | `(opts?: RouteOptions) => ExpressMiddleware`   | Per-route middleware with optional overrides.                      |
-| `invalidate(...patterns)`      | `(...patterns: string[]) => ExpressMiddleware` | Middleware: increments epochs on successful (2xx) response.        |
+| `invalidate(...patterns)`      | `(...patterns: string[]) => ExpressMiddleware` | Middleware: awaits epoch increment on 2xx **before** the response is flushed. |
 | `invalidateRoute(...patterns)` | `(...patterns: string[]) => Promise<void>`     | Programmatic invalidation from outside a request context.          |
 | `fetch(key, fetcher, opts?)`   | `<T>(key, fetcher, opts?) => Promise<T>`       | Standalone data caching with SWR, Stampede, and Retry support.     |
 | `adapter`                      | `CacheClient`                                  | The underlying storage adapter instance.                           |
@@ -122,7 +122,7 @@ const data = await cache.fetch(
 
 ## `cache.invalidate(...patterns)`
 
-Express middleware that increments the epoch version for specific patterns upon a successful (2xx) response.
+Express middleware that increments the epoch for specific patterns on a successful (2xx) response **before the body is flushed**. Clients that refetch on mutation success (React Query, SWR) therefore cannot read the previous cache key.
 
 ```ts
 app.post("/api/posts", cache.invalidate("/api/posts"), createPost);

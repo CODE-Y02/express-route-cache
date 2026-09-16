@@ -1,5 +1,14 @@
 # @express-route-cache/studio
 
+## 1.1.2
+
+### Patch Changes
+
+- Updated dependencies [c60f36a]
+  - @express-route-cache/core@2.2.1
+  - @express-route-cache/memcached@1.1.2
+  - @express-route-cache/redis@1.1.2
+
 ## 1.1.1
 
 ### Patch Changes

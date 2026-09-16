@@ -65,7 +65,7 @@ app.get("/users/:id", cache.route({ staleTime: 120 }), (req, res) => {
   res.json({ id: req.params.id, name: "John Doe" });
 });
 
-// 4. Invalidate instantly upon mutation
+// 4. Invalidate on 2xx before the response is flushed (safe for React Query / SWR refetch)
 app.post("/users", cache.invalidate("/users"), (req, res) => {
   // logic to create user...
   res.status(201).json({ success: true });
@@ -122,7 +122,7 @@ cache.route({ sortQuery: true });
 
 ### 4. Automatic Invalidation
 
-You can tell the cache to automatically increment the version for a route pattern whenever a successful `POST`, `PUT`, `PATCH`, or `DELETE` request is made:
+You can tell the cache to automatically increment the version for a route pattern whenever a successful `POST`, `PUT`, `PATCH`, or `DELETE` is about to be flushed (2xx):
 
 ```ts
 // Globally

@@ -188,6 +188,7 @@
   "instructions": {
     "installation": "npm install @express-route-cache/core",
     "basic_usage": "const cache = createCache({ adapter: createMemoryAdapter() }); app.get('/', cache.route(), handler);",
-    "invalidation": "app.post('/api', cache.invalidate('/api'), handler);"
+    "invalidation": "app.post('/api', cache.invalidate('/api'), handler); // awaits epoch INCR on 2xx before flush; use invalidateRoute() programmatically",
+    "invalidation_timing": "Do not use res.on('finish') after sending the mutation response. cache.invalidate() and autoInvalidate increment the epoch before the 2xx body is flushed so React Query/SWR refetch cannot hit stale cache."
   }
 }
