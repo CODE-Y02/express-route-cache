@@ -220,6 +220,112 @@ describe("@express-route-cache/core", () => {
       expect(m2.headers["x-cache"]).toBe("MISS");
       expect(getCallCount()).toBe(4); // both handlers called again
     });
+
+    it("awaits slow epoch increment before flushing the mutation response", async () => {
+      const adapter = createMemoryAdapter();
+      const originalIncr = adapter.incr.bind(adapter);
+      adapter.incr = async (key: string) => {
+        await new Promise((r) => setTimeout(r, 80));
+        return originalIncr(key);
+      };
+
+      const app = express();
+      app.use(express.json());
+      const cache = createCache({
+        adapter,
+        staleTime: 60,
+        gcTime: 300,
+        swr: false,
+      });
+
+      let calls = 0;
+      app.get("/items", cache.route(), (_req, res) => {
+        calls++;
+        res.json({ calls });
+      });
+      app.post("/items", cache.invalidate("/items"), (_req, res) => {
+        res.json({ created: true });
+      });
+
+      await request(app).get("/items");
+      expect((await request(app).get("/items")).headers["x-cache"]).toBe("HIT");
+      expect(calls).toBe(1);
+
+      const started = Date.now();
+      await request(app).post("/items").send({});
+      expect(Date.now() - started).toBeGreaterThanOrEqual(70);
+
+      const refetch = await request(app).get("/items");
+      expect(refetch.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(2);
+    });
+
+    it("does not wait to flush non-2xx responses and leaves cache intact", async () => {
+      const adapter = createMemoryAdapter();
+      adapter.incr = async () => {
+        throw new Error("incr should not run on 4xx");
+      };
+
+      const app = express();
+      app.use(express.json());
+      const cache = createCache({
+        adapter,
+        staleTime: 60,
+        gcTime: 300,
+      });
+
+      let calls = 0;
+      app.get("/items", cache.route(), (_req, res) => {
+        calls++;
+        res.json({ calls });
+      });
+      app.post("/items", cache.invalidate("/items"), (_req, res) => {
+        res.status(400).json({ error: true });
+      });
+
+      await request(app).get("/items");
+      const post = await request(app).post("/items").send({});
+      expect(post.status).toBe(400);
+
+      const hit = await request(app).get("/items");
+      expect(hit.headers["x-cache"]).toBe("HIT");
+      expect(calls).toBe(1);
+    });
+
+    it("autoInvalidate also bumps the epoch before the client can refetch", async () => {
+      const adapter = createMemoryAdapter();
+      const originalIncr = adapter.incr.bind(adapter);
+      adapter.incr = async (key: string) => {
+        await new Promise((r) => setTimeout(r, 80));
+        return originalIncr(key);
+      };
+
+      const app = express();
+      app.use(express.json());
+      const cache = createCache({
+        adapter,
+        staleTime: 60,
+        gcTime: 300,
+        autoInvalidate: true,
+      });
+
+      let calls = 0;
+      app.get("/items", cache.route(), (_req, res) => {
+        calls++;
+        res.json({ calls });
+      });
+      app.post("/items", cache.route({ autoInvalidate: true }), (_req, res) => {
+        res.json({ created: true });
+      });
+
+      await request(app).get("/items");
+      expect((await request(app).get("/items")).headers["x-cache"]).toBe("HIT");
+
+      await request(app).post("/items").send({});
+      const refetch = await request(app).get("/items");
+      expect(refetch.headers["x-cache"]).toBe("MISS");
+      expect(calls).toBe(2);
+    });
   });
 
   // ── 4. Only GET requests are cached ─────────────────────────────────

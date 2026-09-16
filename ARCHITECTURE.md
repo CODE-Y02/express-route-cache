@@ -33,18 +33,18 @@ flowchart TD
 ```
 
 **Invalidation Flow:**
-When `POST /users` occurs, we don't look for cache keys. We simply execute `INCR epoch:/users` to change it from `5` to `6` **after the handler finishes successfully**.
+When `POST /users` occurs, we don't look for cache keys. We simply execute `INCR epoch:/users` to change it from `5` to `6` **when the handler ends with 2xx, before the response is flushed**.
 All future `/users/*` requests will now query for `v:/users=6`, causing an instant, calculated **O(1) Cache MISS**.
 
 ### Sequential Integrity (Smart Invalidation)
 
-To prevent race conditions during database updates, all invalidations (manual or automatic) are hooked into the Express `res.on('finish')` event. This guarantees that:
+To prevent race conditions during database updates, all invalidations (manual or automatic) wrap `res.end`. This guarantees that:
 
-1. The database update completes.
-2. The response is sent to the client.
-3. Only then is the cache invalidated.
+1. The database update completes (the handler is ready to send a 2xx).
+2. The route epoch is incremented (`INCR`) and awaited.
+3. Only then is the response flushed to the client.
 
-Without this "post-handler" sequence, a concurrent `GET` request could hit the server _after_ the epoch is incremented but _before_ the DB update is finished, causing the server to re-cache stale data under the new epoch (creating a "Cache Zombie").
+Waiting until `res.on('finish')` (after the body has already left the socket) lets a fast client refetch on mutation success and win against Redis, receiving the old cached payload. Incrementing _before_ the handler finishes the write would let a concurrent `GET` recache pre-commit DB data under the new epoch (a "Cache Zombie"). Awaiting `INCR` inside `res.end` closes both races.
 
 ### Trade-offs
 
