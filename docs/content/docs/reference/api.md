@@ -43,16 +43,16 @@ The main entry point for initializing the caching layer.
 
 ### Returns (`CacheInstance`)
 
-| Property                       | Type                                           | Description                                                        |
-| :----------------------------- | :--------------------------------------------- | :----------------------------------------------------------------- |
-| `middleware()`                 | `() => ExpressMiddleware`                      | Global middleware — caches all GET requests. Use with `app.use()`. |
-| `route(opts?)`                 | `(opts?: RouteOptions) => ExpressMiddleware`   | Per-route middleware with optional overrides.                      |
+| Property                       | Type                                           | Description                                                                   |
+| :----------------------------- | :--------------------------------------------- | :---------------------------------------------------------------------------- |
+| `middleware()`                 | `() => ExpressMiddleware`                      | Global middleware — caches all GET requests. Use with `app.use()`.            |
+| `route(opts?)`                 | `(opts?: RouteOptions) => ExpressMiddleware`   | Per-route middleware with optional overrides.                                 |
 | `invalidate(...patterns)`      | `(...patterns: string[]) => ExpressMiddleware` | Middleware: awaits epoch increment on 2xx **before** the response is flushed. |
-| `invalidateRoute(...patterns)` | `(...patterns: string[]) => Promise<void>`     | Programmatic invalidation from outside a request context.          |
-| `fetch(key, fetcher, opts?)`   | `<T>(key, fetcher, opts?) => Promise<T>`       | Standalone data caching with SWR, Stampede, and Retry support.     |
-| `adapter`                      | `CacheClient`                                  | The underlying storage adapter instance.                           |
-| `metrics`                      | `CacheMetrics \| undefined`                    | Live telemetry counters (only defined when `metrics: true`).       |
-| `studio`                       | `boolean \| StudioOptions \| undefined`        | Studio configuration reference passed through from config.         |
+| `invalidateRoute(...patterns)` | `(...patterns: string[]) => Promise<void>`     | Programmatic invalidation from outside a request context.                     |
+| `fetch(key, fetcher, opts?)`   | `<T>(key, fetcher, opts?) => Promise<T>`       | Standalone data caching with SWR, Stampede, and Retry support.                |
+| `adapter`                      | `CacheClient`                                  | The underlying storage adapter instance.                                      |
+| `metrics`                      | `CacheMetrics \| undefined`                    | Live telemetry counters (only defined when `metrics: true`).                  |
+| `studio`                       | `boolean \| StudioOptions \| undefined`        | Studio configuration reference passed through from config.                    |
 
 ---
 
