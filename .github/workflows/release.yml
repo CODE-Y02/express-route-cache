@@ -24,8 +24,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate changelogs correctly
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -61,6 +62,7 @@ jobs:
 
             git add .
             git commit -m "chore: version packages [skip ci]"
+            git pull --rebase origin ${{ github.ref_name }}
             git push origin ${{ github.ref_name }}
           else
             echo "No changesets found to version."
