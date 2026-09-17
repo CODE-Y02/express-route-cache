@@ -1,5 +1,16 @@
 # @express-route-cache/redis
 
+## 1.2.0
+
+### Minor Changes
+
+- 41b5d1f: fix criticla isse
+
+### Patch Changes
+
+- Updated dependencies [41b5d1f]
+  - @express-route-cache/core@2.3.0
+
 ## 1.1.2
 
 ### Patch Changes

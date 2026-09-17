@@ -1,5 +1,11 @@
 # @express-route-cache/core
 
+## 2.3.0
+
+### Minor Changes
+
+- 41b5d1f: fix criticla isse
+
 ## 2.2.1
 
 ### Patch Changes

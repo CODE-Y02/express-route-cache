@@ -1,5 +1,17 @@
 # cache-example
 
+## 0.2.0
+
+### Minor Changes
+
+- 41b5d1f: fix criticla isse
+
+### Patch Changes
+
+- Updated dependencies [41b5d1f]
+  - @express-route-cache/studio@1.2.0
+  - @express-route-cache/core@2.3.0
+
 ## 0.1.7
 
 ### Patch Changes
