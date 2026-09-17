@@ -49,16 +49,25 @@ jobs:
       - name: Run Tests
         run: pnpm test
 
-      - name: Ensure all changesets are versioned (consumed)
+      - name: Version and Push (if changesets exist)
         run: |
-          # Count markdown changeset files (excluding config.json)
           CHANGESETS=$(find .changeset -name "*.md" | wc -l)
           if [ "$CHANGESETS" -gt 0 ]; then
-            echo "❌ Error: Unconsumed changesets found in .changeset/ directory!"
-            echo "Please run 'pnpm changeset version' locally, commit the version bump, and push."
-            exit 1
+            echo "Changesets detected. Running changeset version..."
+            pnpm run version-packages
+
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git add .
+            git commit -m "chore: version packages [skip ci]"
+            git push origin ${{ github.ref_name }}
+          else
+            echo "No changesets found to version."
           fi
-          echo "✅ No unconsumed changesets found."
+
+      - name: Re-build packages with updated versions
+        run: pnpm run build
 
       - name: Publish to NPM
         run: |

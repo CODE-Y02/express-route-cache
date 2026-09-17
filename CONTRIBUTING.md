@@ -33,15 +33,16 @@ We use an automated CI/CD pipeline driven by GitHub Actions and the `changesets`
 
 ### 1. `main` Branch (Stable releases)
 
-- This is the bleeding edge for stable, production-ready code.
-- A push to `main` with a valid changeset file triggers the **Release Bot** to open a pull request.
-- **Merge the PR** to automatically publish to the `@latest` tag on NPM.
+- This is for stable, production-ready code.
+- When a PR with changesets is merged into `main`, the **Release workflow** runs automatically:
+  - Consumes the changesets and bumps package versions (`changeset version`).
+  - Commits & pushes the updated versions and changelogs.
+  - Automatically publishes packages to the `@latest` tag on NPM.
 
-### 2. `next` Branch (Beta / Release Candidates)
+### 2. `next` Branch (Beta / Prereleases)
 
-- Use this branch for massive rewrites or features that need community testing before hitting `main`.
-- To start a beta track, run `pnpm changeset pre enter next` locally, commit the generated config, and push.
-- The Release Bot will append a beta tag (e.g. `1.1.0-beta.0`) and publish cleanly to the `@next` tag on NPM.
+- Used for active beta development and community preview releases.
+- When a PR with changesets is merged into `next`, the **Release workflow** runs automatically and publishes to the `@next` tag on NPM.
 
 ### 3. `v*` Branches (Legacy Hotfixes)
 
