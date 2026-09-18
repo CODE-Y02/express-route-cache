@@ -41,46 +41,20 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Packages
-        run: pnpm run build
-
-      - name: Run Type Checks
-        run: pnpm run check-types
-
-      - name: Run Tests
-        run: pnpm test
-
-      - name: Version and Push (if changesets exist)
-        run: |
-          CHANGESETS=$(find .changeset -name "*.md" | wc -l)
-          if [ "$CHANGESETS" -gt 0 ]; then
-            echo "Changesets detected. Running changeset version..."
-            pnpm run version-packages
-
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-
-            git add .
-            git commit -m "chore: version packages [skip ci]"
-            git pull --rebase origin ${{ github.ref_name }}
-            git push origin ${{ github.ref_name }}
-          else
-            echo "No changesets found to version."
-          fi
-
-      - name: Re-build packages with updated versions
-        run: pnpm run build
-
-      - name: Publish to NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm run version-packages
+          publish: pnpm run release
+          commit: "chore: version packages"
+          title: "chore: version packages"
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Sync NPM Tags (Main Branch)
-        if: github.ref_name == 'main'
+        if: steps.changesets.outputs.published == 'true' && github.ref_name == 'main'
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           # Loop through all packages and conditionally tag them
