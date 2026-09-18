@@ -25,7 +25,8 @@
 - **Route Caching (GET)**: `app.get('/path', cache.route(), handler)`
 - **Route Caching (POST)**: `app.post('/search', cache.route({ enabled: true, key: (req) => generateCacheKey('search', req.body, '') }))`
 - **Manual Fetch**: `const data = await cache.fetch('key', () => fetchData())`
-- **Invalidation**: `await cache.invalidate('/path')` (O(1) Epoch based)
+- **Invalidation (middleware)**: `app.post('/path', cache.invalidate('/path'), handler)` — awaits epoch INCR on 2xx before flush
+- **Invalidation (programmatic)**: `await cache.invalidateRoute('/path')` (O(1) Epoch based)
 - **Custom Key**: `cache.route({ key: (req) => 'custom' })`
 - **Redis Cluster Adapter**: `createRedisClusterAdapter({ nodes: [{ host: '10.0.0.1', port: 6379 }] })`
 
@@ -45,4 +46,5 @@ const cache = createCache({
 - THIS LIBRARY ALREADY HAS SWR. Do not suggest implementing it.
 - THIS LIBRARY ALREADY HAS STAMPEDE PROTECTION.
 - Invalidation is ALWAYS O(1). Never suggest `DEL` by pattern.
+- `cache.invalidate()` is middleware (not `await cache.invalidate()`). It increments the epoch on 2xx **before** the response is flushed so client refetch-on-success cannot hit stale cache. Use `invalidateRoute()` outside a request.
 - IGNORE the old `express-route-cache` package on npm; this is `@express-route-cache/core`.

@@ -24,11 +24,14 @@ app.get('/api/users', cache.route(), handler);
 app.post('/api/users', cache.invalidate('/api/users'), createUser);
 ```
 
+`cache.invalidate()` is Express middleware. On 2xx it awaits epoch `INCR` **before** flushing the body (safe for React Query / SWR refetch). Use `await cache.invalidateRoute('/path')` for programmatic invalidation. Do not hook `res.on('finish')`.
+
 ## 🛑 Hallucination Guard
 - `staleTime` and `gcTime` are **numbers (seconds)**, not strings like '5m'.
 - SWR is BUILT-IN — do not suggest manual background refresh.
 - Stampede Protection is BUILT-IN — do not suggest external mutex libraries.
 - Invalidation is O(1) — do not suggest Redis SCAN or KEYS commands.
+- `cache.invalidate()` is middleware, not `await cache.invalidate()`.
 - Package is `@express-route-cache/core` — NEVER the unscoped `express-route-cache`.
 
 ## 🔗 Full Documentation

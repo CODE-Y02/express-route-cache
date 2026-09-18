@@ -6,7 +6,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-100%25-blue)](https://www.typescriptlang.org/)
 [![NPM Version](https://img.shields.io/npm/v/@express-route-cache/core.svg)](https://www.npmjs.com/package/@express-route-cache/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/CODE-Y02/express-route-cache/actions/workflows/release.yml/badge.svg)](https://github.com/CODE-Y02/express-route-cache/actions)
+[![CI](https://github.com/CODE-Y02/express-route-cache/actions/workflows/ci.yml/badge.svg)](https://github.com/CODE-Y02/express-route-cache/actions)
 [![AI Support](https://img.shields.io/badge/🤖-AI--Native-purple)](https://express-route-cache.js.org/guide/ai-support)
 [![ChatGPT](https://img.shields.io/badge/Chat--GPT-Support-74aa9c?logo=openai&logoColor=white)](https://chatgpt.com/?q=Analyze+this+library.+Docs:+https://express-route-cache.js.org/+GitHub:+https://github.com/CODE-Y02/express-route-cache+NPM:+https://www.npmjs.com/package/@express-route-cache/core)
 [![Claude](https://img.shields.io/badge/Claude-Support-d97757?logo=anthropic&logoColor=white)](https://claude.ai/new?q=Help+me+with+this+library.+Docs:+https://express-route-cache.js.org/+LLM+Context:+https://express-route-cache.js.org/llms.txt)
@@ -209,7 +209,7 @@ Unlike many middleware libraries that only work with `res.json()` or `res.send()
 
 ### Smart Invalidation
 
-Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
+Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) runs **on 2xx `res.end`, before the body is flushed**. The epoch is incremented only after the handler succeeds, and the client cannot refetch until Redis (or the adapter) has moved the version. This prevents both stale refetches (React Query / SWR) and "Cache Zombies" from pre-commit recaching.
 
 ### Comprehensive Header Preservation
 
@@ -304,7 +304,7 @@ Unlike most Express caching libraries that only handle JSON strings, `@express-r
 
 ### Smart Invalidation
 
-Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) is **post-response**. This means we only increment the route version if your handler finishes successfully (2xx). This prevents "Cache Zombies" where stale data is re-cached due to race conditions during database updates.
+Invalidation (via `cache.invalidate()` or `autoInvalidate: true`) runs **on 2xx `res.end`, before the body is flushed**. The epoch is incremented only after the handler succeeds, and the client cannot refetch until Redis (or the adapter) has moved the version. This prevents both stale refetches (React Query / SWR) and "Cache Zombies" from pre-commit recaching.
 
 ---
 

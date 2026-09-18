@@ -43,7 +43,7 @@ await cache.invalidateRoute("/api/users", "/api/posts");
 ### Middleware Invalidation
 
 ```ts
-// Automatically invalidate after a successful POST
+// Invalidate on 2xx before the response is flushed (safe for React Query / SWR refetch)
 app.post("/users", cache.invalidate("/users"), createUser);
 ```
 

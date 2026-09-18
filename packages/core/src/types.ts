@@ -216,7 +216,11 @@ export interface CacheInstance {
   /** Per-route middleware — use as `router.get('/path', cache.route(), handler)`. */
   route: (opts?: RouteOptions) => ExpressMiddleware;
 
-  /** Invalidation middleware — use as `router.post('/path', cache.invalidate('/path'), handler)`. */
+  /**
+   * Invalidation middleware — use as `router.post('/path', cache.invalidate('/path'), handler)`.
+   * On 2xx, awaits epoch increment before the response is flushed so clients
+   * cannot refetch stale cache on mutation success.
+   */
   invalidate: (...routePatterns: string[]) => ExpressMiddleware;
 
   /** Programmatic invalidation — call from anywhere (service layer, cron, webhook). */

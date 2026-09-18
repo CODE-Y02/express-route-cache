@@ -34,6 +34,8 @@ Key structure:
 
 When epoch `v:/api/users` increments from `3` to `4`, all previously cached keys for `/api/users/*` produce a different SHA-256 hash and are never looked up again. They expire naturally via `gcTime`.
 
+**Sequential integrity:** `cache.invalidate()` and `autoInvalidate` wrap `res.end`. On 2xx they await `INCR` **then** flush the body. That way a client refetch-on-success cannot race the old epoch, while a concurrent GET during the DB write still sees the previous epoch (no cache zombie).
+
 ## 2. Two-Tier Stampede Protection
 
 When a popular cache entry expires, hundreds of concurrent requests might hit your database at once — the "Thundering Herd."

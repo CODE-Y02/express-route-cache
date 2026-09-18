@@ -24,8 +24,9 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate changelogs correctly
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,36 +41,20 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Packages
-        run: pnpm run build
-
-      - name: Run Type Checks
-        run: pnpm run check-types
-
-      - name: Run Tests
-        run: pnpm test
-
-      - name: Ensure all changesets are versioned (consumed)
-        run: |
-          # Count markdown changeset files (excluding config.json)
-          CHANGESETS=$(find .changeset -name "*.md" | wc -l)
-          if [ "$CHANGESETS" -gt 0 ]; then
-            echo "❌ Error: Unconsumed changesets found in .changeset/ directory!"
-            echo "Please run 'pnpm changeset version' locally, commit the version bump, and push."
-            exit 1
-          fi
-          echo "✅ No unconsumed changesets found."
-
-      - name: Publish to NPM
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          npx changeset publish --tag ${{ github.ref_name == 'next' && 'next' || 'latest' }}
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm run version-packages
+          publish: pnpm run release
+          commit: "chore: version packages"
+          title: "chore: version packages"
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Sync NPM Tags (Main Branch)
-        if: github.ref_name == 'main'
+        if: steps.changesets.outputs.published == 'true' && github.ref_name == 'main'
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           # Loop through all packages and conditionally tag them

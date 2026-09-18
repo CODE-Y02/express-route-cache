@@ -88,14 +88,14 @@ app.get("/api/todos/:id", cache.route({ staleTime: 60 }), (req, res) => {
 
 ## POST /api/todos — Create with Auto-Invalidation
 
-When a new todo is created, the cached list at `/api/todos` must be cleared. `autoInvalidate: true` handles this automatically after any successful 2xx response.
+When a new todo is created, the cached list at `/api/todos` must be cleared. `autoInvalidate: true` increments that route's epoch on 2xx **before** the create response is flushed.
 
 ```ts
 app.post("/api/todos", cache.route({ autoInvalidate: true }), (req, res) => {
   const newTodo = { id: db.nextId++, text: req.body.text, completed: false };
   db.todos.push(newTodo);
 
-  // The cache for '/api/todos' is automatically invalidated after this response
+  // Epoch for '/api/todos' is incremented before this 201 is flushed
   res.status(201).json(newTodo);
 });
 ```

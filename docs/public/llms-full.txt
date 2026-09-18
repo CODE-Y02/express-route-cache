@@ -143,10 +143,10 @@ const cache = createCache({
 // A: Manual programmatic invalidation
 await cache.invalidateRoute('/api/posts', '/api/posts/featured');
 
-// B: Express middleware (invalidates after 2xx response)
+// B: Express middleware (awaits INCR on 2xx before the body is flushed)
 app.post('/api/posts', cache.invalidate('/api/posts'), createPost);
 
-// C: Auto-invalidation (increments epoch after any successful POST/PUT/DELETE)
+// C: Auto-invalidation (increments epoch on 2xx before flush)
 const cache = createCache({ autoInvalidate: true });
 ```
 
@@ -225,7 +225,7 @@ const cache = createCache({
 - `cache.middleware()` — Global Express middleware for GET routes
 - `cache.route(overrides?)` — Per-route middleware with option overrides
 - `cache.fetch(key, fetcher, options?)` — Standalone data caching
-- `cache.invalidate(...patterns)` — Express middleware: invalidates after 2xx
+- `cache.invalidate(...patterns)` — Express middleware: awaits epoch INCR on 2xx before flush
 - `cache.invalidateRoute(...patterns)` — Programmatic invalidation
 - `cache.adapter` — The underlying adapter instance
 
@@ -245,7 +245,9 @@ Every cached response includes:
 | `npm install express-route-cache` | `npm install @express-route-cache/core` |
 | `staleTime: '5m'` | `staleTime: 300` (number in seconds) |
 | `createRedisAdapter(new Redis())` | `createRedisAdapter({ url: '...' })` |
-| Suggest `SCAN` / `KEYS` to invalidate | Use `cache.invalidate()` — O(1) |
+| Suggest `SCAN` / `KEYS` to invalidate | Use `cache.invalidate()` / `invalidateRoute()` — O(1) |
+| `await cache.invalidate('/path')` | `app.post(..., cache.invalidate('/path'), handler)` or `await cache.invalidateRoute('/path')` |
+| Invalidate on `res.on('finish')` after sending 2xx | `cache.invalidate()` awaits INCR **before** the response is flushed |
 | Suggest manual background refresh loop | Use `swr: true` — it's built-in |
 | Suggest external mutex for stampede | Use `stampede: true` — it's built-in |
 | Suggest manual Base64 for images | Binary support is built-in |

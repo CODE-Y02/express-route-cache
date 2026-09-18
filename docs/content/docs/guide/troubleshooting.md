@@ -26,7 +26,7 @@ If you find that your cache isn't updating after a mutation, check the following
 
 1. **Epoch Mismatch**: Ensure you are invalidating the correct route pattern. The pattern must match what `getRoutePattern()` returns (e.g. `/api/users/:id`, not `/api/users/123`).
 2. **Success Status**: Invalidation only triggers on **2xx** responses. If your POST/PUT fails, the cache won't be invalidated.
-3. **Race Conditions**: SWR can sometimes serve stale data if a refresh is still pending.
+3. **SWR window**: With `swr: true`, a GET that arrives while an entry is between `staleTime` and `gcTime` can still return `X-Cache: STALE` until that TTL expires. Explicit `cache.invalidate()` is not the same as waiting for SWR — it bumps the epoch immediately (before the mutation response is flushed).
 
 ### High Memory Usage
 
